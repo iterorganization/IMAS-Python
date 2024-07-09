@@ -17,7 +17,9 @@ class GetSliceParameters:
     """Helper class to store parameters to get_slice."""
 
     time_requested: float
+    """See :param:`imaspy.db_entry.DBEntry.get_slice.time_requested`."""
     interpolation_method: int
+    """See :param:`imaspy.db_entry.DBEntry.get_slice.interpolation_method`."""
 
 
 @dataclass
@@ -25,9 +27,13 @@ class GetSampleParameters:
     """Helper class to store parameters to get_sample."""
 
     tmin: float
+    """See :param:`imaspy.db_entry.DBEntry.get_sample.tmin`."""
     tmax: float
+    """See :param:`imaspy.db_entry.DBEntry.get_sample.tmax`."""
     dtime: Optional[numpy.ndarray]
+    """See :param:`imaspy.db_entry.DBEntry.get_sample.dtime`."""
     interpolation_method: Optional[int]
+    """See :param:`imaspy.db_entry.DBEntry.get_sample.interpolation_method`."""
 
 
 class DBEntryImpl(ABC):
