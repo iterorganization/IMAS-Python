@@ -8,6 +8,8 @@ import weakref
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Callable, Iterator, List, Optional, Tuple
 
+import numpy
+
 from imaspy.backends.imas_core.imas_interface import ll_interface
 from imaspy.exception import LowlevelError
 from imaspy.ids_defs import (
@@ -103,6 +105,21 @@ class ALContext:
         )
         if status != 0:
             raise LowlevelError("slice_action", status)
+        return ALContext(ctx)
+
+    def timerange_action(
+        self,
+        path: str,
+        rwmode: int,
+        tmin: float,
+        tmax: float,
+        dtime: Optional[numpy.ndarray],
+        interpolation_method: int,
+    ) -> "ALContext":
+        """Begin a new timerange action for use in a ``with`` context."""
+        ctx = ll_interface.begin_timerange_action(
+            self.ctx, path, rwmode, tmin, tmax, dtime, interpolation_method
+        )
         return ALContext(ctx)
 
     def arraystruct_action(
@@ -315,6 +332,25 @@ class LazyALContext:
             self,
             ALContext.slice_action,
             (path, rwmode, time_requested, interpolation_method),
+        )
+
+    @contextmanager
+    def timerange_action(
+        self,
+        path: str,
+        rwmode: int,
+        tmin: float,
+        tmax: float,
+        dtime: Optional[numpy.ndarray],
+        interpolation_method: int,
+    ) -> Iterator["LazyALContext"]:
+        """Lazily start a lowlevel timerange action, see
+        :meth:`ALContext.timerange_action`.
+        """
+        yield LazyALContext(
+            self,
+            ALContext.timerange_action,
+            (path, rwmode, tmin, tmax, dtime, interpolation_method),
         )
 
     def arraystruct_action(

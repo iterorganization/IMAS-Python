@@ -215,6 +215,13 @@ class LowlevelInterface:
     def get_al_version(self):
         return self._al_version_str
 
+    # New methods added in AL 5.3
+
+    def begin_timerange_action(
+        self, ctx, path, rwmode, tmin, tmax, dtime, interpolation_method
+    ):
+        raise self._minimal_version("5.3")
+
 
 # Dummy documentation for interface:
 for funcname in dir(LowlevelInterface):

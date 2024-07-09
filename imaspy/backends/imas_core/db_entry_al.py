@@ -5,9 +5,10 @@ import getpass
 import logging
 import os
 from collections import deque
-from typing import Any, Deque, List, Optional
+from typing import Any, Deque, List, Optional, Union
 from urllib.parse import urlparse
 
+from imaspy.backends.db_entry_impl import GetSampleParameters, GetSliceParameters
 from imaspy.db_entry import DBEntryImpl
 from imaspy.exception import DataEntryException, LowlevelError
 from imaspy.ids_convert import NBCPathMap, dd_version_map_from_factories
@@ -219,8 +220,7 @@ class ALDBEntryImpl(DBEntryImpl):
         self,
         ids_name: str,
         occurrence: int,
-        time_requested: Optional[float],
-        interpolation_method: int,
+        parameters: Union[None, GetSliceParameters, GetSampleParameters],
         destination: IDSToplevel,
         lazy: bool,
         nbc_map: Optional[NBCPathMap],
@@ -248,13 +248,28 @@ class ALDBEntryImpl(DBEntryImpl):
         else:
             context = self._db_ctx
         # Now fill the IDSToplevel
-        if time_requested is None or destination.metadata.type is IDSType.CONSTANT:
+        if parameters is None or destination.metadata.type is IDSType.CONSTANT:
             # called from get(), or when the IDS is constant (see IMAS-3330)
             manager = context.global_action(ll_path, READ_OP)
-        else:  # get_slice
+        elif isinstance(parameters, GetSliceParameters):
             manager = context.slice_action(
-                ll_path, READ_OP, time_requested, interpolation_method
+                ll_path,
+                READ_OP,
+                parameters.time_requested,
+                parameters.interpolation_method,
             )
+        elif isinstance(parameters, GetSampleParameters):
+            manager = context.timerange_action(
+                ll_path,
+                READ_OP,
+                parameters.tmin,
+                parameters.tmax,
+                parameters.dtime,
+                parameters.interpolation_method,
+            )
+        else:
+            raise TypeError(f"Incorrect type for parameters: {type(parameters)}.")
+
         with manager as read_ctx:
             if lazy:
                 destination._set_lazy_context(read_ctx)

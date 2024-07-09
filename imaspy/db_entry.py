@@ -5,10 +5,16 @@
 
 import logging
 import os
-from typing import Any, List, Optional, Tuple, Type, overload
+from typing import Any, List, Optional, Tuple, Type, Union, overload
+
+import numpy
 
 import imaspy
-from imaspy.backends.db_entry_impl import DBEntryImpl
+from imaspy.backends.db_entry_impl import (
+    DBEntryImpl,
+    GetSampleParameters,
+    GetSliceParameters,
+)
 from imaspy.dd_zip import dd_xml_versions
 from imaspy.exception import IDSNameError, UnknownDDVersion, ValidationError
 from imaspy.ids_base import IDSBase
@@ -349,7 +355,6 @@ class DBEntry:
             ids_name,
             occurrence,
             None,
-            0,
             destination,
             lazy,
             autoconvert,
@@ -418,8 +423,117 @@ class DBEntry:
         return self._get(
             ids_name,
             occurrence,
-            time_requested,
-            interpolation_method,
+            GetSliceParameters(time_requested, interpolation_method),
+            destination,
+            lazy,
+            autoconvert,
+            ignore_unknown_dd_version,
+        )
+
+    def get_sample(
+        self,
+        ids_name: str,
+        tmin: float,
+        tmax: float,
+        dtime: Optional[Union[float, numpy.ndarray]] = None,
+        interpolation_method: Optional[int] = None,
+        occurrence: int = 0,
+        *,
+        lazy: bool = False,
+        autoconvert: bool = True,
+        ignore_unknown_dd_version: bool = False,
+        destination: Optional[IDSToplevel] = None,
+    ) -> IDSToplevel:
+        """Read a range of time slices from an IDS in this Database Entry.
+
+        This method has three different modes, depending on the provided arguments:
+
+        1.  No interpolation. This method is selected when :param:`dtime` and
+            :param:`interpolation_method` are not provided.
+
+            This mode returns an IDS object with all constant/static data filled. The
+            dynamic data is retrieved for the provided time range [tmin, tmax].
+
+        2.  Interpolate dynamic data on a uniform time base. This method is selected
+            when :param:`dtime` and :param:`interpolation_method` are provided.
+            :param:`dtime` must be a number or a numpy array of size 1.
+
+            This mode will generate an IDS with a homogeneous time vector ``[tmin, tmin
+            + dtime, tmin + 2*dtime, ...`` up to ``tmax``. The returned IDS always has
+            ``ids_properties.homogeneous_time = 1``.
+
+        3.  Interpolate dynamic data on an explicit time base. This method is selected
+            when :param:`dtime` and :param:`interpolation_method` are provided.
+            :param:`dtime` must be a numpy array of size larger than 1.
+
+            This mode will generate an IDS with a homogeneous time vector equal to
+            :param:`dtime`. :param:`tmin` and :param:`tmax` are ignored in this mode.
+            The returned IDS always has ``ids_properties.homogeneous_time = 1``.
+
+        Args:
+            ids_name: Name of the IDS to read from the backend
+            tmin: Lower bound of the requested time range
+            tmax: Upper bound of the requested time range, must be larger than or
+                equal to :param:`tmin`
+            dtime: Interval to use when interpolating, must be positive, or numpy array
+                containing an explicit time base to interpolate.
+            interpolation_method: Interpolation method to use. Available options:
+
+                - :const:`~imaspy.ids_defs.CLOSEST_INTERP`
+                - :const:`~imaspy.ids_defs.PREVIOUS_INTERP`
+                - :const:`~imaspy.ids_defs.LINEAR_INTERP`
+
+            occurrence: Which occurrence of the IDS to read.
+
+        Keyword Args:
+            lazy: When set to ``True``, values in this IDS will be retrieved only when
+                needed (instead of getting the full IDS immediately). See :ref:`Lazy
+                loading` for more details.
+            autoconvert: Automatically convert IDSs.
+
+                If enabled (default), a call to ``get_sample()`` will return
+                an IDS from the Data Dictionary version attached to this Data Entry.
+                Data is automatically converted between the on-disk version and the
+                in-memory version.
+
+                When set to ``False``, the IDS will be returned in the DD version it was
+                stored in.
+            ignore_unknown_dd_version: When an IDS is stored with an unknown DD version,
+                do not attempt automatic conversion and fetch the data in the Data
+                Dictionary version attached to this Data Entry.
+            destination: Populate this IDSToplevel instead of creating an empty one.
+
+        Returns:
+            The loaded IDS.
+
+        Example:
+            .. code-block:: python
+
+                import imaspy
+                import numpy
+                from imaspy import ids_defs
+
+                imas_entry = imaspy.DBEntry(
+                    "imas:mdsplus?user=public;pulse=131024;run=41;database=ITER", "r")
+
+                # All time slices between t=200 and t=370
+                core_profiles = imas_entry.get_sample("core_profiles", 200, 370)
+
+                # Closest points to [0, 100, 200, ..., 1000]
+                core_profiles_interp = imas_entry.get_sample(
+                    "core_profiles", 0, 1000, 100, ids_defs.CLOSEST_INTERP)
+
+                # Linear interpolation for [10, 11, 12, 14, 16, 20, 30, 40, 50]
+                times = numpy.array([10, 11, 12, 14, 16, 20, 30, 40, 50])
+                core_profiles_interp = imas_entry.get_sample(
+                    "core_profiles", 0, 0, times, ids_defs.LINEAR_INTERP)
+        """
+        if dtime is not None:
+            dtime = numpy.atleast_1d(dtime)  # Convert floats and 0D arrays to 1D array
+        return self._get(
+            ids_name,
+            occurrence,
+            GetSampleParameters(tmin, tmax, dtime, interpolation_method),
             destination,
             lazy,
             autoconvert,
@@ -430,8 +544,7 @@ class DBEntry:
         self,
         ids_name: str,
         occurrence: int,
-        time_requested: Optional[float],
-        interpolation_method: int,
+        parameters: Union[None, GetSliceParameters, GetSampleParameters],
         destination: Optional[IDSToplevel],
         lazy: bool,
         autoconvert: bool,
@@ -504,8 +617,7 @@ class DBEntry:
         return self._dbe_impl.get(
             ids_name,
             occurrence,
-            time_requested,
-            interpolation_method,
+            parameters,
             destination,
             lazy,
             nbc_map,
