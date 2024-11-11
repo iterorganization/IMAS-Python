@@ -1,9 +1,13 @@
 """DBEntry implementation using NetCDF as a backend."""
 
 import logging
-from typing import List
+from typing import List, Optional, Union
 
-from imaspy.backends.db_entry_impl import DBEntryImpl
+from imaspy.backends.db_entry_impl import (
+    DBEntryImpl,
+    GetSampleParameters,
+    GetSliceParameters,
+)
 from imaspy.backends.netcdf.ids2nc import IDS2NC
 from imaspy.backends.netcdf.nc2ids import nc2ids
 from imaspy.exception import DataEntryException
@@ -74,15 +78,18 @@ class NCDBEntryImpl(DBEntryImpl):
         self,
         ids_name: str,
         occurrence: int,
-        time_requested: float | None,
-        interpolation_method: int,
+        parameters: Union[None, GetSliceParameters, GetSampleParameters],
         destination: IDSToplevel,
         lazy: bool,
-        nbc_map: NBCPathMap | None,
+        nbc_map: Optional[NBCPathMap],
     ) -> None:
         # Feature compatibility checks
-        if time_requested is not None:
-            raise NotImplementedError("`get_slice` is not available for netCDF files.")
+        if parameters is not None:
+            if isinstance(parameters, GetSliceParameters):
+                func = "get_slice"
+            else:
+                func = "get_sample"
+            raise NotImplementedError(f"`{func}` is not available for netCDF files.")
         if lazy:
             raise NotImplementedError(
                 "Lazy loading is not implemented for netCDF files."
