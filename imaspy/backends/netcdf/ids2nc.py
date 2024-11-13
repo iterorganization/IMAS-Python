@@ -23,10 +23,10 @@ default_fillvals = {
     IDSDataType.CPX: netCDF4.default_fillvals["f8"] * (1 + 1j),
 }
 dtypes = {
-    IDSDataType.INT: numpy.int32,
+    IDSDataType.INT: numpy.dtype(numpy.int32),
     IDSDataType.STR: str,
-    IDSDataType.FLT: numpy.float64,
-    IDSDataType.CPX: numpy.complex128,
+    IDSDataType.FLT: numpy.dtype(numpy.float64),
+    IDSDataType.CPX: numpy.dtype(numpy.complex128),
 }
 SHAPE_DTYPE = numpy.int32
 
@@ -188,7 +188,7 @@ class IDS2NC:
                 kwargs = {}
                 if dtype is not str:  # Enable compression:
                     kwargs.update(compression="zlib", complevel=1)
-                if dtype is not numpy.complex128:  # Set fillvalue
+                if dtype is not dtypes[IDSDataType.CPX]:  # Set fillvalue
                     kwargs.update(fill_value=default_fillvals[metadata.data_type])
                 # Create variable
                 dimensions = get_dimensions(path, self.homogeneous_time)

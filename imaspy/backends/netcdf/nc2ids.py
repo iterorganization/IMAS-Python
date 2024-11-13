@@ -2,7 +2,9 @@ from typing import Iterator, List, Tuple
 
 import netCDF4
 
+from imaspy.backends.netcdf import ids2nc
 from imaspy.backends.netcdf.nc_metadata import NCMetadata
+from imaspy.exception import InvalidNetCDFEntry
 from imaspy.ids_base import IDSBase
 from imaspy.ids_data_type import IDSDataType
 from imaspy.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
@@ -73,15 +75,26 @@ class NC2IDS:
         """NetCDF related metadata."""
         self.variables = list(group.variables)
         """List of variable names stored in the netCDF group."""
-        # TODO: validate ids_properties.homogeneous_time
-        self.homogeneous_time = (
-            group["ids_properties.homogeneous_time"][()] == IDS_TIME_MODE_HOMOGENEOUS
-        )
-        """True iff the IDS time mode is homogeneous."""
-
         # Don't use masked arrays: they're slow and we'll handle most of the unset
         # values through the `:shape` arrays
         self.group.set_auto_mask(False)
+
+        # Validate and get value of ids_properties.homogeneous_time
+        self.homogeneous_time = True  # Must be initialized for self._validate_variable
+        """True iff the IDS time mode is homogeneous."""
+
+        if "ids_properties.homogeneous_time" not in self.variables:
+            raise InvalidNetCDFEntry(
+                "Mandatory variable `ids_properties.homogeneous_time` does not exist."
+            )
+        var = group["ids_properties.homogeneous_time"]
+        self._validate_variable(var, ids.ids_properties.homogeneous_time.metadata)
+        if var[()] not in [0, 1, 2]:
+            raise InvalidNetCDFEntry(
+                f"Invalid value for ids_properties.homogeneous_time: {var[()]}. "
+                "Was expecting: 0, 1 or 2."
+            )
+        self.homogeneous_time = var[()] == IDS_TIME_MODE_HOMOGENEOUS
 
     def run(self) -> None:
         """Load the data from the netCDF group into the IDS."""
@@ -141,6 +154,28 @@ class NC2IDS:
             else:
                 for index, node in tree_iter(self.ids, metadata):
                     node.value = data[index]
+
+    def _validate_variable(self, var: netCDF4.Variable, metadata: IDSMetadata) -> None:
+        """Validate that the variable has correct metadata, raise an exception if not.
+
+        Args:
+            var: NetCDF variable
+            metadata: IDSMetadata of the corresponding IDS object
+        """
+        if var.dtype != ids2nc.dtypes[metadata.data_type]:
+            raise InvalidNetCDFEntry(
+                f"Variable {var.name} has incorrect data type: {var.dtype}. "
+                f"Was expecting: {ids2nc.dtypes[metadata.data_type]}."
+            )
+        # Dimensions
+        expected_dims = self.ncmeta.get_dimensions(
+            metadata.path_string, self.homogeneous_time
+        )
+        if var.dimensions != expected_dims:
+            raise InvalidNetCDFEntry(
+                f"Variable {var.name} has incorrect dimensions: {var.dimensions}. "
+                f"Was expecting: {expected_dims}."
+            )
 
 
 def nc2ids(group: netCDF4.Group, ids: IDSToplevel):

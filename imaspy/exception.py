@@ -101,3 +101,7 @@ class CoordinateError(ValidationError):
         super().__init__(
             f"Element `{node._path}` has incorrect shape {node.shape}: {details}"
         )
+
+
+class InvalidNetCDFEntry(Exception):
+    """Error raised when loading an IDS from a NetCDF file that fails validation."""
