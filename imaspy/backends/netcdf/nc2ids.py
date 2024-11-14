@@ -84,6 +84,7 @@ class NC2IDS:
         self.group.set_auto_mask(False)
 
     def run(self) -> None:
+        """Load the data from the netCDF group into the IDS."""
         # FIXME: ensure that var_names are sorted properly
         # Current assumption is that creation-order is fine
         for var_name in self.variables:
