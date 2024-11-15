@@ -1,3 +1,4 @@
+import logging
 from typing import Iterator, List, Tuple
 
 import netCDF4
@@ -11,6 +12,15 @@ from imaspy.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
 from imaspy.ids_metadata import IDSMetadata
 from imaspy.ids_structure import IDSStructure
 from imaspy.ids_toplevel import IDSToplevel
+
+logger = logging.getLogger(__name__)
+
+
+def variable_error(var, issue, value, expected=None) -> InvalidNetCDFEntry:
+    return InvalidNetCDFEntry(
+        f"Variable `{var.name}` has incorrect {issue}: `{value}`."
+        + (f" Was expecting `{expected}`." if expected is not None else "")
+    )
 
 
 def split_on_aos(metadata: IDSMetadata):
@@ -98,6 +108,7 @@ class NC2IDS:
 
     def run(self) -> None:
         """Load the data from the netCDF group into the IDS."""
+        self._validate_variables()
         # FIXME: ensure that var_names are sorted properly
         # Current assumption is that creation-order is fine
         for var_name in self.variables:
@@ -155,6 +166,42 @@ class NC2IDS:
                 for index, node in tree_iter(self.ids, metadata):
                     node.value = data[index]
 
+    def _validate_variables(self) -> None:
+        """Validate that all variables in the netCDF Group exist and match the DD."""
+        self.variables.sort()
+        for var_name in self.variables:
+            if var_name.endswith(":shape"):
+                # Check that there is a corresponding variable
+                data_var = var_name.rpartition(":shape")[0]
+                if data_var not in self.variables:
+                    raise InvalidNetCDFEntry(
+                        f"Invalid netCDF variable: {var_name}. "
+                        f"Shape information provided for non-existing {data_var}."
+                    )
+                # Corresponding variable must be sparse
+                if "sparse" not in self.group[data_var].ncattrs():
+                    raise InvalidNetCDFEntry(
+                        f"Shape information provided for {data_var}, but this variable "
+                        "is not sparse."
+                    )
+                # That's all for :shape arrays
+                continue
+
+            # Check that the DD defines this variable, and validate its metadata
+            var = self.group[var_name]
+            try:
+                metadata = self.ids.metadata[var_name]
+            except KeyError:
+                raise InvalidNetCDFEntry(
+                    f"Invalid variable {var_name}: no such variable exists in the "
+                    f"{self.ids.metadata.name} IDS."
+                )
+            self._validate_variable(var, metadata)
+
+            # Validate sparsity metadata
+            if "sparse" in var.ncattrs():
+                ...  # TODO
+
     def _validate_variable(self, var: netCDF4.Variable, metadata: IDSMetadata) -> None:
         """Validate that the variable has correct metadata, raise an exception if not.
 
@@ -162,20 +209,58 @@ class NC2IDS:
             var: NetCDF variable
             metadata: IDSMetadata of the corresponding IDS object
         """
-        if var.dtype != ids2nc.dtypes[metadata.data_type]:
-            raise InvalidNetCDFEntry(
-                f"Variable {var.name} has incorrect data type: {var.dtype}. "
-                f"Was expecting: {ids2nc.dtypes[metadata.data_type]}."
+        attrs: dict = vars(var).copy()
+        attrs.pop("_FillValue", None)
+        if metadata.data_type not in [IDSDataType.STRUCTURE, IDSDataType.STRUCT_ARRAY]:
+            # Data type
+            expected_dtype = ids2nc.dtypes[metadata.data_type]
+            if var.dtype != expected_dtype:
+                raise variable_error(var, "data type", var.dtype, expected_dtype)
+
+            # Dimensions
+            expected_dims = self.ncmeta.get_dimensions(
+                metadata.path_string, self.homogeneous_time
             )
-        # Dimensions
-        expected_dims = self.ncmeta.get_dimensions(
-            metadata.path_string, self.homogeneous_time
-        )
-        if var.dimensions != expected_dims:
-            raise InvalidNetCDFEntry(
-                f"Variable {var.name} has incorrect dimensions: {var.dimensions}. "
-                f"Was expecting: {expected_dims}."
+            if var.dimensions != expected_dims:
+                raise variable_error(var, "dimensions", var.dimensions, expected_dims)
+
+            # Coordinates
+            coordinates = str(attrs.pop("coordinates", ""))
+            expected_coordinates = self.ncmeta.get_coordinates(
+                metadata.path_string, self.homogeneous_time
             )
+            if any(coord not in expected_coordinates for coord in coordinates.split()):
+                raise variable_error(
+                    var, "coordinates", coordinates, " ".join(expected_coordinates)
+                )
+
+            # Ancillary variables
+            ancvar = attrs.pop("ancillary_variables", None)
+            if ancvar:
+                allowed_ancvar = [f"{var.name}_error_upper", f"{var.name}_error_lower"]
+                if any(var not in allowed_ancvar for var in ancvar.split()):
+                    raise variable_error(
+                        var, "ancillary_variables", ancvar, " ".join(allowed_ancvar)
+                    )
+
+        # Units
+        units = attrs.pop("units", None)
+        if metadata.units and metadata.units != units:
+            raise variable_error(var, "units", units, metadata.units)
+
+        # Sparse
+        sparse = attrs.pop("sparse", None)
+        if sparse is not None:
+            ...  # TODO
+
+        # Documentation
+        doc = attrs.pop("documentation", None)
+        if metadata.documentation != doc:
+            logger.warning("Documentation of variable %s differs from the DD", var.name)
+
+        # Unknown attrs
+        if attrs:
+            raise variable_error(var, "attributes", list(attrs.keys()))
 
 
 def nc2ids(group: netCDF4.Group, ids: IDSToplevel):
