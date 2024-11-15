@@ -21,7 +21,8 @@ def test_db_uri(backend, worker_id, tmp_path_factory):
     if not hasattr(lowlevel, "al_begin_timerange_action"):
         pytest.skip("imas_core version doesn't support begin_timerange_action.")
 
-    if backend not in [HDF5_BACKEND, MDSPLUS_BACKEND]:
+    # TODO: add MDSPLUS_BACKEND once implemented, see IMAS-5593
+    if backend not in [HDF5_BACKEND]:
         pytest.skip("Backend doesn't support time range operations.")
 
     tmp_path = tmp_path_factory.mktemp(f"testdb.{worker_id}")
