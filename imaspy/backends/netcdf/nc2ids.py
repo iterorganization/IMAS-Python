@@ -300,17 +300,3 @@ class NC2IDS:
             raise variable_error(
                 shape_var, "dtype", shape_var.dtype, "any integer type"
             )
-
-
-def nc2ids(group: netCDF4.Group, ids: IDSToplevel):
-    """Get data from the netCDF group and store it in the provided IDS."""
-    try:
-        NC2IDS(group, ids).run()
-    except Exception as exc:
-        raise RuntimeError(
-            "An error occurred while reading data from the netCDF file "
-            f"'{group.filepath()}'. The netCDF functionality is currently in "
-            "preview status. Unexpected data in an otherwise valid netCDF file "
-            "may cause errors in IMASPy. A more robust mechanism to load IDS data from "
-            "netCDF files will be included in the next release of IMASPy."
-        ) from exc

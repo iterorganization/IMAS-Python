@@ -9,7 +9,7 @@ from imaspy.backends.db_entry_impl import (
     GetSliceParameters,
 )
 from imaspy.backends.netcdf.ids2nc import IDS2NC
-from imaspy.backends.netcdf.nc2ids import nc2ids
+from imaspy.backends.netcdf.nc2ids import NC2IDS
 from imaspy.exception import DataEntryException
 from imaspy.ids_convert import NBCPathMap, convert_ids
 from imaspy.ids_factory import IDSFactory
@@ -105,13 +105,13 @@ class NCDBEntryImpl(DBEntryImpl):
 
         # Load data into the destination IDS
         if self._ds_factory.dd_version == destination._dd_version:
-            nc2ids(group, destination)
+            NC2IDS(group, destination).run()
         else:
             # FIXME: implement automatic conversion using nbc_map
             #   As a work-around: do an explicit conversion, but automatic conversion
             #   will also be needed to implement lazy loading.
             ids = self._ds_factory.new(ids_name)
-            nc2ids(group, ids)
+            NC2IDS(group, ids).run()
             convert_ids(ids, None, target=destination)
 
         return destination
