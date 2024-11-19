@@ -163,3 +163,23 @@ def test_lazy_load_with_new_aos(requires_imas):
     assert len(lazy_et.model[0].ggd[0].electrons.particles.d_radial) == 0
 
     dbentry.close()
+
+
+def test_lazy_load_multiple_ids(backend, worker_id, tmp_path):
+    if backend == ASCII_BACKEND:
+        pytest.skip("Lazy loading is not supported by the ASCII backend.")
+
+    with open_dbentry(backend, "w", worker_id, tmp_path) as dbentry:
+        cp = dbentry.factory.core_profiles()
+        cp.ids_properties.homogeneous_time = 1
+        cp.time = [0.0, 1.0]
+        dbentry.put(cp)
+        eq = dbentry.factory.equilibrium()
+        eq.ids_properties.homogeneous_time = 1
+        eq.time = [1.0, 2.0]
+        dbentry.put(eq)
+
+        lazy_cp = dbentry.get("core_profiles", lazy=True)
+        lazy_eq = dbentry.get("equilibrium", lazy=True)
+        assert all(cp.time - eq.time == -1)
+        assert all(lazy_cp.time - lazy_eq.time == -1)

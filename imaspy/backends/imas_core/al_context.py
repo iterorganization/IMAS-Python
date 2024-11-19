@@ -316,6 +316,10 @@ class LazyALContext:
             # from the cache
 
         else:
+            # Purge the cache to close open contexts from other IDSs (IMAS-5603)
+            cache = self.dbentry._lazy_ctx_cache
+            while cache:
+                cache.pop().close()
             return self.dbentry_ctx
 
     @contextmanager
