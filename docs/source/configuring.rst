@@ -29,6 +29,13 @@ This page provides an overview of available variables.
         you can use :external:py:meth:`logging.getLogger("imaspy").setLevel(...)
         <logging.Logger.setLevel>` to change the log level programmatically.
 
+
+``IMASPY_DISABLE_NC_VALIDATE``
+    Disables validation of netCDF files when loading an IDS from an IMAS netCDF file.
+
+    .. caution::
+        Disabling the validation may lead to errors when reading data from an IMAS netCDF file.
+
 ``IMAS_VERSION``
     Sets :ref:`The default Data Dictionary version` to use.
 

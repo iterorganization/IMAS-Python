@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Iterator, List, Optional, Tuple
 
 import netCDF4
@@ -163,6 +164,14 @@ class NC2IDS:
 
     def _validate_variables(self) -> None:
         """Validate that all variables in the netCDF Group exist and match the DD."""
+        disable_validate = os.environ.get("IMASPY_DISABLE_NC_VALIDATE")
+        if disable_validate and disable_validate != "0":
+            logger.info(
+                "NetCDF file validation disabled: "
+                "This may lead to errors when reading data!"
+            )
+            return  # validation checks are disabled
+
         for var_name in self.variables:
             if var_name.endswith(":shape"):
                 # Check that there is a corresponding variable
