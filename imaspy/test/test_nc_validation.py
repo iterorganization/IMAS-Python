@@ -1,4 +1,5 @@
 import netCDF4
+import numpy as np
 import pytest
 
 from imaspy.backends.netcdf.ids2nc import IDS2NC
@@ -24,9 +25,10 @@ def memfile_with_ids(memfile, factory):
     ids = factory.core_profiles()
     ids.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
     ids.time = [1.0, 2.0, 3.0]
-    ids.profiles_1d.resize(2)
-    for i in range(2):
+    ids.profiles_1d.resize(3)
+    for i in range(3):
         ids.profiles_1d[i].grid.rho_tor_norm = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+    ids.profiles_1d[0].zeff = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
     IDS2NC(ids, memfile).run()
     # This one is valid:
     NC2IDS(memfile, factory.core_profiles()).run()
@@ -98,4 +100,47 @@ def test_extra_attributes(memfile_with_ids, factory):
         NC2IDS(memfile_with_ids, factory.core_profiles()).run()
 
 
-# TODO: tests for sparsity information
+def test_shape_array_without_data(memfile_with_ids, factory):
+    memfile_with_ids.createVariable("profiles_1d.t_i_average:shape", int, ())
+    with pytest.raises(InvalidNetCDFEntry):
+        NC2IDS(memfile_with_ids, factory.core_profiles()).run()
+
+
+def test_shape_array_without_sparse_data(memfile_with_ids, factory):
+    memfile_with_ids.createVariable("profiles_1d.grid.rho_tor_norm:shape", int, ())
+    with pytest.raises(InvalidNetCDFEntry):
+        NC2IDS(memfile_with_ids, factory.core_profiles()).run()
+
+
+def test_shape_array_with_invalid_dimensions(memfile_with_ids, factory):
+    cp = factory.core_profiles()
+    t_i_average_meta = cp.metadata["profiles_1d.t_i_average"]
+    t_i_average = memfile_with_ids.createVariable(
+        "profiles_1d.t_i_average", float, ("time", "profiles_1d.grid.rho_tor_norm:i")
+    )
+    t_i_average.units = t_i_average_meta.units
+    t_i_average.documentation = t_i_average_meta.documentation
+    t_i_average.sparse = "Contents don't matter"
+    memfile_with_ids.createVariable(
+        "profiles_1d.t_i_average:shape",
+        np.int32,
+        ("time", "profiles_1d.grid.rho_tor_norm:i"),
+    )
+    with pytest.raises(InvalidNetCDFEntry):
+        NC2IDS(memfile_with_ids, cp).run()
+
+
+def test_shape_array_with_invalid_dtype(memfile_with_ids, factory):
+    cp = factory.core_profiles()
+    t_i_average_meta = cp.metadata["profiles_1d.t_i_average"]
+    t_i_average = memfile_with_ids.createVariable(
+        "profiles_1d.t_i_average", float, ("time", "profiles_1d.grid.rho_tor_norm:i")
+    )
+    t_i_average.units = t_i_average_meta.units
+    t_i_average.documentation = t_i_average_meta.documentation
+    t_i_average.sparse = "Contents don't matter"
+    memfile_with_ids.createVariable(
+        "profiles_1d.t_i_average:shape", float, ("time", "1D")
+    )
+    with pytest.raises(InvalidNetCDFEntry):
+        NC2IDS(memfile_with_ids, cp).run()

@@ -1,5 +1,5 @@
 import logging
-from typing import Iterator, List, Tuple
+from typing import Iterator, List, Optional, Tuple
 
 import netCDF4
 
@@ -108,17 +108,12 @@ class NC2IDS:
 
     def run(self) -> None:
         """Load the data from the netCDF group into the IDS."""
+        self.variables.sort()
         self._validate_variables()
-        # FIXME: ensure that var_names are sorted properly
-        # Current assumption is that creation-order is fine
         for var_name in self.variables:
             if var_name.endswith(":shape"):
-                continue  # TODO: validate that this is used
-
-            # FIXME: error handling:
+                continue
             metadata = self.ids.metadata[var_name]
-
-            # TODO: validate metadata (data type, units, etc.) conforms to DD
 
             if metadata.data_type is IDSDataType.STRUCTURE:
                 continue  # This only contains DD metadata we already know
@@ -168,7 +163,6 @@ class NC2IDS:
 
     def _validate_variables(self) -> None:
         """Validate that all variables in the netCDF Group exist and match the DD."""
-        self.variables.sort()
         for var_name in self.variables:
             if var_name.endswith(":shape"):
                 # Check that there is a corresponding variable
@@ -184,7 +178,8 @@ class NC2IDS:
                         f"Shape information provided for {data_var}, but this variable "
                         "is not sparse."
                     )
-                # That's all for :shape arrays
+                # That's all for :shape arrays here, rest is checked in
+                # _validate_variable (which defers to _validate_sparsity)
                 continue
 
             # Check that the DD defines this variable, and validate its metadata
@@ -197,10 +192,6 @@ class NC2IDS:
                     f"{self.ids.metadata.name} IDS."
                 )
             self._validate_variable(var, metadata)
-
-            # Validate sparsity metadata
-            if "sparse" in var.ncattrs():
-                ...  # TODO
 
     def _validate_variable(self, var: netCDF4.Variable, metadata: IDSMetadata) -> None:
         """Validate that the variable has correct metadata, raise an exception if not.
@@ -251,7 +242,9 @@ class NC2IDS:
         # Sparse
         sparse = attrs.pop("sparse", None)
         if sparse is not None:
-            ...  # TODO
+            shape_name = f"{var.name}:shape"
+            shape_var = self.group[shape_name] if shape_name in self.variables else None
+            self._validate_sparsity(var, shape_var, metadata)
 
         # Documentation
         doc = attrs.pop("documentation", None)
@@ -261,6 +254,43 @@ class NC2IDS:
         # Unknown attrs
         if attrs:
             raise variable_error(var, "attributes", list(attrs.keys()))
+
+    def _validate_sparsity(
+        self,
+        var: netCDF4.Variable,
+        shape_var: Optional[netCDF4.Variable],
+        metadata: IDSMetadata,
+    ) -> None:
+        """Validate that the variable has correct sparsity.
+
+        Args:
+            var: Variable with a "sparse" attribute
+            shape_var: Corresponding shape array (if it exists in the NC group)
+            metadata: IDSMetadata of the corresponding IDS object
+        """
+        if metadata.ndim == 0:
+            return  # Sparsity is stored with _Fillvalue, nothing to validate
+
+        # Dimensions
+        aos_dimensions = self.ncmeta.get_dimensions(
+            self.ncmeta.aos.get(metadata.path_string), self.homogeneous_time
+        )
+        shape_dimensions = shape_var.dimensions
+        if (
+            len(shape_dimensions) != len(aos_dimensions) + 1
+            or shape_dimensions[:-1] != aos_dimensions
+            or self.group.dimensions[shape_dimensions[-1]].size != metadata.ndim
+        ):
+            expected_dims = aos_dimensions + (f"{metadata.ndim}D",)
+            raise variable_error(
+                shape_var, "dimensions", shape_dimensions, expected_dims
+            )
+
+        # Data type
+        if shape_var.dtype.kind not in "ui":  # should be (un)signed integer
+            raise variable_error(
+                shape_var, "dtype", shape_var.dtype, "any integer type"
+            )
 
 
 def nc2ids(group: netCDF4.Group, ids: IDSToplevel):
