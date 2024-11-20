@@ -459,7 +459,9 @@ class DBEntry:
             :param:`dtime` must be a number or a numpy array of size 1.
 
             This mode will generate an IDS with a homogeneous time vector ``[tmin, tmin
-            + dtime, tmin + 2*dtime, ...`` up to ``tmax``. The returned IDS always has
+            + dtime, tmin + 2*dtime, ...`` up to ``tmax``. The chosen interpolation
+            method will have no effect on the time vector, but may have an impact on the
+            other dynamic values. The returned IDS always has
             ``ids_properties.homogeneous_time = 1``.
 
         3.  Interpolate dynamic data on an explicit time base. This method is selected
@@ -468,7 +470,9 @@ class DBEntry:
 
             This mode will generate an IDS with a homogeneous time vector equal to
             :param:`dtime`. :param:`tmin` and :param:`tmax` are ignored in this mode.
-            The returned IDS always has ``ids_properties.homogeneous_time = 1``.
+            The chosen interpolation method will have no effect on the time vector, but
+            may have an impact on the other dynamic values. The returned IDS always has
+            ``ids_properties.homogeneous_time = 1``.
 
         Args:
             ids_name: Name of the IDS to read from the backend
