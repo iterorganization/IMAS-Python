@@ -218,5 +218,20 @@ def convert_ids(
         console.Console().print(timer.get_table("Time required per IDS"))
 
 
+@cli.command("validate_nc", no_args_is_help=True)
+@click.argument("filename", type=click.Path(exists=True, dir_okay=False))
+def validate_nc(filename):
+    """Validate if the provided netCDF file adheres to the IMAS conventions."""
+    from imaspy.backends.netcdf.nc_validate import validate_netcdf_file
+
+    try:
+        validate_netcdf_file(filename)
+    except Exception as exc:
+        click.echo(f"File `{filename}` does not adhere to the IMAS conventions:")
+        click.echo(exc)
+        sys.exit(1)
+    click.echo(f"File `{filename}` is a valid IMAS netCDF file.")
+
+
 if __name__ == "__main__":
     cli()

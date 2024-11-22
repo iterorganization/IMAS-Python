@@ -110,7 +110,7 @@ class NC2IDS:
     def run(self) -> None:
         """Load the data from the netCDF group into the IDS."""
         self.variables.sort()
-        self._validate_variables()
+        self.validate_variables()
         for var_name in self.variables:
             if var_name.endswith(":shape"):
                 continue
@@ -162,7 +162,7 @@ class NC2IDS:
                 for index, node in tree_iter(self.ids, metadata):
                     node.value = data[index]
 
-    def _validate_variables(self) -> None:
+    def validate_variables(self) -> None:
         """Validate that all variables in the netCDF Group exist and match the DD."""
         disable_validate = os.environ.get("IMASPY_DISABLE_NC_VALIDATE")
         if disable_validate and disable_validate != "0":

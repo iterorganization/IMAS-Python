@@ -10,7 +10,7 @@ from imaspy.backends.db_entry_impl import (
 )
 from imaspy.backends.netcdf.ids2nc import IDS2NC
 from imaspy.backends.netcdf.nc2ids import NC2IDS
-from imaspy.exception import DataEntryException
+from imaspy.exception import DataEntryException, InvalidNetCDFEntry
 from imaspy.ids_convert import NBCPathMap, convert_ids
 from imaspy.ids_factory import IDSFactory
 from imaspy.ids_toplevel import IDSToplevel
@@ -49,14 +49,16 @@ class NCDBEntryImpl(DBEntryImpl):
         # Check if there is already data in this dataset:
         if self._dataset.dimensions or self._dataset.variables or self._dataset.groups:
             if "data_dictionary_version" not in self._dataset.ncattrs():
-                raise RuntimeError(
+                raise InvalidNetCDFEntry(
                     "Invalid netCDF file: `data_dictionary_version` missing"
                 )
             dataset_dd_version = self._dataset.data_dictionary_version
             if dataset_dd_version != factory.dd_version:
                 self._ds_factory = IDSFactory(dataset_dd_version)
-            # TODO: [validate] that the data contained in this file adheres to the DD
 
+        elif mode not in ["w", "r+", "a"]:
+            # Reading an empty file...
+            raise InvalidNetCDFEntry(f"Invalid netCDF file: `{fname}` is empty.")
         else:
             # This is an empty netCDF dataset: set global attributes
             self._dataset.Conventions = "IMAS"
