@@ -43,9 +43,17 @@ class NCDBEntryImpl(DBEntryImpl):
         """NetCDF4 dataset."""
         self._factory = factory
         """Factory (DD version) that the user wishes to use."""
-        self._ds_factory = factory  # Overwritten if data exists, see below
+        self._ds_factory = factory  # Overwritten if data exists, see _init_dd_version
         """Factory (DD version) that the data is stored in."""
 
+        try:
+            self._init_dd_version(fname, mode, factory)
+        except Exception:
+            self._dataset.close()
+            raise
+
+    def _init_dd_version(self, fname: str, mode: str, factory: IDSFactory) -> None:
+        """Check or setup data dictionary version."""
         # Check if there is already data in this dataset:
         if self._dataset.dimensions or self._dataset.variables or self._dataset.groups:
             if "data_dictionary_version" not in self._dataset.ncattrs():
