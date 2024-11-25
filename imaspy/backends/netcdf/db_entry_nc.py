@@ -56,7 +56,7 @@ class NCDBEntryImpl(DBEntryImpl):
             if dataset_dd_version != factory.dd_version:
                 self._ds_factory = IDSFactory(dataset_dd_version)
 
-        elif mode not in ["w", "r+", "a"]:
+        elif mode not in ["w", "x", "r+", "a"]:
             # Reading an empty file...
             raise InvalidNetCDFEntry(f"Invalid netCDF file: `{fname}` is empty.")
         else:
