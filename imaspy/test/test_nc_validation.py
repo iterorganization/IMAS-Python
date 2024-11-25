@@ -4,7 +4,8 @@ import pytest
 
 from imaspy.backends.netcdf.ids2nc import IDS2NC
 from imaspy.backends.netcdf.nc2ids import NC2IDS
-from imaspy.exception import InvalidNetCDFEntry
+from imaspy.backends.netcdf.nc_validate import validate_netcdf_file
+from imaspy.exception import InvalidNetCDFEntry, UnknownDDVersion
 from imaspy.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
 from imaspy.ids_factory import IDSFactory
 
@@ -144,3 +145,53 @@ def test_shape_array_with_invalid_dtype(memfile_with_ids, factory):
     )
     with pytest.raises(InvalidNetCDFEntry):
         NC2IDS(memfile_with_ids, cp).run()
+
+
+def test_validate_nc(tmpdir):
+    fname = str(tmpdir / "test.nc")
+
+    # Wrong extension
+    with pytest.raises(InvalidNetCDFEntry):
+        validate_netcdf_file("test.h5")  # invalid extension
+
+    # Empty file
+    netCDF4.Dataset(fname, "w").close()
+    with pytest.raises(InvalidNetCDFEntry):
+        validate_netcdf_file(fname)
+
+    # Invalid DD version
+    with netCDF4.Dataset(fname, "w") as dataset:
+        dataset.data_dictionary_version = "invalid"
+        dataset.createGroup("core_profiles")
+    with pytest.raises(UnknownDDVersion):
+        validate_netcdf_file(fname)
+
+    # Invalid group
+    with netCDF4.Dataset(fname, "w") as dataset:
+        dataset.data_dictionary_version = "4.0.0"
+        dataset.createGroup("X")
+    with pytest.raises(InvalidNetCDFEntry):
+        validate_netcdf_file(fname)
+
+    # Invalid occurrence
+    with netCDF4.Dataset(fname, "w") as dataset:
+        dataset.data_dictionary_version = "4.0.0"
+        dataset.createGroup("core_profiles/a")
+    with pytest.raises(InvalidNetCDFEntry):
+        validate_netcdf_file(fname)
+
+    # Invalid variable in root group
+    with netCDF4.Dataset(fname, "w") as dataset:
+        dataset.data_dictionary_version = "4.0.0"
+        dataset.createVariable("core_profiles", int, ())
+    with pytest.raises(InvalidNetCDFEntry):
+        validate_netcdf_file(fname)
+
+    # Missing ids_properties.homogeneous_time
+    with netCDF4.Dataset(fname, "w") as dataset:
+        dataset.data_dictionary_version = "4.0.0"
+        dataset.createGroup("core_profiles/1")
+    with pytest.raises(InvalidNetCDFEntry):
+        validate_netcdf_file(fname)
+
+    # All other validations are handled by NC2IDS and tested above
