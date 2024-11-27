@@ -102,3 +102,11 @@ your directory. Let's open this file with ``xarray.load_dataset``:
         Attributes:
             Conventions:              IMAS
             data_dictionary_version:  3.41.0
+
+
+Validating an IMAS netCDF file
+------------------------------
+
+IMAS netCDF files can be validated with IMASPy through the command line ``imaspy
+validate_nc <filename>``. See also :ref:`IMASPy Command Line tool` or type
+``imaspy validate_nc --help`` in a command line.
