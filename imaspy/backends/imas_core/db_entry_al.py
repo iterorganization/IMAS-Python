@@ -41,6 +41,7 @@ from .al_context import ALContext, LazyALContext
 from .db_entry_helpers import delete_children, get_children, put_children
 from .imas_interface import LLInterfaceError, has_imas, ll_interface
 from .mdsplus_model import ensure_data_dir, mdsplus_model_dir
+from .uda_support import extract_idsdef, get_dd_version_from_idsdef_xml
 
 _BACKEND_NAME = {
     ASCII_BACKEND: "ascii",
@@ -186,6 +187,24 @@ class ALDBEntryImpl(DBEntryImpl):
             pass  # nothing to set up
 
         elif backend == "uda":
+            # Set IDSDEF_PATH to point the UDA backend to the selected DD version
+            idsdef_path = None
+
+            if factory._xml_path is not None:
+                # Factory was constructed with an explicit XML path, point UDA to that:
+                idsdef_path = factory._xml_path
+
+            elif "IMAS_PREFIX" in os.environ:
+                # Check if UDA can use the IDSDef.xml stored in $IMAS_PREFIX/include/
+                idsdef_path = os.environ["IMAS_PREFIX"] + "/include/IDSDef.xml"
+                if get_dd_version_from_idsdef_xml(idsdef_path) != factory.version:
+                    idsdef_path = None
+
+            if idsdef_path is None:
+                # Extract XML from the DD zip and point UDA to it
+                idsdef_path = extract_idsdef(factory.version)
+
+            os.environ["IDSDEF_PATH"] = idsdef_path
             logger.warning(
                 "The UDA backend is not tested with IMASPy and may not work properly. "
                 "Please raise any issues you find."
