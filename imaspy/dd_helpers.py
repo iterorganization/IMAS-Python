@@ -58,8 +58,13 @@ def prepare_data_dictionaries():
                 dd_zip.write(filename, arcname=arcname)
             # Include identifiers from latest tag in zip file
             repo.git.checkout(newest_version_and_tag[1], force=True)
+            # DD layout <= 4.0.0
             for filename in Path("data-dictionary").glob("*/*identifier.xml"):
                 arcname = Path("identifiers").joinpath(*filename.parts[1:])
+                dd_zip.write(filename, arcname=arcname)
+            # DD layout > 4.0.0
+            for filename in Path("data-dictionary").glob("schemas/*/*identifier.xml"):
+                arcname = Path("identifiers").joinpath(*filename.parts[2:])
                 dd_zip.write(filename, arcname=arcname)
 
 
