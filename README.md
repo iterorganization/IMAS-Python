@@ -1,7 +1,7 @@
-# IMAS
+# IMAS-Python
 
-IMAS is a pure-python library to handle arbitrarily nested data structures.
-IMAS is designed for, but not necessarily bound to, interacting with Interface 
+IMAS-Python is a pure-python library to handle arbitrarily nested data structures.
+IMAS-Python is designed for, but not necessarily bound to, interacting with Interface 
 Data Structures (IDSs) as defined by the Integrated Modelling & Analysis Suite (IMAS) 
 Data Model.
 
@@ -40,7 +40,7 @@ A quick 5 minutes introduction is available in the documentation generated from 
 
 ## Legal
 
-IMAS is Copyright 2020-2024 ITER Organization, Copyright 2020-2023 Karel Lucas van de 
+IMAS-Python is Copyright 2020-2024 ITER Organization, Copyright 2020-2023 Karel Lucas van de 
 Plassche <karelvandeplassche@gmail.com>, Copyright 2020-2022 Daan van Vugt <dvanvugt@ignitioncomputing.com>,
 and Copyright 2020 Dutch Institute for Fundamental Energy Research <info@differ.nl>.
 It is licensed under [LGPL 3.0](LICENSE.txt).
