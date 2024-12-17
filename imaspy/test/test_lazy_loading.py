@@ -165,6 +165,22 @@ def test_lazy_load_with_new_aos(requires_imas):
     dbentry.close()
 
 
+def test_lazy_load_with_new_structure(requires_imas):
+    dbentry = DBEntry(MEMORY_BACKEND, "ITER", 1, 1, dd_version="3.30.0")
+    dbentry.create()
+
+    eq = dbentry.factory.equilibrium()
+    eq.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    eq.time = [0.0]
+    eq.time_slice.resize(1)
+    dbentry.put(eq)
+
+    entry2 = DBEntry(MEMORY_BACKEND, "ITER", 1, 1, data_version="3", dd_version="4.0.0")
+    entry2.open()
+    lazy_eq = entry2.get("equilibrium", lazy=True)
+    assert not lazy_eq.time_slice[0].boundary.dr_dz_zero_point.r.has_value
+
+
 def test_lazy_load_multiple_ids(backend, worker_id, tmp_path):
     if backend == ASCII_BACKEND:
         pytest.skip("Lazy loading is not supported by the ASCII backend.")
