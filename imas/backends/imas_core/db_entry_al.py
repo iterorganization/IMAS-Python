@@ -206,7 +206,8 @@ class ALDBEntryImpl(DBEntryImpl):
 
             os.environ["IDSDEF_PATH"] = idsdef_path
             logger.warning(
-                "The UDA backend is not tested with imas-python and may not work properly. "
+                "The UDA backend is not tested with "
+                "imas-python and may not work properly. "
                 "Please raise any issues you find."
             )
 

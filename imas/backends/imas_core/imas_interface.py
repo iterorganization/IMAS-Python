@@ -61,8 +61,8 @@ class LLInterfaceError(RuntimeError):
 class LowlevelInterface:
     """Compatibility object.
 
-    Provides a stable API for the rest of imas-python even when the `imas.lowlevel` interface
-    changes.
+    Provides a stable API for the rest of imas-python even when the
+    `imas.lowlevel` interface changes.
 
     .. rubric:: Developer notes
 

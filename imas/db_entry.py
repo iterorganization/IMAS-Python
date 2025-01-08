@@ -605,9 +605,10 @@ class DBEntry:
             if dd_version.split(".")[0] != destination._dd_version.split(".")[0]:
                 logger.warning(
                     "On-disk data is stored in DD %s which has a different major "
-                    "version than the requested DD version (%s). imas-python will convert "
-                    "the data automatically, but this does not cover all changes. See "
-                    "%s/multi-dd.html#conversion-of-idss-between-dd-versions",
+                    "version than the requested DD version (%s). imas-python will "
+                    "convert the data automatically, but this does not cover all"
+                    "changes. "
+                    "See %s/multi-dd.html#conversion-of-idss-between-dd-versions",
                     dd_version,
                     destination._dd_version,
                     imas.PUBLISHED_DOCUMENTATION_ROOT,

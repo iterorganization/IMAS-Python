@@ -154,7 +154,8 @@ class IDSMetadata:
         else:
             self._ctx_path = self.name
 
-        # These are special and used in imas-python logic, so we need to ensure proper values
+        # These are special and used in imas-python logic,
+        # so we need to ensure proper values
         maxoccur = attrib.get("maxoccur", "unbounded")
         self.maxoccur: Optional[int] = (
             None if maxoccur == "unbounded" else int(maxoccur)
