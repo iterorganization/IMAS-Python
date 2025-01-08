@@ -7,9 +7,9 @@ requires = ["setuptools>=61", "wheel", "numpy", "gitpython", "packaging", "tomli
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "imaspy"
+name = "imas-python"
 authors = [
-  {name = "IMASPy Developers"},
+  {name = "imas-python Developers"},
   {name = "Olivier Hoenen", email = "olivier.hoenen@iter.org"},
 ]
 description = "Pythonic wrappers for the IMAS Access Layer"
