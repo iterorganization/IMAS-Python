@@ -1,8 +1,8 @@
-import imaspy
-from imaspy.util import get_data_dictionary_version
+import imas
+from imas.util import get_data_dictionary_version
 
 # 1. Create an IDSFactory
-default_factory = imaspy.IDSFactory()
+default_factory = imas.IDSFactory()
 
 # 2. Print the DD version used by the IDSFactory
 #
@@ -17,9 +17,9 @@ print("DD version used for pf_active:", get_data_dictionary_version(pf_active))
 # it.
 
 # 4. Create a new DBEntry
-default_entry = imaspy.DBEntry(imaspy.ids_defs.MEMORY_BACKEND, "test", 0, 0)
+default_entry = imas.DBEntry(imas.ids_defs.MEMORY_BACKEND, "test", 0, 0)
 default_entry.create()
 # Alternative URI syntax when using AL5.0.0:
-# default_entry = imaspy.DBEntry("imas:memory?path=.")
+# default_entry = imas.DBEntry("imas:memory?path=.")
 print("DD version used for the DBEntry:", get_data_dictionary_version(default_entry))
 # What do you notice? It is the same default version again.

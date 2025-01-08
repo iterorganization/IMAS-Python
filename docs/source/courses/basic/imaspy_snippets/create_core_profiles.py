@@ -1,17 +1,17 @@
 import datetime
 
-import imaspy
+import imas
 import numpy as np
 
 
-factory = imaspy.IDSFactory()
+factory = imas.IDSFactory()
 cp = factory.new("core_profiles")
 # Alternative
 cp = factory.core_profiles()
 
 # Set properties
-cp.ids_properties.homogeneous_time = imaspy.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
-cp.ids_properties.comment = "Synthetic IDS created for the IMASPy course"
+cp.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
+cp.ids_properties.comment = "Synthetic IDS created for the imas-python course"
 cp.ids_properties.creation_date = datetime.date.today().isoformat()
 
 # Set a time array
@@ -32,7 +32,7 @@ for index, t in enumerate(cp.time):
 try:
     cp.validate()
     print("IDS is valid!")
-except imaspy.exception.ValidationError as exc:
+except imas.exception.ValidationError as exc:
     print("Oops, the IDS is not valid: ", exc)
 
 # Fill in the missing rho_tor_norm coordinate
@@ -42,8 +42,8 @@ for index in range(3):
 cp.validate()
 
 # Create a new data entry for storing the IDS
-pulse, run, database = 1, 1, "imaspy-course"
-entry = imaspy.DBEntry(imaspy.ids_defs.ASCII_BACKEND, database, pulse, run)
+pulse, run, database = 1, 1, "imas-course"
+entry = imas.DBEntry(imas.ids_defs.ASCII_BACKEND, database, pulse, run)
 entry.create()
 
 entry.put(cp)

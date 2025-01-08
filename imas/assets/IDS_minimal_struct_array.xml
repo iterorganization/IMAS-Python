@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<IDSs xmlns:fn="http://www.w3.org/2005/02/xpath-functions">
+   <version name="version">0.0.1</version>
+   <IDS name="minimal_struct_array"
+        maxoccur="1"
+        documentation="A minimal test imas-python Data Structure (IDS)"
+        lifecycle_status="alpha"
+        lifecycle_version="0.0.1"
+        lifecycle_last_change="0.0.1">
+      <field name="ids_properties"
+             structure_reference="ids_properties"
+             path="ids_properties"
+             path_doc="ids_properties"
+             documentation="Properties of this IDS"
+             data_type="structure">
+         <field name="comment"
+                path="ids_properties/comment"
+                path_doc="ids_properties/comment"
+                documentation="A string comment"
+                data_type="STR_0D"
+                type="constant"/>
+         <field name="homogeneous_time"
+                path="ids_properties/homogeneous_time"
+                path_doc="ids_properties/homogeneous_time"
+                documentation="This node must be filled (with 0, 1, or 2) for the IDS to be valid. If 1, the time of this IDS is homogeneous, i.e. the time values for this IDS are stored in the time node just below the root of this IDS. If 0, the time values are stored in the various time fields at lower levels in the tree. In the case only constant or static nodes are filled within the IDS, homogeneous_time must be set to 2"
+                data_type="INT_0D"
+                type="constant"/>
+      </field>
+      <field name="struct_array"
+         path="struct_array"
+         data_type="struct_array"
+         maxoccur="2"
+         coordinate1="1...N">
+         <field name="a"
+            data_type="structure"
+            path="struct_array/a">
+            <field name="flt_0d"
+               path="struct_array/a/flt_0d"
+               data_type="FLT_0D"/>
+         </field>
+      </field>
+   </IDS>
+</IDSs>

@@ -1,33 +1,33 @@
 .. _`benchmarking IMASPY`:
 
-Benchmarking IMASPy
+Benchmarking imas-python
 ===================
 
-IMASPy integrates with the `airspeed velocity
+imas-python integrates with the `airspeed velocity
 <https://asv.readthedocs.io/en/stable/index.html>`_ ``asv`` package for benchmarking.
 
 
-IMASPy benchmarks
+imas-python benchmarks
 -----------------
 
-IMASPy benchmarks are stored in the ``benchmarks`` folder in the git repository. We can
+imas-python benchmarks are stored in the ``benchmarks`` folder in the git repository. We can
 currently distinguish three types of benchmarks:
 
 Technical benchmarks
     These are for benchmarking features not directly connected to user-interfacing
-    functionality. For example benchmarking the time it takes to import the imaspy
+    functionality. For example benchmarking the time it takes to import the imas
     package.
 
 Basic functional benchmarks
     These are for benchmarking functionality with an equivalent feature in the IMAS
-    Access Layer HLI. In addition to tracking the performance of the IMASPy features
+    Access Layer HLI. In addition to tracking the performance of the imas-python features
     over time, we can also benchmark the performance against the traditional HLI.
 
     For example: putting and getting IDSs.
 
-IMASPy-specific functional benchmarks
+imas-python-specific functional benchmarks
     These are for benchmarking functionality without an equivalent feature in the IMAS
-    Access Layer HLI. We use these for tracking the IMASPy performance over time.
+    Access Layer HLI. We use these for tracking the imas-python performance over time.
 
     For example: data conversion between DD versions.
 
@@ -35,7 +35,7 @@ IMASPy-specific functional benchmarks
 Running benchmarks (quick)
 --------------------------
 
-When you have an existing IMASPy installation, you can run the benchmarks like this:
+When you have an existing imas-python installation, you can run the benchmarks like this:
 
 .. code-block:: console
 
@@ -67,12 +67,12 @@ contains tabular results. Some examples:
                     hli                
                   -------- ------------
                     imas    22.9±0.4μs 
-                   imaspy    408±8μs   
+                   imas    408±8μs   
                   ======== ============
 
 Here we see the benchmark ``core_profiles.Generate.time_create_core_profiles`` was
 repeated for multiple values of ``hli``: once for the ``imas`` HLI, and once for the
-``imaspy`` HLI.
+``imas`` HLI.
 
 Some benchmarks are parametrized in multiple dimensions, as in below example. This
 results in a 2D table of results.
@@ -87,7 +87,7 @@ results in a 2D table of results.
                     hli        13          14          11   
                   ======== ========== ============ =========
                     imas    75.1±1ms   70.2±0.5ms   207±2ms 
-                   imaspy   241±4ms     229±2ms     364±6ms 
+                   imas   241±4ms     229±2ms     364±6ms 
                   ======== ========== ============ =========
 
 .. note::
@@ -103,8 +103,8 @@ Running benchmarks (advanced)
 -----------------------------
 
 Running benchmarks quickly, as explained in the previous section, is great during
-development and for comparing the performance of IMASPy against the imas HLI. However,
-``asv`` can also track the performance of benchmarks over various commits of IMASPy.
+development and for comparing the performance of imas-python against the imas HLI. However,
+``asv`` can also track the performance of benchmarks over various commits of imas-python.
 Unfortunately this is a bit more tricky to set up.
 
 
@@ -112,7 +112,7 @@ Setup advanced benchmarking
 '''''''''''''''''''''''''''
 
 First, some background on how ``asv`` tracks performance: it creates an isolated virtual
-environment (using the ``virtualenv`` package) and installs IMASPy for each commit that
+environment (using the ``virtualenv`` package) and installs imas-python for each commit that
 will be benchmarked. However, because the virtual environment is isolated, the ``imas``
 package won't be available. We need to work around it by setting the environment
 variable ``ASV_PYTHONPATH``:
@@ -125,8 +125,8 @@ variable ``ASV_PYTHONPATH``:
 
 .. caution::
 
-    ``imaspy`` must not be available on the ``ASV_PYTHONPATH`` to avoid the interfering
-    of two imaspy modules (one on the ``PYTHONPATH``, and the other installed by ``asv``
+    ``imas`` must not be available on the ``ASV_PYTHONPATH`` to avoid the interfering
+    of two imas modules (one on the ``PYTHONPATH``, and the other installed by ``asv``
     in the virtual environment).
 
 
@@ -171,7 +171,7 @@ Instead, you can submit a benchmark job to the compute nodes.
     #!/bin/bash
 
     # Set SLURM options:
-    #SBATCH --job-name=IMASPy-benchmark
+    #SBATCH --job-name=imas-python-benchmark
     #SBATCH --time=1:00:00
     #SBATCH --partition=gen10_ib
     # Note: for proper benchmarking we need to exclusively reserve a node, even though
@@ -199,7 +199,7 @@ Instead, you can submit a benchmark job to the compute nodes.
     echo
 
     # Activate the virtual environment which has asv installed
-    . venv_imaspy/bin/activate
+    . venv_imas/bin/activate
 
     # Setup asv machine (using default values)
     asv machine --yes

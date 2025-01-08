@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-import imaspy
+import imas
 
 from .utils import available_backends, create_dbentry, factory, hlis
 
@@ -17,18 +17,18 @@ def fill_ggd(edge_profiles, times):
     """Fill nested arrays of structures in grids_ggd and ggd substructures.
 
     Args:
-        edge_profiles: edge_profiles IDS object (either from IMASPy or AL HLI)
+        edge_profiles: edge_profiles IDS object (either from imas-python or AL HLI)
         times: time values to fill
     """
     edge_profiles.ids_properties.homogeneous_time = (
-        imaspy.ids_defs.IDS_TIME_MODE_HETEROGENEOUS
+        imas.ids_defs.IDS_TIME_MODE_HETEROGENEOUS
     )
-    edge_profiles.ids_properties.comment = "Generated for IMASPy benchmark suite"
+    edge_profiles.ids_properties.comment = "Generated for imas-python benchmark suite"
     edge_profiles.ids_properties.creation_date = datetime.date.today().isoformat()
-    edge_profiles.code.name = "IMASPy ASV benchmark"
-    edge_profiles.code.version = imaspy.__version__
+    edge_profiles.code.name = "imas-python ASV benchmark"
+    edge_profiles.code.version = imas.__version__
     edge_profiles.code.repository = (
-        "https://git.iter.org/projects/IMAS/repos/imaspy/browse"
+        "https://git.iter.org/projects/IMAS/repos/imas/browse"
     )
 
     # This GGD grid is not a valid description, but it's a good stress test for the

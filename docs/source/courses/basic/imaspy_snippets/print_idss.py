@@ -1,10 +1,10 @@
-import imaspy
+import imas
 
-# IMASPy has multiple DD versions inside, which makes this exercise harder.
+# imas-python has multiple DD versions inside, which makes this exercise harder.
 # We provide possible solutions here
 
 # Option 1: Print the IDSs in the default-selected DD version
-factory = imaspy.IDSFactory()
+factory = imas.IDSFactory()
 print("IDSs available in DD version", factory.version)
 print(factory.ids_names())
 
@@ -14,6 +14,6 @@ for ids_name in factory:
 print()
 
 # Option 2: Print the IDSs in a specific DD version
-factory = imaspy.IDSFactory("3.39.0")
+factory = imas.IDSFactory("3.39.0")
 print("IDSs available in DD version", factory.version)
 print(list(factory))

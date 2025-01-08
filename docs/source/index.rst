@@ -3,11 +3,11 @@
    define TOC here, but it'll be put in the sidebar by the theme
 
 =============
-IMASPy Manual
+imas-python Manual
 =============
 
-IMASPy is a pure-python library to handle arbitrarily nested
-data structures. IMASPy is designed for, but not necessarily bound to,
+imas-python is a pure-python library to handle arbitrarily nested
+data structures. imas-python is designed for, but not necessarily bound to,
 interacting with Interface Data Structures (IDSs) as defined by the
 Integrated Modelling & Analysis Suite (IMAS) Data Model.
 
@@ -20,9 +20,9 @@ It provides:
 - Checking of correctness at assign time, instead of at database write time
 - Dynamically created in-memory pre-filled data trees from DD XML specifications
 
-The README is best read on :src:`#imaspy`.
+The README is best read on :src:`#imas`.
 
-Read what's new in the current version of IMASPy in our :ref:`changelog`!
+Read what's new in the current version of imas-python in our :ref:`changelog`!
 
 
 Manual
@@ -48,7 +48,7 @@ Manual
    changelog
 
 .. toctree::
-   :caption: IMASPy training courses
+   :caption: imas-python training courses
    :maxdepth: 1
 
    courses/basic_user_training
@@ -64,14 +64,14 @@ Manual
 
 
 .. toctree::
-   :caption: IMASPy development
+   :caption: imas-python development
    :maxdepth: 1
 
-   imaspy_architecture
+   imas_architecture
    code_style
    ci_config
    benchmarking
-   release_imaspy
+   release_imas
 
 
 LICENSE

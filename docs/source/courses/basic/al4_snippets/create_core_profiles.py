@@ -8,7 +8,7 @@ cp = imas.core_profiles()
 
 # Set properties
 cp.ids_properties.homogeneous_time = imas.imasdef.IDS_TIME_MODE_HOMOGENEOUS
-cp.ids_properties.comment = "Synthetic IDS created for the IMASPy course"
+cp.ids_properties.comment = "Synthetic IDS created for the imas-python course"
 cp.ids_properties.creation_date = datetime.date.today().isoformat()
 
 # Set a time array
@@ -33,7 +33,7 @@ for index in range(3):
     cp.profiles_1d[index].grid.rho_tor_norm = rho_tor_norm
 
 # Create a new data entry for storing the IDS
-pulse, run, database = 1, 1, "imaspy-course"
+pulse, run, database = 1, 1, "imas-course"
 entry = imas.DBEntry(imas.imasdef.ASCII_BACKEND, database, pulse, run)
 entry.create()
 

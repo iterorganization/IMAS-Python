@@ -1,5 +1,5 @@
-# This file is part of IMASPy.
-# You should have received the IMASPy LICENSE file with this project.
+# This file is part of imas-python.
+# You should have received the imas-python LICENSE file with this project.
 #
 # Set up pytest:
 # - Backend parametrization (and corresponding command line options)
@@ -22,19 +22,19 @@ import numpy as np
 import pytest
 from packaging.version import Version
 
-from imaspy.backends.imas_core.imas_interface import has_imas as _has_imas
-from imaspy.backends.imas_core.imas_interface import ll_interface, lowlevel
-from imaspy.dd_zip import dd_etree, dd_xml_versions, latest_dd_version
-from imaspy.ids_defs import (
+from imas.backends.imas_core.imas_interface import has_imas as _has_imas
+from imas.backends.imas_core.imas_interface import ll_interface, lowlevel
+from imas.dd_zip import dd_etree, dd_xml_versions, latest_dd_version
+from imas.ids_defs import (
     ASCII_BACKEND,
     HDF5_BACKEND,
     IDS_TIME_MODE_INDEPENDENT,
     MDSPLUS_BACKEND,
     MEMORY_BACKEND,
 )
-from imaspy.ids_factory import IDSFactory
+from imas.ids_factory import IDSFactory
 
-logger = logging.getLogger("imaspy")
+logger = logging.getLogger("imas")
 logger.setLevel(logging.INFO)
 
 os.environ["IMAS_AL_DISABLE_VALIDATE"] = "1"
@@ -136,33 +136,33 @@ def latest_factory3():
 
 # Fixtures for various assets
 @pytest.fixture()
-def imaspy_assets():
-    return files("imaspy") / "assets"
+def imas_assets():
+    return files("imas") / "assets"
 
 
 @pytest.fixture()
-def fake_toplevel_xml(imaspy_assets):
-    return imaspy_assets / "IDS_fake_toplevel.xml"
+def fake_toplevel_xml(imas_assets):
+    return imas_assets / "IDS_fake_toplevel.xml"
 
 
 @pytest.fixture()
-def ids_minimal(imaspy_assets):
-    return imaspy_assets / "IDS_minimal.xml"
+def ids_minimal(imas_assets):
+    return imas_assets / "IDS_minimal.xml"
 
 
 @pytest.fixture()
-def ids_minimal2(imaspy_assets):
-    return imaspy_assets / "IDS_minimal_2.xml"
+def ids_minimal2(imas_assets):
+    return imas_assets / "IDS_minimal_2.xml"
 
 
 @pytest.fixture()
-def ids_minimal_struct_array(imaspy_assets):
-    return imaspy_assets / "IDS_minimal_struct_array.xml"
+def ids_minimal_struct_array(imas_assets):
+    return imas_assets / "IDS_minimal_struct_array.xml"
 
 
 @pytest.fixture()
-def ids_minimal_types(imaspy_assets):
-    return imaspy_assets / "IDS_minimal_types.xml"
+def ids_minimal_types(imas_assets):
+    return imas_assets / "IDS_minimal_types.xml"
 
 
 @pytest.fixture

@@ -9,12 +9,12 @@ else:
 
 import matplotlib.pyplot as plt
 import numpy
-import imaspy
-import imaspy.training
+import imas
+import imas.training
 import xarray
 
 # 1. Load core_profiles IDS from training DBEntry
-entry = imaspy.training.get_training_db_entry()
+entry = imas.training.get_training_db_entry()
 cp = entry.get("core_profiles")
 
 # 2. Store the temperature of the first time slice

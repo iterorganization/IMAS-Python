@@ -1,7 +1,7 @@
-IMASPy Architecture
+imas-python Architecture
 ===================
 
-This document provides a brief overview of the components of IMASPy, grouped into
+This document provides a brief overview of the components of imas-python, grouped into
 different functional areas.
 
 We don't aim to give detailed explanations of the code or the algorithms in it. These
@@ -15,53 +15,53 @@ These classes are used to parse and represent IDS metadata from the Data Diction
 Metadata objects are generated from a Data Dictionary XML and are (supposed to be)
 immutable.
 
--   :py:mod:`imaspy.ids_metadata` contains the main metadata class
-    :py:class:`~imaspy.ids_metadata.IDSMetadata`. This class is generated from an
+-   :py:mod:`imas.ids_metadata` contains the main metadata class
+    :py:class:`~imas.ids_metadata.IDSMetadata`. This class is generated from an
     ``<IDS>`` or ``<field>`` element in the Data Dictionary XML and contains all
     (parsed) data belonging to that ``<IDS>`` or ``<field>``. Most of the (Python)
     attributes correspond directly to an attribute of the XML element.
 
-    This module also contains the :py:class:`~imaspy.ids_metadata.IDSType` enum. This
+    This module also contains the :py:class:`~imas.ids_metadata.IDSType` enum. This
     enum corresponds to the Data Dictionary notion of ``type`` which can be ``dynamic``,
     ``constant``, ``static`` or unavailable on a Data Dictionary element.
 
--   :py:mod:`imaspy.ids_coordinates` contains two classes:
-    :py:class:`~imaspy.ids_coordinates.IDSCoordinate`, which handles the parsing of
+-   :py:mod:`imas.ids_coordinates` contains two classes:
+    :py:class:`~imas.ids_coordinates.IDSCoordinate`, which handles the parsing of
     coordinate identifiers from the Data Dictionary, and
-    :py:class:`~imaspy.ids_coordinates.IDSCoordinates`, which handles coordinate
+    :py:class:`~imas.ids_coordinates.IDSCoordinates`, which handles coordinate
     retrieval and validation of IDS nodes.
 
-    :py:class:`~imaspy.ids_coordinates.IDSCoordinate`\ s are created for each coordinate
+    :py:class:`~imas.ids_coordinates.IDSCoordinate`\ s are created for each coordinate
     attribute of a Data Dictionary element: ``coordinate1``, ``coordinate2``, ...
     ``coordinate1_same_as``, etc.
 
-    :py:class:`~imaspy.ids_coordinates.IDSCoordinates` is created and assigned as
-    ``coordinates`` attribute of :py:class:`~imaspy.ids_struct_array.IDSStructArray` and
-    :py:class:`~imaspy.ids_primitive.IDSPrimitive` objects. This class is responsible
+    :py:class:`~imas.ids_coordinates.IDSCoordinates` is created and assigned as
+    ``coordinates`` attribute of :py:class:`~imas.ids_struct_array.IDSStructArray` and
+    :py:class:`~imas.ids_primitive.IDSPrimitive` objects. This class is responsible
     for retrieving coordinate values and for checking the coordinate consistency in
-    :py:func:`~imaspy.ids_toplevel.IDSToplevel.validate`.
+    :py:func:`~imas.ids_toplevel.IDSToplevel.validate`.
 
--   :py:mod:`imaspy.ids_data_type` handles parsing Data Dictionary ``data_type``
-    attributes (see method :py:meth:`~imaspy.ids_data_type.IDSDataType.parse`) to an
-    :py:class:`~imaspy.ids_data_type.IDSDataType` and number of dimensions.
+-   :py:mod:`imas.ids_data_type` handles parsing Data Dictionary ``data_type``
+    attributes (see method :py:meth:`~imas.ids_data_type.IDSDataType.parse`) to an
+    :py:class:`~imas.ids_data_type.IDSDataType` and number of dimensions.
 
-    :py:class:`~imaspy.ids_data_type.IDSDataType` also has attributes for default values
+    :py:class:`~imas.ids_data_type.IDSDataType` also has attributes for default values
     and mappings to Python / Numpy / Access Layer type identifiers.
 
--   :py:mod:`imaspy.ids_path` handles parsing of IDS paths to
-    :py:class:`~imaspy.ids_path.IDSPath` objects. Paths can occur as the ``path``
+-   :py:mod:`imas.ids_path` handles parsing of IDS paths to
+    :py:class:`~imas.ids_path.IDSPath` objects. Paths can occur as the ``path``
     attribute of Data Dictionary elements, and inside coordinate identifiers.
 
     .. caution::
 
-        Although an :py:class:`~imaspy.ids_path.IDSPath` in IMASPy implements roughly
+        Although an :py:class:`~imas.ids_path.IDSPath` in imas-python implements roughly
         the same concept as `the "IDS Path syntax" in the Data Dictionary
         <https://git.iter.org/projects/IMAS/repos/data-dictionary/browse/html_documentation/utilities/IDS-path-syntax.md?at=refs%2Fheads%2Fdevelop%2F3>`__,
         they are not necessarily the same thing!
 
         At the moment of writing this (January 2024), the IDS path definition in the
         Data Dictionary is not yet finalized.
-        Be aware that the syntax of IMASPy's :py:class:`~imaspy.ids_path.IDSPath` may
+        Be aware that the syntax of imas-python's :py:class:`~imas.ids_path.IDSPath` may
         differ slightly and might be incompatible with the definition from the Data
         Dictionary.
 
@@ -72,22 +72,22 @@ Data Dictionary building and loading
 The following submodules are responsible for building the Data Dictionary and loading DD
 definitions at runtime.
 
--   :py:mod:`imaspy.dd_helpers` handles building the ``IDSDef.zip`` file, containing all
+-   :py:mod:`imas.dd_helpers` handles building the ``IDSDef.zip`` file, containing all
     versions of the Data Dictionary since ``3.22.0``.
 
--   :py:mod:`imaspy.dd_zip` handles loading the Data Dictionary definitions at run time.
+-   :py:mod:`imas.dd_zip` handles loading the Data Dictionary definitions at run time.
     These definitions can be loaded from an ``IDSDef.zip`` or from a custom XML file.
 
 
-.. _imaspy_architecture/IDS_nodes:
+.. _imas_architecture/IDS_nodes:
 
 IDS nodes
 ---------
 
 The following submodules and classes represent IDS nodes.
 
--   :py:mod:`imaspy.ids_base` defines the base class for all IDS nodes:
-    :py:class:`~imaspy.ids_base.IDSBase`. This class is an abstract class and shouldn't
+-   :py:mod:`imas.ids_base` defines the base class for all IDS nodes:
+    :py:class:`~imas.ids_base.IDSBase`. This class is an abstract class and shouldn't
     be instantiated directly.
 
     Several useful properties are defined in this class, which are therefore available
@@ -98,9 +98,9 @@ The following submodules and classes represent IDS nodes.
 
         .. code-block:: python
 
-            >>> core_profiles = imaspy.IDSFactory().core_profiles()
+            >>> core_profiles = imas.IDSFactory().core_profiles()
             >>> core_profiles._parent
-            <imaspy.ids_factory.IDSFactory object at 0x7faa06bfac70>
+            <imas.ids_factory.IDSFactory object at 0x7faa06bfac70>
             >>> core_profiles.ids_properties._parent
             <IDSToplevel (IDS:core_profiles)>
             >>> core_profiles.ids_properties.homogeneous_time._parent
@@ -116,9 +116,9 @@ The following submodules and classes represent IDS nodes.
 
         .. code-block:: python
 
-            >>> core_profiles = imaspy.IDSFactory().core_profiles()
+            >>> core_profiles = imas.IDSFactory().core_profiles()
             >>> core_profiles._dd_parent
-            <imaspy.ids_factory.IDSFactory object at 0x7faa06bfac70>
+            <imas.ids_factory.IDSFactory object at 0x7faa06bfac70>
             >>> core_profiles.ids_properties._dd_parent
             <IDSToplevel (IDS:core_profiles)>
             >>> core_profiles.ids_properties.homogeneous_time._dd_parent
@@ -134,52 +134,52 @@ The following submodules and classes represent IDS nodes.
         indices.
     -   ``_lazy`` indicates if the IDS is lazy loaded.
     -   ``_version`` is the Data Dictionary version of this node.
-    -   ``_toplevel`` is a shortcut to the :py:class:`~imaspy.ids_toplevel.IDSToplevel`
+    -   ``_toplevel`` is a shortcut to the :py:class:`~imas.ids_toplevel.IDSToplevel`
         element that this node is a decendent of.
 
--   :py:mod:`imaspy.ids_primitive` contains all data node classes, which are child
-    classes of :py:class:`~imaspy.ids_primitive.IDSPrimitive`. ``IDSPrimitive``
+-   :py:mod:`imas.ids_primitive` contains all data node classes, which are child
+    classes of :py:class:`~imas.ids_primitive.IDSPrimitive`. ``IDSPrimitive``
     implements all functionality that is common for every data type, whereas the
     classes in below list are specific per data type.
 
     Assignment-time data type checking is handled by the setter of the
-    :py:attr:`~imaspy.ids_primitive.IDSPrimitive.value` property and the ``_cast_value``
+    :py:attr:`~imas.ids_primitive.IDSPrimitive.value` property and the ``_cast_value``
     methods on each of the type specialization classes.
 
-    -   :py:class:`~imaspy.ids_primitive.IDSString0D` is the type specialization for 0D
+    -   :py:class:`~imas.ids_primitive.IDSString0D` is the type specialization for 0D
         strings. It can be used as if it is a python :external:py:class:`str` object.
-    -   :py:class:`~imaspy.ids_primitive.IDSString1D` is the type specialization for 1D
+    -   :py:class:`~imas.ids_primitive.IDSString1D` is the type specialization for 1D
         strings. It behaves as if it is a python :external:py:class:`list` of
         :external:py:class:`str`.
-    -   :py:class:`~imaspy.ids_primitive.IDSNumeric0D` is the base class for 0D
+    -   :py:class:`~imas.ids_primitive.IDSNumeric0D` is the base class for 0D
         numerical types:
 
-        -   :py:class:`~imaspy.ids_primitive.IDSComplex0D` is the type specialization
+        -   :py:class:`~imas.ids_primitive.IDSComplex0D` is the type specialization
             for 0D complex numbers. It can be used as if it is a python
             :external:py:class:`complex`.
-        -   :py:class:`~imaspy.ids_primitive.IDSFloat0D` is the type specialization
+        -   :py:class:`~imas.ids_primitive.IDSFloat0D` is the type specialization
             for 0D floating point numbers. It can be used as if it is a python
             :external:py:class:`float`.
-        -   :py:class:`~imaspy.ids_primitive.IDSInt0D` is the type specialization
+        -   :py:class:`~imas.ids_primitive.IDSInt0D` is the type specialization
             for 0D whole numbers. It can be used as if it is a python
             :external:py:class:`int`.
 
-    -   :py:class:`~imaspy.ids_primitive.IDSNumericArray` is the type specialization for
+    -   :py:class:`~imas.ids_primitive.IDSNumericArray` is the type specialization for
         any numeric type with at least one dimension. It can be used as if it is a
         :external:py:class:`numpy.ndarray`.
 
--   :py:mod:`imaspy.ids_struct_array` contains the
-    :py:class:`~imaspy.ids_struct_array.IDSStructArray` class, which models Arrays of
+-   :py:mod:`imas.ids_struct_array` contains the
+    :py:class:`~imas.ids_struct_array.IDSStructArray` class, which models Arrays of
     Structures. It also contains some :ref:`dev lazy loading` logic.
 
--   :py:mod:`imaspy.ids_structure` contains the
-    :py:class:`~imaspy.ids_structure.IDSStructure` class, which models Structures. It
+-   :py:mod:`imas.ids_structure` contains the
+    :py:class:`~imas.ids_structure.IDSStructure` class, which models Structures. It
     contains the :ref:`lazy instantiation` logic and some of the :ref:`dev lazy loading`
     logic.
 
--   :py:mod:`imaspy.ids_toplevel` contains the
-    :py:class:`~imaspy.ids_toplevel.IDSToplevel` class, which is a subclass of
-    :py:class:`~imaspy.ids_structure.IDSStructure` and models toplevel IDSs.
+-   :py:mod:`imas.ids_toplevel` contains the
+    :py:class:`~imas.ids_toplevel.IDSToplevel` class, which is a subclass of
+    :py:class:`~imas.ids_structure.IDSStructure` and models toplevel IDSs.
 
     It implements some API methods that are only available on IDSs, such as
     ``validate`` and ``(de)serialize``, and overwrites implementations of some
@@ -197,9 +197,9 @@ have any IDS child nodes instantiated:
 
 .. code-block:: python
 
-    >>> import imaspy
+    >>> import imas
     >>> # Create an empty IDS
-    >>> cp = imaspy.IDSFactory().core_profiles()
+    >>> cp = imas.IDSFactory().core_profiles()
     >>> # Show which elements are already created:
     >>> list(cp.__dict__)
     ['_lazy', '_children', '_parent', 'metadata', '__doc__', '_lazy_context']
@@ -221,12 +221,12 @@ Lazy loading
 ''''''''''''
 
 :ref:`lazy loading` defers reading the data from the backend in a
-:py:meth:`~imaspy.db_entry.DBEntry.get` or :py:meth:`~imaspy.db_entry.DBEntry.get_slice`
+:py:meth:`~imas.db_entry.DBEntry.get` or :py:meth:`~imas.db_entry.DBEntry.get_slice`
 until the data is requested. This is handled in two places:
 
 1.  ``IDSStructure.__getattr__`` implements the lazy loading alongside the lazy
     instantiation. When a new element is created by lazy instantiation, it will call
-    ``imaspy.db_entry_helpers._get_child`` to lazy load this element:
+    ``imas.db_entry_helpers._get_child`` to lazy load this element:
 
     -   When the element is a data node (``IDSPrimitive`` subclass), the data for this
         element is loaded from the backend.
@@ -244,18 +244,18 @@ until the data is requested. This is handled in two places:
 Creating and loading IDSs
 -------------------------
 
--   :py:mod:`imaspy.db_entry` contains the :py:class:`~imaspy.db_entry.DBEntry` class.
+-   :py:mod:`imas.db_entry` contains the :py:class:`~imas.db_entry.DBEntry` class.
     This class represents an on-disk Data Entry and can be used to store
-    (:py:meth:`~imaspy.db_entry.DBEntry.put`,
-    :py:meth:`~imaspy.db_entry.DBEntry.put_slice`) or load
-    (:py:meth:`~imaspy.db_entry.DBEntry.get`,
-    :py:meth:`~imaspy.db_entry.DBEntry.get_slice`) IDSs. The actual implementation of
+    (:py:meth:`~imas.db_entry.DBEntry.put`,
+    :py:meth:`~imas.db_entry.DBEntry.put_slice`) or load
+    (:py:meth:`~imas.db_entry.DBEntry.get`,
+    :py:meth:`~imas.db_entry.DBEntry.get_slice`) IDSs. The actual implementation of
     data storage and retrieval is handled by the backends in the
-    ``imaspy.backends.*`` subpackages.
+    ``imas.backends.*`` subpackages.
 
-    :py:class:`~imaspy.db_entry.DBEntry` handles the autoconversion between IDS versions
+    :py:class:`~imas.db_entry.DBEntry` handles the autoconversion between IDS versions
     as described in :ref:`Automatic conversion between DD versions`.
--   :py:mod:`imaspy.ids_factory` contains the :py:class:`~imaspy.ids_factory.IDSFactory`
+-   :py:mod:`imas.ids_factory` contains the :py:class:`~imas.ids_factory.IDSFactory`
     class. This class is responsible for creating IDS toplevels from a given Data
     Dictionary definition, and can list all IDS names inside a DD definition.
 
@@ -263,20 +263,20 @@ Creating and loading IDSs
 Access Layer interfaces
 -----------------------
 
--   :py:mod:`imaspy.backends.imas_core.al_context` provides an object-oriented interface when working with
+-   :py:mod:`imas.backends.imas_core.al_context` provides an object-oriented interface when working with
     Lowlevel contexts. The contexts returned by the lowlevel are an integer identifier
     and need to be provided to several LL methods (e.g. ``read_data``), some of which
     may create new contexts.
     
-    The :py:class:`~imaspy.backends.imas_core.al_context.ALContext` class implements this object oriented
+    The :py:class:`~imas.backends.imas_core.al_context.ALContext` class implements this object oriented
     interface.
 
-    A second class (:py:class:`~imaspy.backends.imas_core.al_context.LazyALContext`) implements the same
+    A second class (:py:class:`~imas.backends.imas_core.al_context.LazyALContext`) implements the same
     interface, but is used when :ref:`dev lazy loading`.
--   :py:mod:`imaspy.ids_defs` provides access to Access Layer constants (mostly defined
+-   :py:mod:`imas.ids_defs` provides access to Access Layer constants (mostly defined
     in ``imas.imasdef``).
--   :py:mod:`imaspy.backends.imas_core.imas_interface` provides a version-independent interface to the
-    Access Layer through :py:class:`~imaspy.backends.imas_core.imas_interface.LowlevelInterface`. It
+-   :py:mod:`imas.backends.imas_core.imas_interface` provides a version-independent interface to the
+    Access Layer through :py:class:`~imas.backends.imas_core.imas_interface.LowlevelInterface`. It
     defines all known methods of the Access Layer and defers to the correct
     implementation if it is available in the loaded AL version (and raises a descriptive
     exception if the function is not available).
@@ -285,24 +285,24 @@ Access Layer interfaces
 MDSplus support
 ---------------
 
--   :py:mod:`imaspy.backends.imas_core.mdsplus_model` is responsible for creating MDSplus `models`. These
+-   :py:mod:`imas.backends.imas_core.mdsplus_model` is responsible for creating MDSplus `models`. These
     models are specific to a DD version and are required when using the MDSplus
     backend for creating new Data Entries.
 
-    .. seealso:: :ref:`MDSplus in IMASPy`
+    .. seealso:: :ref:`MDSplus in imas-python`
 
 
 Versioning
 ----------
 
-IMASPy uses `versioneer <https://github.com/python-versioneer/python-versioneer>`_ for
-versioning. An IMASPy release has a corresponding tag (which sets the version), e.g.
+imas-python uses `versioneer <https://github.com/python-versioneer/python-versioneer>`_ for
+versioning. An imas-python release has a corresponding tag (which sets the version), e.g.
 `this is the tag
-<https://git.iter.org/projects/IMAS/repos/imaspy/browse?at=refs%2Ftags%2F0.8.0>`_ for
+<https://git.iter.org/projects/IMAS/repos/imas/browse?at=refs%2Ftags%2F0.8.0>`_ for
 version ``0.8.0``. Development builds are versioned based on the ``git describe`` of the
 repository.
 
-The ``imaspy._version`` module is generated by ``versioneer`` and implements this logic
+The ``imas._version`` module is generated by ``versioneer`` and implements this logic
 for editable installs. This module is replaced by ``versioneer`` when building python
 packages (this is handled in ``setup.py``).
 
@@ -310,15 +310,15 @@ packages (this is handled in ``setup.py``).
 Conversion between Data Dictionary versions
 -------------------------------------------
 
-:py:mod:`imaspy.ids_convert` contains logic for converting an IDS between DD versions.
+:py:mod:`imas.ids_convert` contains logic for converting an IDS between DD versions.
 
-The :py:class:`~imaspy.ids_convert.DDVersionMap` class creates and contains mappings for
+The :py:class:`~imas.ids_convert.DDVersionMap` class creates and contains mappings for
 an IDS between two Data Dictionary versions. It creates two mappings: one to be used
 when converting from the newer version of the two to the older version (``new_to_old``)
 and a map for the reverse (``old_to_new``). These mappings are of type
-:py:class:`~imaspy.ids_convert.NBCPathMap`. See its API documentation for more details.
+:py:class:`~imas.ids_convert.NBCPathMap`. See its API documentation for more details.
 
-:py:func:`~imaspy.ids_convert.convert_ids` is the main API method for converting IDSs
+:py:func:`~imas.ids_convert.convert_ids` is the main API method for converting IDSs
 between versions. It works as follows:
 
 -   It builds a ``DDVersionMap`` between the two DD versions version and selects the
@@ -326,11 +326,11 @@ between versions. It works as follows:
 -   If needed, it creates a target IDS of the destination DD version.
 -   It then uses the ``NBCPathMap`` to convert data and store it in the target IDS.
 
-:py:class:`~imaspy.db_entry.DBEntry` can also handle automatic DD version conversion. It
+:py:class:`~imas.db_entry.DBEntry` can also handle automatic DD version conversion. It
 uses the same ``DDVersionMap`` and ``NBCPathMap`` as
-:py:func:`~imaspy.ids_convert.convert_ids`. When reading data from the backends, the
+:py:func:`~imas.ids_convert.convert_ids`. When reading data from the backends, the
 ``NBCPathMap`` is used to translate between the old and the new DD version. See the
-implementation in :py:mod:`imaspy.backends.imas_core.db_entry_helpers`.
+implementation in :py:mod:`imas.backends.imas_core.db_entry_helpers`.
 
 
 Miscelleneous
@@ -339,13 +339,13 @@ Miscelleneous
 The following is a list of miscelleneous modules, which don't belong to any of the other
 categories on this page.
 
--   :py:mod:`imaspy.exception` contains all Exception classes that IMASPy may raise.
--   :py:mod:`imaspy.setup_logging` initializes a logging handler for IMASPy.
--   :py:mod:`imaspy.training` contains helper methods for making training data
+-   :py:mod:`imas.exception` contains all Exception classes that imas-python may raise.
+-   :py:mod:`imas.setup_logging` initializes a logging handler for imas-python.
+-   :py:mod:`imas.training` contains helper methods for making training data
     available.
--   :py:mod:`imaspy.util` contains useful utility methods. It is imported automatically.
+-   :py:mod:`imas.util` contains useful utility methods. It is imported automatically.
 
     All methods requiring third party libraries (``rich`` and ``scipy``) are implemented
-    in ``imaspy._util``. This avoids importing these libraries immediately when a
-    user imports ``imaspy`` (which can take a couple hundred milliseconds). Instead,
+    in ``imas._util``. This avoids importing these libraries immediately when a
+    user imports ``imas`` (which can take a couple hundred milliseconds). Instead,
     this module is only loaded when a user needs this functionality.

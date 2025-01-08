@@ -1,4 +1,4 @@
-"""Compare the access patterns of the lowlevel AL API between IMASPy and the HLI.
+"""Compare the access patterns of the lowlevel AL API between imas-python and the HLI.
 """
 
 from functools import wraps
@@ -9,9 +9,9 @@ import traceback
 import click
 
 import imas
-import imaspy
-from imaspy.test.test_helpers import fill_with_random_data
-from imaspy.ids_defs import IDS_TIME_MODE_HETEROGENEOUS
+import imas
+from imas.test.test_helpers import fill_with_random_data
+from imas.ids_defs import IDS_TIME_MODE_HETEROGENEOUS
 
 
 class ALWrapper:
@@ -46,10 +46,10 @@ for item in sys.modules:
                 setattr(sys.modules[item], alias, wrapper)
 
 
-def compare_ids_put(imaspy_ids, hli_ids):
+def compare_ids_put(imas_ids, hli_ids):
     imas._al_lowlevel._log.clear()
     # Start with hli IDS
-    dbentry = imas.DBEntry(imaspy.ids_defs.MEMORY_BACKEND, "ITER", 1, 1, "test")
+    dbentry = imas.DBEntry(imas.ids_defs.MEMORY_BACKEND, "ITER", 1, 1, "test")
     dbentry.create()
     try:
         dbentry.put(hli_ids)
@@ -59,49 +59,49 @@ def compare_ids_put(imaspy_ids, hli_ids):
     dbentry.close()
     hli_log = imas._al_lowlevel._log
     imas._al_lowlevel._log = []
-    # And then the imaspy IDS
-    dbentry = imaspy.DBEntry(imaspy.ids_defs.MEMORY_BACKEND, "ITER", 1, 1, "test")
+    # And then the imas IDS
+    dbentry = imas.DBEntry(imas.ids_defs.MEMORY_BACKEND, "ITER", 1, 1, "test")
     dbentry.create()
     try:
-        dbentry.put(imaspy_ids)
+        dbentry.put(imas_ids)
     except Exception as exc:
-        print("Caught error while putting imaspy ids:", exc)
+        print("Caught error while putting imas ids:", exc)
         traceback.print_exc()
     dbentry.close()
-    imaspy_log = imas._al_lowlevel._log
+    imas_log = imas._al_lowlevel._log
     imas._al_lowlevel._log = []
     hli_log_text = "\n".join("\t".join(item) for item in hli_log)
-    imaspy_log_text = "\n".join("\t".join(item) for item in imaspy_log)
+    imas_log_text = "\n".join("\t".join(item) for item in imas_log)
     Path("/tmp/hli.log").write_text(hli_log_text)
-    Path("/tmp/imaspy.log").write_text(imaspy_log_text)
-    print("Logs stored in /tmp/hli.log and /tmp/imaspy.log")
+    Path("/tmp/imas.log").write_text(imas_log_text)
+    print("Logs stored in /tmp/hli.log and /tmp/imas.log")
 
 
-def compare_ids_get(imaspy_ids):
+def compare_ids_get(imas_ids):
     # First put the ids
-    idbentry = imaspy.DBEntry(imaspy.ids_defs.MEMORY_BACKEND, "ITER", 1, 1, "test")
+    idbentry = imas.DBEntry(imas.ids_defs.MEMORY_BACKEND, "ITER", 1, 1, "test")
     idbentry.create()
-    idbentry.put(imaspy_ids)
+    idbentry.put(imas_ids)
 
-    dbentry = imas.DBEntry(imaspy.ids_defs.MEMORY_BACKEND, "ITER", 1, 1, "test")
+    dbentry = imas.DBEntry(imas.ids_defs.MEMORY_BACKEND, "ITER", 1, 1, "test")
     dbentry.open()
     # Start with hli IDS
     imas._al_lowlevel._log.clear()
-    dbentry.get(imaspy_ids.metadata.name)
+    dbentry.get(imas_ids.metadata.name)
     hli_log = imas._al_lowlevel._log
     imas._al_lowlevel._log = []
-    # And then the imaspy IDS
-    idbentry.get(imaspy_ids.metadata.name)
-    imaspy_log = imas._al_lowlevel._log
+    # And then the imas IDS
+    idbentry.get(imas_ids.metadata.name)
+    imas_log = imas._al_lowlevel._log
     imas._al_lowlevel._log = []
     # Cleanup
     dbentry.close()
     idbentry.close()
     hli_log_text = "\n".join("\t".join(item) for item in hli_log)
-    imaspy_log_text = "\n".join("\t".join(item) for item in imaspy_log)
+    imas_log_text = "\n".join("\t".join(item) for item in imas_log)
     Path("/tmp/hli.log").write_text(hli_log_text)
-    Path("/tmp/imaspy.log").write_text(imaspy_log_text)
-    print("Logs stored in /tmp/hli.log and /tmp/imaspy.log")
+    Path("/tmp/imas.log").write_text(imas_log_text)
+    print("Logs stored in /tmp/hli.log and /tmp/imas.log")
 
 
 @click.command()
@@ -113,33 +113,33 @@ def compare_ids_get(imaspy_ids):
     help="Use heterogeneous time mode instead of homogeneous time.",
 )
 def main(ids_name, method, heterogeneous):
-    """Compare lowlevel calls done by IMASPy vs. the Python HLI
+    """Compare lowlevel calls done by imas-python vs. the Python HLI
 
     This program fills the provided IDS with random data, then does I/O with it using
-    both the Python HLI and the IMASPy APIs. The resulting calls to the lowlevel Access
-    Layer are logged to respectively /tmp/hli.log and /tmp/imaspy.log.
+    both the Python HLI and the imas-python APIs. The resulting calls to the lowlevel Access
+    Layer are logged to respectively /tmp/hli.log and /tmp/imas.log.
 
     You may use your favorite diff tool to compare the two files.
 
     \b
     IDS_NAME:   The name of the IDS to use for testing, for example "core_profiles".
     """
-    imaspy_ids = imaspy.IDSFactory().new(ids_name)
+    imas_ids = imas.IDSFactory().new(ids_name)
     hli_ids = getattr(imas, ids_name)()
 
-    fill_with_random_data(imaspy_ids)
-    hli_ids.deserialize(imaspy_ids.serialize())
+    fill_with_random_data(imas_ids)
+    hli_ids.deserialize(imas_ids.serialize())
 
     if heterogeneous:
         # Change time mode
         time_mode = IDS_TIME_MODE_HETEROGENEOUS
-        imaspy_ids.ids_properties.homogeneous_time = time_mode
+        imas_ids.ids_properties.homogeneous_time = time_mode
         hli_ids.ids_properties.homogeneous_time = time_mode
 
     if method == "put":
-        compare_ids_put(imaspy_ids, hli_ids)
+        compare_ids_put(imas_ids, hli_ids)
     elif method == "get":
-        compare_ids_get(imaspy_ids)
+        compare_ids_get(imas_ids)
 
 
 if __name__ == "__main__":

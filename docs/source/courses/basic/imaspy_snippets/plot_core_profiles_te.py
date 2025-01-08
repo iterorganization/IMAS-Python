@@ -11,11 +11,11 @@ else:
 
 from matplotlib import pyplot as plt
 
-import imaspy
-from imaspy.ids_defs import MDSPLUS_BACKEND
+import imas
+from imas.ids_defs import MDSPLUS_BACKEND
 
 database, pulse, run, user = "ITER", 134173, 106, "public"
-data_entry = imaspy.DBEntry(
+data_entry = imas.DBEntry(
     MDSPLUS_BACKEND, database, pulse, run, user, data_version="3"
 )
 data_entry.open()

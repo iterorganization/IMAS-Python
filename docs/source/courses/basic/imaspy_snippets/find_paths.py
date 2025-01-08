@@ -1,16 +1,16 @@
-import imaspy.util
+import imas.util
 
-factory = imaspy.IDSFactory()
+factory = imas.IDSFactory()
 core_profiles = factory.core_profiles()
 
 print("Paths containing `rho`:")
-print(imaspy.util.find_paths(core_profiles, "rho"))
+print(imas.util.find_paths(core_profiles, "rho"))
 print()
 
 print("Paths containing `rho`, not followed by `error`:")
-print(imaspy.util.find_paths(core_profiles, "rho(?!.*error)"))
+print(imas.util.find_paths(core_profiles, "rho(?!.*error)"))
 print()
 
 print("All paths ending with `time`:")
-print(imaspy.util.find_paths(core_profiles, "time$"))
+print(imas.util.find_paths(core_profiles, "time$"))
 print()

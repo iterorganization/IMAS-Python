@@ -69,7 +69,7 @@ dependencies = [
 [project.optional-dependencies]
 # these self-dependencies are available since pip 21.2
 all = [
-    "imaspy[test,docs,imas-core,netcdf,h5py]"
+    "imas[test,docs,imas-core,netcdf,h5py]"
 ]
 docs = [
     "sphinx>=6.0.0,<7.0.0",
@@ -99,15 +99,15 @@ test = [
 ]
 
 [project.scripts]
-build_DD = "imaspy.dd_helpers:prepare_data_dictionaries"
-imaspy = "imaspy.command.cli:cli"
+build_DD = "imas.dd_helpers:prepare_data_dictionaries"
+imas = "imas.command.cli:cli"
 
 [project.urls]
-homepage = "https://git.iter.org/projects/IMAS/repos/imaspy"
+homepage = "https://git.iter.org/projects/IMAS/repos/imas"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["imaspy*"]
+include = ["imas*"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -116,19 +116,19 @@ markers = [
     "cli: Tests for the command line interface.",
     "slow: Slow tests.",
 ]
-testpaths = "imaspy"
+testpaths = "imas"
 
 [tool.versioneer]
 VCS = "git"
 style = "pep440"
-versionfile_source = "imaspy/_version.py"
-versionfile_build = "imaspy/_version.py"
+versionfile_source = "imas/_version.py"
+versionfile_build = "imas/_version.py"
 tag_prefix = ""
 parentdir_prefix = ""
 
 [tool.black]
 # Exclude versioneer-generated file
-extend-exclude = "imaspy/_version.py"
+extend-exclude = "imas/_version.py"
 
 [tool.isort]
 profile = "black"

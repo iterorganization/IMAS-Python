@@ -1,11 +1,11 @@
 # pylint: disable=wrong-import-position
-# This file is part of IMASPy.
-# You should have received the IMASPy LICENSE file with this project.
+# This file is part of imas-python.
+# You should have received the imas-python LICENSE file with this project.
 """
 Packaging settings. Inspired by a minimal setup.py file, the Pandas cython build
 and the access-layer setup template.
 
-The installable IMASPy package tries to follow in the following order:
+The installable imas-python package tries to follow in the following order:
 - The style guide for Python code [PEP8](https://www.python.org/dev/peps/pep-0008/)
 - The [PyPA guide on packaging projects](
   https://packaging.python.org/guides/distributing-packages-using-setuptools/#distributing-packages)
@@ -80,13 +80,13 @@ this_file = Path(__file__)
 this_dir = this_file.parent.resolve()
 
 # Start: Load dd_helpers
-dd_helpers_file = this_dir / "imaspy/dd_helpers.py"
+dd_helpers_file = this_dir / "imas/dd_helpers.py"
 assert dd_helpers_file.is_file()
 spec = importlib.util.spec_from_file_location("dd_helpers", dd_helpers_file)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
-sys.modules["imaspy.dd_helpers"] = module
-from imaspy.dd_helpers import prepare_data_dictionaries  # noqa
+sys.modules["imas.dd_helpers"] = module
+from imas.dd_helpers import prepare_data_dictionaries  # noqa
 
 # End: Load dd_helpers
 
@@ -116,7 +116,7 @@ class BuildDDCommand(setuptools.Command):
 # - Source tarball from git-archive. Note: version only picked up when doing git-archive
 #   from a tagged release, otherwise version will be "0+unknown" (expected versioneer
 #   behaviour).
-#   `git archive HEAD -v -o imaspy.tar.gz && pip install imaspy.tar.gz`
+#   `git archive HEAD -v -o imas.tar.gz && pip install imas.tar.gz`
 cmd_class = {}
 build_overrides = {"build_ext": build_ext, "build_py": build_py, "sdist": sdist}
 if bdist_wheel:

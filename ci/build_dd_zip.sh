@@ -17,4 +17,4 @@ echo "Done loading modules"
 set -x
 
 # Build the DD zip
-python imaspy/dd_helpers.py
+python imas/dd_helpers.py

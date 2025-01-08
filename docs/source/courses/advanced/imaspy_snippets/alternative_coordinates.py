@@ -1,7 +1,7 @@
-import imaspy
+import imas
 
 # 1. Create an empty distributions IDS
-distributions = imaspy.IDSFactory().distributions()
+distributions = imas.IDSFactory().distributions()
 
 # 2. Use the metadata attribute to find the coordinates of
 #    distribution/profiles_2d/density
@@ -21,7 +21,7 @@ print(p2d.density.metadata.coordinates)
 # What do you notice: in both dimensions there are multiple options for the coordinate.
 
 # 3. Retrieve the coordinate values through the ``coordinates`` attribute.
-# This will raise a coordinate lookup error because IMASPy cannot choose which of the
+# This will raise a coordinate lookup error because imas-python cannot choose which of the
 # coordinates to use:
 try:
     print(p2d.density.coordinates[0])

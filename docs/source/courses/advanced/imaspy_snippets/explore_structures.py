@@ -1,8 +1,8 @@
-import imaspy
-import imaspy.training
+import imas
+import imas.training
 
 # 1. Load the equilibrium IDS from the training data
-entry = imaspy.training.get_training_db_entry()
+entry = imas.training.get_training_db_entry()
 equilibrium = entry.get("equilibrium")
 
 # 2. Print non-empty child nodes

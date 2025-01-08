@@ -3,8 +3,8 @@ import logging
 import uuid
 from pathlib import Path
 
-import imaspy
-import imaspy.exception
+import imas
+import imas.exception
 
 # Don't directly import imas: code analyzers break on the huge code base
 imas = importlib.import_module("imas")
@@ -28,11 +28,11 @@ def backend_exists(backend):
     """Tries to detect if the lowlevel has support for the given backend."""
     uri = create_uri(backend, str(uuid.uuid4()))
     try:
-        entry = imaspy.DBEntry(uri, "r")
+        entry = imas.DBEntry(uri, "r")
     except Exception as exc:
         if "backend is not available" in str(exc):
             return False
-        elif isinstance(exc, (imaspy.exception.ALException, FileNotFoundError)):
+        elif isinstance(exc, (imas.exception.ALException, FileNotFoundError)):
             return True
         return True
     # Highly unlikely, but it could succeed without error
@@ -60,16 +60,16 @@ available_slicing_backends = [
     backend for backend in available_backends if backend not in [ASCII, NETCDF]
 ]
 
-hlis = ["imas", "imaspy"]
+hlis = ["imas", "imas"]
 DBEntry = {
     "imas": imas.DBEntry,
-    "imaspy": imaspy.DBEntry,
+    "imas": imas.DBEntry,
 }
 factory = {
     "imas": imas,
-    "imaspy": imaspy.IDSFactory(),
+    "imas": imas.IDSFactory(),
 }
-available_serializers = [imaspy.ids_defs.ASCII_SERIALIZER_PROTOCOL]
+available_serializers = [imas.ids_defs.ASCII_SERIALIZER_PROTOCOL]
 
 
 def create_dbentry(hli, backend):
@@ -77,15 +77,15 @@ def create_dbentry(hli, backend):
         if hli == "imas":
             # Raising NotImplementedError will skip the benchmarks for this combination
             raise NotImplementedError("AL-Python HLI doesn't implement netCDF.")
-        if hli == "imaspy":  # check if netcdf backend is available
+        if hli == "imas":  # check if netcdf backend is available
             try:
                 assert (
-                    imaspy.DBEntry._select_implementation("x.nc").__name__
+                    imas.DBEntry._select_implementation("x.nc").__name__
                     == "NCDBEntryImpl"
                 )
             except (AttributeError, AssertionError):
                 raise NotImplementedError(
-                    "This version of IMASPy doesn't implement netCDF."
+                    "This version of imas-python doesn't implement netCDF."
                 ) from None
 
     path = Path.cwd() / f"DB-{hli}-{backend}"

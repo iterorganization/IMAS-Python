@@ -1,7 +1,7 @@
 import os
 
 import imas
-import imaspy.training
+import imas.training
 import matplotlib
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
@@ -14,14 +14,14 @@ else:
 import matplotlib.pyplot as plt
 
 # Open input data entry
-entry = imaspy.training.get_training_imas_db_entry()
+entry = imas.training.get_training_imas_db_entry()
 
 # Use a partial get to retrieve the full time vector
 input_times = entry.partial_get("equilibrium", "time")
 
 # Create output data entry
 output_entry = imas.DBEntry(
-    imas.imasdef.MEMORY_BACKEND, "imaspy-course", 2, 1)
+    imas.imasdef.MEMORY_BACKEND, "imas-course", 2, 1)
 output_entry.create()
 
 # Loop over each time slice
@@ -29,7 +29,7 @@ for time in input_times:
     eq = entry.get_slice("equilibrium", time, imas.imasdef.CLOSEST_INTERP)
 
     # Update comment
-    eq.ids_properties.comment = "IMASPy training: transform coordinate system"
+    eq.ids_properties.comment = "imas-python training: transform coordinate system"
 
     p2d = eq.time_slice[0].profiles_2d[0]
     r, z = p2d.grid.dim1, p2d.grid.dim2

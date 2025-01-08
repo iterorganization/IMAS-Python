@@ -1,7 +1,7 @@
-IMASPy development and release process
+imas-python development and release process
 ======================================
 
-IMASPy development follows the `Gitflow workflow
+imas-python development follows the `Gitflow workflow
 <https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow>`_:
 
 1.  New features, bug fixes, etc. are developed in a separate branch. Typically named
@@ -11,22 +11,22 @@ IMASPy development follows the `Gitflow workflow
 4.  The ``main`` branch is updated only on releases, see below.
 
 
-Creating an IMASPy release
+Creating an imas-python release
 --------------------------
 
 1.  Create a Pull Request from ``develop`` to ``main``.
 2.  Add a change log to the Pull Request, briefly describing new features, bug fixes,
     etc. See, for example, `this PR for version 0.8.0
-    <https://git.iter.org/projects/IMAS/repos/imaspy/pull-requests/136/overview>`_.
+    <https://git.iter.org/projects/IMAS/repos/imas/pull-requests/136/overview>`_.
 3.  The PR is reviewed and merged by IO (currently Olivier Hoenen, who also creates the
     release tags).
 4.  After the release PR is merged, update the Easybuild configurations for SDCC modules
     in the `easybuild-easyconfigs repository
-    <https://git.iter.org/projects/IMEX/repos/easybuild-easyconfigs/browse/easybuild/easyconfigs/i/IMASPy>`_.
+    <https://git.iter.org/projects/IMEX/repos/easybuild-easyconfigs/browse/easybuild/easyconfigs/i/imas-python>`_.
     See the next section for more details on how to do this.
 
 
-Updating and testing the IMASPy Easybuild configuration
+Updating and testing the imas-python Easybuild configuration
 -------------------------------------------------------
 
 The following steps can be taken on an SDCC login node.
@@ -77,7 +77,7 @@ The following steps must be performed for each of the tool chains (currently
 
     a.  Copy the ``.eb`` file from the previous release.
     b.  Update the ``version`` to reflect the just-released version tag.
-    c.  If any of the IMASPy dependencies in ``pyproject.toml`` where updated or changed
+    c.  If any of the imas-python dependencies in ``pyproject.toml`` where updated or changed
         since the previous release, update the easybuild dependencies:
 
         -   ``builddependencies`` contains build-time dependencies which are available
@@ -86,7 +86,7 @@ The following steps must be performed for each of the tool chains (currently
             .. note::
 
                 The IMAS module is a build-time dependency only and not a runtime
-                dependency. This allows IMASPy users to load the IMASPy module and
+                dependency. This allows imas-python users to load the imas-python module and
                 **any** supported IMAS module.
 
         -   ``dependencies`` contains run-time dependencies which are available as a
@@ -95,13 +95,13 @@ The following steps must be performed for each of the tool chains (currently
             dependencies of dependencies) which are not available in any of the Python
             modules on SDCC.
     
-    d.  Update the checksum of imaspy: download an archive of the IMASPy repository from
+    d.  Update the checksum of imas: download an archive of the imas-python repository from
         bitbucket. This is easiest to do by copying the following URL, replace
         ``<version>`` with the version tag, and paste it in a web browser:
 
         .. code-block:: text
 
-            https://git.iter.org/rest/api/latest/projects/IMAS/repos/imaspy/archive?at=refs/tags/<version>&format=tar.gz
+            https://git.iter.org/rest/api/latest/projects/IMAS/repos/imas/archive?at=refs/tags/<version>&format=tar.gz
 
         Then, calculate the hash of the downloaded archive with ``sha256sum`` and update
         it in the ``.eb`` file.
@@ -127,7 +127,7 @@ The following steps must be performed for each of the tool chains (currently
 
             module purge
             module use ~/.local/easybuild/modules/all/
-            module load IMASPy/<version>-<toolchain>
+            module load imas-python/<version>-<toolchain>
             module laod IMAS
     
     c.  Sanity check the module, for example by running the ``pytest`` unit tests.

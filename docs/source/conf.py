@@ -17,15 +17,15 @@ import sphinx_autosummary_accessors
 from jinja2.defaults import DEFAULT_FILTERS
 from packaging.version import Version
 
-import imaspy
+import imas
 
 print("python exec:", sys.executable)
 print("sys.path:", sys.path)
 
 # -- Project information -----------------------------------------------------
 # The documented project’s name
-project = src_project = PROJECT = "IMASPy"
-PACKAGE = "imaspy"
+project = src_project = PROJECT = "imas-python"
+PACKAGE = "imas"
 src_group = GROUP = "IMAS"
 
 # A copyright statement in the style '2008, Author Name'.
@@ -44,7 +44,7 @@ dd_url = urljoin(imas_repos, "repos/data-dictionary/")
 al_url = urljoin(imas_repos, "repos/access-layer/")
 issue_url = jira_url = "https://jira.iter.org/browse/"
 
-# IMASPy
+# imas-python
 repository_url = f"{iter_projects}/{src_group}/repos/{src_project}/"
 blob_url = urljoin(repository_url, "browse/")
 mr_url = urljoin(repository_url, "/pull-requests")
@@ -62,7 +62,7 @@ extlinks = {
     "pypa": ("https://packaging.python.org/%s", None),
 }
 
-full_version = Version(imaspy.__version__)
+full_version = Version(imas.__version__)
 
 # version: The major project version, used as the replacement for |version|.
 #   For example, for the Python documentation, this may be something like 2.6.
@@ -137,8 +137,8 @@ html_theme = "sphinx_immaterial"
 # and
 # https://sphinx-immaterial.readthedocs.io/en/latest/customization.html#confval-html_theme_options
 html_theme_options = {
-    "repo_url": "https://git.iter.org/projects/IMAS/repos/imaspy",
-    "repo_name": "IMASPy",
+    "repo_url": "https://git.iter.org/projects/IMAS/repos/imas",
+    "repo_name": "imas-python",
     "icon": {
         "repo": "fontawesome/brands/bitbucket",
     },
@@ -202,7 +202,7 @@ object_description_options = [
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "_static/imaspy_200x200.png"
+html_logo = "_static/imas_200x200.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -261,7 +261,7 @@ html_last_updated_fmt = today_fmt
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "imaspy_doc"
+htmlhelp_basename = "imas_doc"
 
 
 # -- Extension configuration -------------------------------------------------
@@ -356,7 +356,7 @@ def sphinx_click_process_usage(app, ctx, lines):
 
 def setup(app):
     DEFAULT_FILTERS["escape_underscores"] = escape_underscores
-    app.add_css_file("imaspy.css")
+    app.add_css_file("imas.css")
     # Customize output of sphinx-click
     app.connect("sphinx-click-process-arguments", sphinx_click_process_arguments)
     app.connect("sphinx-click-process-description", sphinx_click_process_description)

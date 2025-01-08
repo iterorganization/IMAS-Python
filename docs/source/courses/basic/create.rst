@@ -1,4 +1,4 @@
-Create with IMASPy
+Create with imas-python
 ==================
 
 In this section of the training, we will have a look at creating (and filling) IDSs from
@@ -7,8 +7,8 @@ scratch.
 Create an empty IDS
 -------------------
 
-Empty IDSs in IMASPy are created by the :py:meth:`~imaspy.ids_factory.IDSFactory.new`
-method of an :py:class:`~imaspy.ids_factory.IDSFactory`.
+Empty IDSs in imas-python are created by the :py:meth:`~imas.ids_factory.IDSFactory.new`
+method of an :py:class:`~imas.ids_factory.IDSFactory`.
 
 .. note::
     New IDSs can also be created by calling :code:`IDSFactory().<ids_name>()`, similar
@@ -29,9 +29,9 @@ Exercise 1
         .. literalinclude:: al4_snippets/create_core_profiles.py
             :end-before: # Set properties
 
-    .. md-tab-item:: IMASPy
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: imaspy_snippets/create_core_profiles.py
+        .. literalinclude:: imas_snippets/create_core_profiles.py
             :end-before: # Set properties
 
 
@@ -42,7 +42,7 @@ Now we have an empty IDS, we can start filling fields. For this exercise we will
 populate the following fields:
 
 - ``ids_properties.homogeneous_time``, which we will set to the constant
-  :py:const:`~imaspy.ids_defs.IDS_TIME_MODE_HOMOGENEOUS`. This flags that this IDS is in
+  :py:const:`~imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS`. This flags that this IDS is in
   homogeneous time mode, meaning that all time-dependent quantities use the root
   ``time`` as their coordinate.
 - ``ids_properties.comment``, where we can describe this IDS.
@@ -71,19 +71,19 @@ Exercise 2
 
         .. note::
 
-            When using the IMAS access layer instead of IMASPy, we must always create
-            numpy arrays (of the correct data type). IMASPy will
+            When using the IMAS access layer instead of imas-python, we must always create
+            numpy arrays (of the correct data type). imas-python will
             automatically convert your data to the appropriate numpy array.
 
-    .. md-tab-item:: IMASPy
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: imaspy_snippets/create_core_profiles.py
+        .. literalinclude:: imas_snippets/create_core_profiles.py
             :start-at: # Set properties
             :end-before: # Validate the IDS for consistency
 
         .. note::
 
-            Observe that we can assign a Python list to ``cp.time``. IMASPy will
+            Observe that we can assign a Python list to ``cp.time``. imas-python will
             automatically convert it to a numpy array.
 
 
@@ -113,9 +113,9 @@ Exercise 3
             :start-at: # Validate the IDS for consistency
             :end-before: # Fill in the missing rho_tor_norm coordinate
 
-    .. md-tab-item:: IMASPy
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: imaspy_snippets/create_core_profiles.py
+        .. literalinclude:: imas_snippets/create_core_profiles.py
             :start-at: # Validate the IDS for consistency
             :end-before: # Fill in the missing rho_tor_norm coordinate
 
@@ -145,9 +145,9 @@ Exercise 4
             :start-at: # Fill in the missing rho_tor_norm coordinate
             :end-before: # Create a new data entry for storing the IDS
 
-    .. md-tab-item:: IMASPy
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: imaspy_snippets/create_core_profiles.py
+        .. literalinclude:: imas_snippets/create_core_profiles.py
             :start-at: # Fill in the missing rho_tor_norm coordinate
             :end-before: # Create a new data entry for storing the IDS
 
@@ -157,9 +157,9 @@ Store the IDS on disk
 
 Now we have created, filled and validated an IDS, the only thing left is to store it to
 disk. Like loading IDSs, storing IDSs is achieved through the
-:py:class:`~imaspy.db_entry.DBEntry` class. After constructing a ``DBEntry`` object, you
-need to :py:meth:`~imaspy.db_entry.DBEntry.create` the data entry on-disk before you can
-:py:meth:`~imaspy.db_entry.DBEntry.put` the IDS to disk.
+:py:class:`~imas.db_entry.DBEntry` class. After constructing a ``DBEntry`` object, you
+need to :py:meth:`~imas.db_entry.DBEntry.create` the data entry on-disk before you can
+:py:meth:`~imas.db_entry.DBEntry.put` the IDS to disk.
 
 .. note::
     For this exercise we will use the ASCII backend. Although it doesn't have the best
@@ -178,30 +178,30 @@ Exercise 5
 
         The recommended parameters for this exercise are::
 
-            backend = imaspy.ids_defs.ASCII_BACKEND
-            database = "imaspy-course"
+            backend = imas.ids_defs.ASCII_BACKEND
+            database = "imas-course"
             pulse = 1
             run = 1
 
         After a successful ``put``, the ids file will be created. If you are using
-        AL4, you should see a file ``imaspy-course_1_1_core_profiles.ids`` in your 
+        AL4, you should see a file ``imas-course_1_1_core_profiles.ids`` in your 
         working directory with the contents of the IDS. 
         If you are using AL5, this file can be found under
-        ``~/public/imasdb/imaspy-course/3/1/1/core_profiles.ids`` 
+        ``~/public/imasdb/imas-course/3/1/1/core_profiles.ids`` 
 
         .. hint::
             :collapsible:
 
-            The signature of :meth:`~imaspy.db_entry.DBEntry()` is: ``DBEntry(backend, database, pulse, run)``
+            The signature of :meth:`~imas.db_entry.DBEntry()` is: ``DBEntry(backend, database, pulse, run)``
 
     .. md-tab-item:: AL4
 
         .. literalinclude:: al4_snippets/create_core_profiles.py
             :start-at: # Create a new data entry for storing the IDS
 
-    .. md-tab-item:: IMASPy
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: imaspy_snippets/create_core_profiles.py
+        .. literalinclude:: imas_snippets/create_core_profiles.py
             :start-at: # Create a new data entry for storing the IDS
 
 Summary
@@ -224,6 +224,6 @@ Congratulations for completing this section of the course. You have:
 
         .. literalinclude:: al4_snippets/create_core_profiles.py
 
-    .. md-tab-item:: IMASPy
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: imaspy_snippets/create_core_profiles.py
+        .. literalinclude:: imas_snippets/create_core_profiles.py

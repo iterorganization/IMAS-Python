@@ -1,8 +1,8 @@
 import imas
-import imaspy.training
+import imas.training
 
 # Open input data entry
-entry = imaspy.training.get_training_imas_db_entry()
+entry = imas.training.get_training_imas_db_entry()
 
 # 1. Read and print the time of the equilibrium IDS for the whole scenario
 equilibrium = entry.get("equilibrium")  # All time slices

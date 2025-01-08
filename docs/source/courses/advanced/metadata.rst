@@ -3,13 +3,13 @@
 Using Data Dictionary metadata
 ==============================
 
-IMASPy provides convenient access to Data Dictionary metadata of any IDS node through
+imas-python provides convenient access to Data Dictionary metadata of any IDS node through
 the ``metadata`` attribute:
 
 .. code-block:: python
 
-    >>> import imaspy
-    >>> core_profiles = imaspy.IDSFactory().core_profiles()
+    >>> import imas
+    >>> core_profiles = imas.IDSFactory().core_profiles()
     >>> core_profiles.metadata
     <IDSMetadata for 'core_profiles'>
     >>> core_profiles.time.metadata
@@ -23,21 +23,21 @@ cases.
 Overview of available metadata
 ------------------------------
 
-The data dictionary metadata that is parsed by IMASPy is listed in the API
-documentation for :py:class:`~imaspy.ids_metadata.IDSMetadata`.
+The data dictionary metadata that is parsed by imas-python is listed in the API
+documentation for :py:class:`~imas.ids_metadata.IDSMetadata`.
 
-Note that not all metadata from the IMAS Data Dictionary is parsed by IMASPy.
+Note that not all metadata from the IMAS Data Dictionary is parsed by imas-python.
 This metadata is still accessible on the :code:`metadata` attribute. You can use
-:py:func:`imaspy.util.inspect` to get an overview of all metadata associated to an
+:py:func:`imas.util.inspect` to get an overview of all metadata associated to an
 element in an IDS.
 
 .. code-block:: python
     :caption: Example showing all metadata for some ``core_profiles`` elements.
 
-    >>> import imaspy
-    >>> core_profiles = imaspy.IDSFactory().core_profiles()
-    >>> imaspy.util.inspect(core_profiles.metadata)
-    ╭---- <class 'imaspy.ids_metadata.IDSMetadata'> -----╮
+    >>> import imas
+    >>> core_profiles = imas.IDSFactory().core_profiles()
+    >>> imas.util.inspect(core_profiles.metadata)
+    ╭---- <class 'imas.ids_metadata.IDSMetadata'> -----╮
     │ Container for IDS Metadata                         │
     │                                                    │
     │ ╭------------------------------------------------╮ │
@@ -63,8 +63,8 @@ element in an IDS.
     │                      type = <IDSType.NONE: None>   │
     │                     units = ''                     │
     ╰----------------------------------------------------╯
-    >>> imaspy.util.inspect(core_profiles.time.metadata)
-    ╭------ <class 'imaspy.ids_metadata.IDSMetadata'> -------╮
+    >>> imas.util.inspect(core_profiles.time.metadata)
+    ╭------ <class 'imas.ids_metadata.IDSMetadata'> -------╮
     │ Container for IDS Metadata                             │
     │                                                        │
     │ ╭----------------------------------------------------╮ │
@@ -108,7 +108,7 @@ quite complicated, but summarized they come in two categories:
     values per pixel, and another variable storing some processed quantities per pixel.
     In this case, the coordinates are indices (line / column index of the pixel), but
     these must be the same for both quantities. This information is stored in the
-    :py:attr:`~imaspy.ids_metadata.IDSMetadata.coordinates_same_as` metadata.
+    :py:attr:`~imas.ids_metadata.IDSMetadata.coordinates_same_as` metadata.
 
 2.  Coordinates are other quantities in the Data Dictionary.
 
@@ -140,7 +140,7 @@ Exercise 1: Using coordinates
                 do you notice?
             c.  Change the time mode of the IDS from homogeneous time to heterogeneous
                 time. You do this by setting 
-                ``ids_properties.homogeneous_time = imaspy.ids_defs.IDS_TIME_MODE_HETEROGENEOUS``.
+                ``ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HETEROGENEOUS``.
                 Print the coordinate of the ``profiles_1d`` array of structure again.
                 What has changed?
 
@@ -151,7 +151,7 @@ Exercise 1: Using coordinates
 
     .. md-tab-item:: Solution
 
-        .. literalinclude:: imaspy_snippets/coordinates.py
+        .. literalinclude:: imas_snippets/coordinates.py
 
 
 Exercise 2: Alternative coordinates
@@ -176,7 +176,7 @@ Exercise 2: Alternative coordinates
                 1.  Resize the array of structures so you can access the metadata of the
                     elements.
                 2.  Use the indexing operator on
-                    :py:class:`~imaspy.ids_metadata.IDSMetadata`. For example,
+                    :py:class:`~imas.ids_metadata.IDSMetadata`. For example,
                     ``distributions.metadata["distribution/wave"]`` to get the metadata
                     of the ``distribution[]/wave`` array of structures.
         3.  Resize the ``distribution`` and ``distribution[0].profiles_2d`` arrays of
@@ -185,17 +185,17 @@ Exercise 2: Alternative coordinates
             you notice?
         4.  You can still use the metadata to go to the coordinate node options:
 
-            a.  Use the :py:attr:`~imaspy.ids_coordinates.IDSCoordinate.references`
-                attribute of the :py:class:`~imaspy.ids_coordinates.IDSCoordinate`
+            a.  Use the :py:attr:`~imas.ids_coordinates.IDSCoordinate.references`
+                attribute of the :py:class:`~imas.ids_coordinates.IDSCoordinate`
                 objects in the ``metadata`` to get the paths to each of the coordinate
-                options. This will give you the :py:class:`~imaspy.ids_path.IDSPath`
+                options. This will give you the :py:class:`~imas.ids_path.IDSPath`
                 objects for each coordinate option.
-            b.  Then, use :py:meth:`IDSPath.goto <imaspy.ids_path.IDSPath.goto>` to go
+            b.  Then, use :py:meth:`IDSPath.goto <imas.ids_path.IDSPath.goto>` to go
                 to the corresponding IDS node.
 
     .. md-tab-item:: Solution
 
-        .. literalinclude:: imaspy_snippets/alternative_coordinates.py
+        .. literalinclude:: imas_snippets/alternative_coordinates.py
 
 
 Units and dimensional analysis with Pint
@@ -208,8 +208,8 @@ Units and dimensional analysis with Pint
     <https://pint.readthedocs.io/en/stable/getting/index.html>`_.
 
 The Data Dictionary specifies the units of stored quantities. This metadata is
-accessible in IMASPy via :py:attr:`metadata.units
-<imaspy.ids_metadata.IDSMetadata.units>`. In most cases, these units are in a format
+accessible in imas-python via :py:attr:`metadata.units
+<imas.ids_metadata.IDSMetadata.units>`. In most cases, these units are in a format
 that ``pint`` can understand (for example ``T``, ``Wb``, ``m^-3``, ``m.s^-1``).
 
 There are some exceptions to that, with the main ones ``-`` (indicating a quantity is
@@ -220,7 +220,7 @@ go into that in this lesson.
 For conversion of units from the Data Dictionary format to pint units, we recommend
 creating a custom function, such as the following:
 
-.. literalinclude:: imaspy_snippets/calc_with_units.py
+.. literalinclude:: imas_snippets/calc_with_units.py
     :caption: Convert DD units to Pint Units
     :start-at: # Create pint UnitRegistry
     :end-before: # End
@@ -253,4 +253,4 @@ Exercise 3: Calculate the mass density from ``core_profiles/profiles_1d``
 
     .. md-tab-item:: Solution
 
-        .. literalinclude:: imaspy_snippets/calc_with_units.py
+        .. literalinclude:: imas_snippets/calc_with_units.py

@@ -4,7 +4,7 @@ import matplotlib
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
-import imaspy.training
+import imas.training
 
 if "DISPLAY" not in os.environ:
     matplotlib.use("agg")
@@ -14,22 +14,22 @@ else:
 import matplotlib.pyplot as plt
 
 # Open input data entry
-entry = imaspy.training.get_training_db_entry()
+entry = imas.training.get_training_db_entry()
 
 # Lazy-loaded input equilibrium
 eq_in = entry.get("equilibrium", lazy=True)
 input_times = eq_in.time
 
 # Create output data entry
-output_entry = imaspy.DBEntry(imaspy.ids_defs.MEMORY_BACKEND, "imaspy-course", 2, 1)
+output_entry = imas.DBEntry(imas.ids_defs.MEMORY_BACKEND, "imas-course", 2, 1)
 output_entry.create()
 
 # Loop over each time slice
 for time in input_times:
-    eq = entry.get_slice("equilibrium", time, imaspy.ids_defs.CLOSEST_INTERP)
+    eq = entry.get_slice("equilibrium", time, imas.ids_defs.CLOSEST_INTERP)
 
     # Update comment
-    eq.ids_properties.comment = "IMASPy training: transform coordinate system"
+    eq.ids_properties.comment = "imas-python training: transform coordinate system"
 
     p2d = eq.time_slice[0].profiles_2d[0]
     # Get `.value` so we can plot the original values after the IDS node is overwritten

@@ -1,6 +1,6 @@
 import numpy as np
 import imas
-import imaspy.training
+import imas.training
 
 
 # Find nearest value and index in an array
@@ -11,7 +11,7 @@ def find_nearest(a, a0):
 
 
 # Open input data entry
-entry = imaspy.training.get_training_imas_db_entry()
+entry = imas.training.get_training_imas_db_entry()
 
 # Read the time array from the equilibrium IDS
 equilibrium = entry.get("equilibrium")  # All time slices

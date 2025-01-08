@@ -1,9 +1,9 @@
-import imaspy
-import imaspy.training
-from imaspy.util import get_full_path
+import imas
+import imas.training
+from imas.util import get_full_path
 
 # 1. Load the training data equilibrium IDS
-entry = imaspy.training.get_training_db_entry()
+entry = imas.training.get_training_db_entry()
 equilibrium = entry.get("equilibrium")
 
 
@@ -13,7 +13,7 @@ def print_path_shape_size(node):
 
 
 # 3. Apply to equilibrium IDS
-imaspy.util.visit_children(print_path_shape_size, equilibrium)
+imas.util.visit_children(print_path_shape_size, equilibrium)
 print()
 
 
@@ -25,4 +25,4 @@ def print_path_shape_size_not0d(node):
 
 
 # And apply to the equilibrium IDS
-imaspy.util.visit_children(print_path_shape_size_not0d, equilibrium)
+imas.util.visit_children(print_path_shape_size_not0d, equilibrium)

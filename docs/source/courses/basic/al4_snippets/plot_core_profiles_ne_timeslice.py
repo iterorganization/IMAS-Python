@@ -2,7 +2,7 @@ import os
 
 import matplotlib
 import imas
-import imaspy.training
+import imas.training
 
 # To avoid possible display issues when Matplotlib uses a non-GUI backend
 if "DISPLAY" not in os.environ:
@@ -13,7 +13,7 @@ else:
 import matplotlib.pyplot as plt
 
 # Open input data entry
-entry = imaspy.training.get_training_imas_db_entry()
+entry = imas.training.get_training_imas_db_entry()
 
 # Read n_e profile and the associated normalised toroidal flux coordinate at
 t = 443 # seconds

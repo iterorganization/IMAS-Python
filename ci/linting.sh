@@ -24,5 +24,5 @@ python -m venv venv
 # Install and run linters
 pip install --upgrade 'black >=24,<25' flake8
 
-black --check imaspy
-flake8 imaspy
+black --check imas
+flake8 imas
