@@ -64,7 +64,9 @@ cli.add_command(process_db_analysis)
 def print_version():
     """Print version information of imas-python."""
     cons = console.Console()
-    grid = Table(title="imas-python version info", show_header=False, title_style="bold")
+    grid = Table(
+        title="imas-python version info", show_header=False, title_style="bold"
+    )
     grid.box = box.HORIZONTALS
     if cons.size.width > 120:
         grid.width = 120

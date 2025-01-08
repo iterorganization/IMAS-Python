@@ -385,7 +385,9 @@ class IDSCoordinates:
                         "some coordinate metadata is incorrect."
                     )
                 else:
-                    version_error = "Please report this issue to the imas-python developers."
+                    version_error = (
+                        "Please report this issue to the imas-python developers."
+                    )
                 logger.warning(
                     "An error occurred while finding coordinate `%s` of dimension %s, "
                     "which is ignored. %s",
