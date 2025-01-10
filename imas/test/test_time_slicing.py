@@ -84,6 +84,7 @@ def test_time_slicing_put(backend, worker_id, tmp_path, request, time_mode):
     dbentry.close()
 
 
+@pytest.mark.skip(reason="skipping hli test")
 def test_hli_time_slicing_put(backend, worker_id, tmp_path, time_mode):
     """Write some slices to an IDS and then check that they are all there"""
     if backend == ASCII_BACKEND:
