@@ -188,7 +188,7 @@ def get_data_dictionary_repo() -> Tuple[bool, bool]:
     else:
         logger.info("Trying to pull data dictionary git repo from ITER")
 
-    # Set up a bare repo and fetch the access-layer repository in it
+    # Set up a bare repo and fetch the data-dictionary repository in it
     os.makedirs(dd_repo_path, exist_ok=True)
     try:
         repo = git.Repo(dd_repo_path)
@@ -199,7 +199,7 @@ def get_data_dictionary_repo() -> Tuple[bool, bool]:
     try:
         origin = repo.remote()
     except ValueError:
-        dd_repo_url = "git@github.com:iterorganization/imas-data-dictionary.git"
+        dd_repo_url = "https://github.com/iterorganization/imas-data-dictionary.git"
         origin = repo.create_remote("origin", url=dd_repo_url)
     logger.info("Set up remote '{!s}' linking to '{!s}'".format(origin, origin.url))
 
