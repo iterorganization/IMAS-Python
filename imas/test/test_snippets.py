@@ -9,6 +9,7 @@ course_snippets = []
 for course in ["basic", "advanced"]:
     course_snippets.extend((courses / course).glob("*snippets/*.py"))
 
+
 @pytest.mark.skip(reason="skipping hli test")
 @pytest.mark.filterwarnings("ignore:The input coordinates to pcolormesh:UserWarning")
 @pytest.mark.parametrize("snippet", course_snippets)

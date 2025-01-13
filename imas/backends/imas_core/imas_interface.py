@@ -28,7 +28,7 @@ try:
     if enable_exceptions:
         enable_exceptions()
 
-except ImportError  as exc:
+except ImportError as exc:
     # Fallback for AL 4.x or 5.0/5.1
     # try:
     #     tic = time.time()
