@@ -105,7 +105,7 @@ containers/arch/access-layer/
 imas/assets/IDSDef.zip
 
 # IDS files
-*.ids
+# *.ids
 
 # ASV folder
 /.asv
