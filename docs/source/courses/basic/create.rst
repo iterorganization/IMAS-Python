@@ -1,5 +1,5 @@
 Create with imas-python
-==================
+=======================
 
 In this section of the training, we will have a look at creating (and filling) IDSs from
 scratch.

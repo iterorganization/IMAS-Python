@@ -4,7 +4,7 @@ Changelog
 =========
 
 What's new in imas-python 1.1.1
---------------------------
+-------------------------------
 
 This is a small release that mainly fixes issues related to the recent Data
 Dictionary 4.0.0 release.
@@ -30,7 +30,7 @@ Bug fixes
 
 
 What's new in imas-python 1.1
-------------------------
+-----------------------------
 
 New features
 ''''''''''''
@@ -77,7 +77,7 @@ New features
 
   Since the Access Layer Core is now installable with ``pip`` as well (requires
   access to the git repository on
-  `<https://git.iter.org/projects/IMAS/repos/al-core/browse>`__), you can install
+  `<https://github.com/iterorganization/imas-core>`__), you can install
   ``imas`` and ``imas_core`` in one go with:
 
   .. code-block:: bash

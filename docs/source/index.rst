@@ -2,9 +2,9 @@
    Master "index". This will be converted to a landing index.html by sphinx. We
    define TOC here, but it'll be put in the sidebar by the theme
 
-=============
+==================
 imas-python Manual
-=============
+==================
 
 imas-python is a pure-python library to handle arbitrarily nested
 data structures. imas-python is designed for, but not necessarily bound to,

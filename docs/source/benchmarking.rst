@@ -1,14 +1,14 @@
 .. _`benchmarking IMASPY`:
 
 Benchmarking imas-python
-===================
+========================
 
 imas-python integrates with the `airspeed velocity
 <https://asv.readthedocs.io/en/stable/index.html>`_ ``asv`` package for benchmarking.
 
 
 imas-python benchmarks
------------------
+----------------------
 
 imas-python benchmarks are stored in the ``benchmarks`` folder in the git repository. We can
 currently distinguish three types of benchmarks:

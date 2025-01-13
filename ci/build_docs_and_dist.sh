@@ -3,14 +3,14 @@
 # Note: this script should be run from the root of the git repository
 
 # Debuggging:
-set -e -o pipefail
+# set -e -o pipefail
 echo "Loading modules:" $@
 
 # Set up environment such that module files can be loaded
 source /etc/profile.d/modules.sh
 module purge
 # Modules are supplied as arguments in the CI job:
-module load $@
+module load Python/3.11.5-GCCcore-13.2.0 Saxon-HE/12.4-Java-21
 
 # Debuggging:
 echo "Done loading modules"

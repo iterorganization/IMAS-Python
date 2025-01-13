@@ -1,5 +1,5 @@
 imas-python development and release process
-======================================
+===========================================
 
 imas-python development follows the `Gitflow workflow
 <https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow>`_:
@@ -12,12 +12,12 @@ imas-python development follows the `Gitflow workflow
 
 
 Creating an imas-python release
---------------------------
+-------------------------------
 
-1.  Create a Pull Request from ``develop`` to ``main``.
+1.  Create a Pull Request using fork based workflow from ``develop`` to ``main``.
 2.  Add a change log to the Pull Request, briefly describing new features, bug fixes,
     etc. See, for example, `this PR for version 0.8.0
-    <https://git.iter.org/projects/IMAS/repos/imas/pull-requests/136/overview>`_.
+    <https://github.com/iterorganization/imas-python/pulls>`_.
 3.  The PR is reviewed and merged by IO (currently Olivier Hoenen, who also creates the
     release tags).
 4.  After the release PR is merged, update the Easybuild configurations for SDCC modules
@@ -27,7 +27,7 @@ Creating an imas-python release
 
 
 Updating and testing the imas-python Easybuild configuration
--------------------------------------------------------
+------------------------------------------------------------
 
 The following steps can be taken on an SDCC login node.
 
@@ -101,7 +101,7 @@ The following steps must be performed for each of the tool chains (currently
 
         .. code-block:: text
 
-            https://git.iter.org/rest/api/latest/projects/IMAS/repos/imas/archive?at=refs/tags/<version>&format=tar.gz
+            https://github.com/iterorganization/imas-python/archive/refs/heads/<version>.tar.gz
 
         Then, calculate the hash of the downloaded archive with ``sha256sum`` and update
         it in the ``.eb`` file.

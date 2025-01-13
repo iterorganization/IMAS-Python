@@ -199,7 +199,7 @@ def get_data_dictionary_repo() -> Tuple[bool, bool]:
     try:
         origin = repo.remote()
     except ValueError:
-        dd_repo_url = "ssh://git@git.iter.org/imas/data-dictionary.git"
+        dd_repo_url = "git@github.com:iterorganization/imas-data-dictionary.git"
         origin = repo.create_remote("origin", url=dd_repo_url)
     logger.info("Set up remote '{!s}' linking to '{!s}'".format(origin, origin.url))
 

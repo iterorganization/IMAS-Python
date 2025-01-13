@@ -1,5 +1,5 @@
 Configuring imas-python
-==================
+=======================
 
 imas-python has a couple of environment variables that can be used to control its behaviour.
 This page provides an overview of available variables.

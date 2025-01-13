@@ -28,7 +28,7 @@ def fill_ggd(edge_profiles, times):
     edge_profiles.code.name = "imas-python ASV benchmark"
     edge_profiles.code.version = imas.__version__
     edge_profiles.code.repository = (
-        "https://git.iter.org/projects/IMAS/repos/imas/browse"
+        "https://github.com/iterorganization/imas-python"
     )
 
     # This GGD grid is not a valid description, but it's a good stress test for the

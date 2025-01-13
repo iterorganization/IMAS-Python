@@ -21,7 +21,7 @@ representations:
 
 
 Identifiers in imas-python
----------------------
+--------------------------
 
 imas-python implements identifiers as an :py:class:`enum.Enum`. Identifiers are
 constructed on-demand from the loaded Data Dictionary definitions.
@@ -60,7 +60,7 @@ the available identifiers is stored as ``imas.identifiers.identifiers``.
 
 
 Assigning identifiers in imas-python
--------------------------------
+------------------------------------
 
 imas-python implements smart assignment of identifiers. You may assign an identifier
 enum value (for example ``imas.identifiers.core_source_identifier.total``), a

@@ -1,7 +1,7 @@
 .. _`MDSplus in imas-python`:
 
 MDSplus in imas-python
-=================
+======================
 
 `MDSplus <https://www.mdsplus.org>`_ is a set of software tools for data
 acquisition and storage and a methodology for management of complex

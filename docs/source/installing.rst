@@ -1,7 +1,7 @@
 .. _`Installing imas-python`:
 
 Installing imas-python
-=================
+======================
 
 imas-python is a pure Python package. For full functionality of the package you need
 an installation of `the IMAS Access Layer <https://imas.iter.org/>`_. See
@@ -10,7 +10,7 @@ an installation of `the IMAS Access Layer <https://imas.iter.org/>`_. See
 
 
 imas-python modules on the ITER cluster and EuroFusion gateway
----------------------------------------------------------
+--------------------------------------------------------------
 
 There is a `module` available on the ITER and Eurofusion Gateway clusters, so
 you can run:
@@ -84,7 +84,7 @@ Installation without ITER access
 --------------------------------
 
 The installation script tries to access the `ITER IMAS Core Data Dictionary
-repository <https://git.iter.org/projects/IMAS/repos/data-dictionary/browse>`_
+repository <https://github.com/iterorganization/imas-data-dictionary>`_
 to fetch the latest versions. If you do not have git+ssh access there, you can
 try to find this repository elsewhere, and do a ``git fetch --tags``.
 

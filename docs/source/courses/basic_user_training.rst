@@ -1,7 +1,7 @@
 .. _`imas-python 101`:
 
 imas-python 101
-==========
+===============
 
 In this imas-python training, we introduce you to the basic concepts and features of
 imas-python. You will need some basic familiarity with Python. For a refresher, see

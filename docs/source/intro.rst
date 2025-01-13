@@ -1,7 +1,7 @@
 .. _`imas-python 5 minute introduction`:
 
 imas-python 5 minute introduction
-----------------------------
+---------------------------------
 
 .. contents:: Contents
     :local:

@@ -1,5 +1,5 @@
 Transform with imas-python
-=====================
+==========================
 
 In this part of the course we'll perform a coordinate transformation. Our input data is
 in rectilinear :math:`R, Z` coordinates, which we will transform into poloidal polar

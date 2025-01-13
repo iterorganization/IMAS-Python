@@ -55,7 +55,7 @@ Exercise 1: Calculate some hashes
 
 
 Properties of imas-python's hashes
------------------------------
+----------------------------------
 
 The implementation of the hash function has the following properties:
 

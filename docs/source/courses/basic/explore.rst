@@ -1,7 +1,7 @@
 .. _`basic/explore`:
 
 Explore with imas-python
-===================
+========================
 
 In this part of the training, we will learn how to use Python to explore data
 saved in IDSs.
@@ -93,7 +93,7 @@ functions, objects, etc.
 
 
 Inspecting imas-python objects
-'''''''''''''''''''''''''
+''''''''''''''''''''''''''''''
 
 :kbd:`Tab` completion is nice when you already know more or less what attribute you are
 looking for. For a more comprehensive overview of any imas-python node, you can use

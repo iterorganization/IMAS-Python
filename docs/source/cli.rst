@@ -1,7 +1,7 @@
 .. _`imas-python Command Line tool`:
 
 imas-python Command Line tool
-========================
+=============================
 
 imas-python comes with a command line tool: ``imas``. This allows you to execute
 some tasks without writing Python code:
@@ -23,7 +23,7 @@ available in the :ref:`Command line tool reference` below.
 .. _`imas-python Data Entry analysis`:
 
 imas-python Data Entry analysis
---------------------------
+-------------------------------
 
 The imas-python Data Entry analysis tool is a set of two command line programs:
 ``imas analyze-db`` and ``imas process-db-analysis``. The tool analyzes the

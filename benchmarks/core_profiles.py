@@ -31,7 +31,7 @@ def fill_slices(core_profiles, times):
     core_profiles.code.name = "imas-python ASV benchmark"
     core_profiles.code.version = imas.__version__
     core_profiles.code.repository = (
-        "https://git.iter.org/projects/IMAS/repos/imas/browse"
+        "https://github.com/iterorganization/imas-python"
     )
 
     core_profiles.time = np.array(times)

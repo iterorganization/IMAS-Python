@@ -8,7 +8,7 @@ and examples, refer to the relevant chapters in the main part of the
 documentation.
 
 imas-python IDS manipulation
--------------------------
+----------------------------
 
 .. currentmodule:: imas
 
