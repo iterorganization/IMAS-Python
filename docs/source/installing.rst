@@ -39,7 +39,8 @@ and run `pip install`:
 
     python3 -m venv ./venv
     . venv/bin/activate
-    git clone ssh://git@git.iter.org/imas/imas.git
+    
+    git clone ssh://git@github.com:iterorganization/imas-python.git
     cd imas
     pip install --upgrade pip
     pip install --upgrade wheel setuptools
