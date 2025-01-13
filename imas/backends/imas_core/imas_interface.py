@@ -6,10 +6,8 @@ Helper module for providing a version-independent interface to the Access Layer.
 This module tries to abstract away most API incompatibilities between the supported
 Access Layer versions (for example the rename of _ual_lowlevel to _al_lowlevel).
 """
-import importlib
 import inspect
 import logging
-import time
 
 from packaging.version import Version
 
@@ -29,27 +27,12 @@ try:
         enable_exceptions()
 
 except ImportError as exc:
-    # Fallback for AL 4.x or 5.0/5.1
-    # try:
-    #     tic = time.time()
-    #     # Don't directly `import imas`: code analyzers will break on the huge code base
-    #     imas = importlib.import_module("imas")
-    #     logger.info(
-    #         "Successfully imported `imas` (took %.3f seconds)", time.time() - tic
-    #     )
-    #     try:
-    #         lowlevel = imas._al_lowlevel  # AL 5.0/5.1
-    #     except AttributeError:
-    #         lowlevel = imas._ual_lowlevel  # AL 4.x
-    #     imasdef = imas.imasdef
-
-    # except ImportError as exc:
     imas = None
     has_imas = False
     imasdef = None
     lowlevel = None
     logger.critical(
-        "Could not import 'imas': %s. Some functionality is not available.",
+        "Could not import 'al_core': %s. Some functionality is not available.",
         exc,
     )
 
