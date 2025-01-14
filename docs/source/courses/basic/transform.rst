@@ -27,12 +27,6 @@ Exercise 1: Check which time slices exist
         .. hint::
             You can use :ref:`lazy loading` to avoid loading all data in memory.
 
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :start-at: # Open input data entry
-            :end-before: # Create output data entry
-
     .. md-tab-item:: imas-python
 
         .. literalinclude:: imas_snippets/transform_grid.py
@@ -49,12 +43,6 @@ Exercise 2: Load a time slice
 
         Loop over each available time in the IDS and load the time slice inside the
         loop.
-
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :start-at: # Loop over each time slice
-            :end-before: # Update comment
 
     .. md-tab-item:: imas-python
 
@@ -86,12 +74,6 @@ We will apply the transformation of the data as follows:
 
 .. md-tab-set::
 
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :start-at: # Loop over each time slice
-            :end-before: # Finally, put the slice to disk
-
     .. md-tab-item:: imas-python
 
         .. literalinclude:: imas_snippets/transform_grid.py
@@ -107,18 +89,6 @@ Exercise 4: Store a time slice
     .. md-tab-item:: Exercise
 
         Store the time slice after the transformation.
-
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :start-at: # Create output data entry
-            :end-at: output_entry.create()
-            :caption: The data entry is created once, outside the time slice loop
-
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :start-at: # Finally, put the slice to disk
-            :end-at: output_entry.put_slice
-            :caption: Store the time slice inside the loop
 
     .. md-tab-item:: imas-python
 
@@ -144,11 +114,6 @@ Exercise 5: Plotting data before and after the transformation
         :math:`\rho,\theta` plane (transformed data) to verify that the transformation
         is correct.
 
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :start-at: # Create a plot
-
     .. md-tab-item:: imas-python
 
         .. literalinclude:: imas_snippets/transform_grid.py
@@ -159,11 +124,6 @@ Bringing it all together
 ------------------------
 
 .. md-tab-set::
-
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :caption: Source code for the complete exercise
 
     .. md-tab-item:: imas-python
 

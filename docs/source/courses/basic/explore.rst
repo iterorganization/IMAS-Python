@@ -36,10 +36,6 @@ Exercise 1
             In imas-python, you can use :py:class:`~imas.ids_factory.IDSFactory` to figure
             out which IDSs are avaible.
 
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/print_idss.py
-
     .. md-tab-item:: imas-python
         
         .. literalinclude:: imas_snippets/print_idss.py

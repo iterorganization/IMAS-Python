@@ -69,10 +69,6 @@ Exercise 1
            ``core_profiles.profiles_1d[i].electrons.temperature``) from the
            ``core_profiles`` IDS at time slice :math:`t\approx 433\,\mathrm{s}`
 
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/read_whole_equilibrium.py
-
     .. md-tab-item:: imas-python
 
         .. literalinclude:: imas_snippets/read_whole_equilibrium.py
@@ -108,9 +104,6 @@ Exercise 2
             Now the index of the closest time slice can be found with
             :external:func:`numpy.argmin`.
 
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/read_equilibrium_time_array.py
 
     .. md-tab-item:: imas-python
 
@@ -166,12 +159,8 @@ Exercise 3
             :collapsible:
 
             :meth:`~imas.db_entry.DBEntry.get_slice()` requires an ``interpolation_method`` as one
-            of its arguments, here you can use ``imas.imasdef.CLOSEST_INTERP``. Alternatively,
-            if you use imas-python, you can use ``imas.ids_defs.CLOSEST_INTERP``.
+            of its arguments, here you can use ``imas.ids_defs.CLOSEST_INTERP``.
 
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/read_core_profiles_ne_timeslice.py
 
     .. md-tab-item:: imas-python
 
@@ -195,10 +184,6 @@ Exercise 4
 
         Using ``matplotlib``, create a plot of :math:`n_e` on the y-axis and
         :math:`\rho_{tor, norm}` on the x-axis at :math:`t=433\mathrm{s}`
-
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/plot_core_profiles_ne_timeslice.py
 
     .. md-tab-item:: imas-python
 

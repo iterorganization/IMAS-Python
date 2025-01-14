@@ -273,8 +273,7 @@ Access Layer interfaces
 
     A second class (:py:class:`~imas.backends.imas_core.al_context.LazyALContext`) implements the same
     interface, but is used when :ref:`dev lazy loading`.
--   :py:mod:`imas.ids_defs` provides access to Access Layer constants (mostly defined
-    in ``imas.imasdef``).
+-   :py:mod:`imas.ids_defs` provides access to Access Layer constants 
 -   :py:mod:`imas.backends.imas_core.imas_interface` provides a version-independent interface to the
     Access Layer through :py:class:`~imas.backends.imas_core.imas_interface.LowlevelInterface`. It
     defines all known methods of the Access Layer and defers to the correct

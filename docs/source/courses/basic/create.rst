@@ -24,11 +24,6 @@ Exercise 1
 
         Create an empty ``core_profiles`` IDS.
 
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/create_core_profiles.py
-            :end-before: # Set properties
-
     .. md-tab-item:: imas-python
 
         .. literalinclude:: imas_snippets/create_core_profiles.py
@@ -63,17 +58,6 @@ Exercise 2
 
         Fill the ``core_profiles`` IDS with the fields as described above.
 
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/create_core_profiles.py
-            :start-at: # Set properties
-            :end-before: # Validate the IDS for consistency
-
-        .. note::
-
-            When using the IMAS access layer instead of imas-python, we must always create
-            numpy arrays (of the correct data type). imas-python will
-            automatically convert your data to the appropriate numpy array.
 
     .. md-tab-item:: imas-python
 
@@ -105,14 +89,6 @@ Exercise 3
 
         Validate the just-filled IDS.
 
-    .. md-tab-item:: AL4
-
-        IDS validation is an Access Layer 5 feature, and cannot be done in Al4.
-
-        .. literalinclude:: al4_snippets/create_core_profiles.py
-            :start-at: # Validate the IDS for consistency
-            :end-before: # Fill in the missing rho_tor_norm coordinate
-
     .. md-tab-item:: imas-python
 
         .. literalinclude:: imas_snippets/create_core_profiles.py
@@ -138,12 +114,6 @@ Exercise 4
     .. md-tab-item:: Exercise
 
         Fix the coordinate consistency error.
-
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/create_core_profiles.py
-            :start-at: # Fill in the missing rho_tor_norm coordinate
-            :end-before: # Create a new data entry for storing the IDS
 
     .. md-tab-item:: imas-python
 
@@ -194,11 +164,6 @@ Exercise 5
 
             The signature of :meth:`~imas.db_entry.DBEntry()` is: ``DBEntry(backend, database, pulse, run)``
 
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/create_core_profiles.py
-            :start-at: # Create a new data entry for storing the IDS
-
     .. md-tab-item:: imas-python
 
         .. literalinclude:: imas_snippets/create_core_profiles.py
@@ -219,10 +184,6 @@ Congratulations for completing this section of the course. You have:
     .. md-tab-item:: Summary
 
         Click on the tabs to see the complete source, combining all exercises.
-
-    .. md-tab-item:: AL4
-
-        .. literalinclude:: al4_snippets/create_core_profiles.py
 
     .. md-tab-item:: imas-python
 
