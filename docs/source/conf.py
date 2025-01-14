@@ -137,7 +137,7 @@ html_theme_options = {
     "repo_url": "https://github.com/iterorganization/imas-python",
     "repo_name": "imas-python",
     "icon": {
-        "repo": "fontawesome/brands/bitbucket",
+        "repo": "fontawesome/brands/github",
     },
     "features": [
         # "navigation.expand",
