@@ -26,8 +26,7 @@ jobs:
         path: dist/
         
   publish-to-pypi:
-    name: Publish imas-data-dictionary distribution to PyPI
-    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
+    name: Publish imas-python distribution to PyPI
     needs:
     - build
     runs-on: ubuntu-latest
@@ -47,7 +46,6 @@ jobs:
       
   publish-to-testpypi:
     name: Publish imas-python distribution to TestPyPI
-    if: github.ref=='refs/heads/develop'  # only publish to TestPyPI on develop pushes
     needs:
     - build
     runs-on: ubuntu-latest
