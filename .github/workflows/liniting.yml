@@ -1,9 +1,6 @@
 name: imas-python
 
-on: [push]
-    branches:
-      - main
-      - rename-imaspy-to-imas
+on: push
 
 jobs:
   build:
