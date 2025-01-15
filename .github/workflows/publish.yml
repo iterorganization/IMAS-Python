@@ -1,14 +1,6 @@
 name: build-wheel-and-publish-test-pypi
 
 on: push
-# Create sdist and wheel
-pip install --upgrade pip setuptools wheel build
-rm -rf dist
-python -m build .
-
-# Install imas and documentation dependencies from the just-built wheel
-pip install "`readlink -f dist/*.whl`[docs,netcdf]"
-
 
 jobs:
   build:
