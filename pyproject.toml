@@ -78,7 +78,7 @@ docs = [
     "sphinx-click",
 ]
 
-imas-core = [ "imas-core@git+https://github.com/iterorganization/imas-core.git@main" ]
+# imas-core = [ "imas-core@git+https://github.com/iterorganization/imas-core.git@main" ]
 
 netcdf = [
     "netCDF4>=1.7.0",
