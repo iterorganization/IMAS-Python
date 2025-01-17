@@ -76,7 +76,10 @@ def print_version():
     dd_versions = ", ".join(imas.dd_zip.dd_xml_versions())
     grid.add_row("Available data dictionary versions:", dd_versions)
     grid.add_section()
-    grid.add_row("Access Layer core version:", ll_interface.get_al_version() or "N/A")
+    try:
+        grid.add_row("Access Layer core version:", ll_interface.get_al_version() or "N/A")
+    except Exception as exc:
+        grid.add_row("Access Layer core version:", "N/A")
     console.Console().print(grid)
 
 
