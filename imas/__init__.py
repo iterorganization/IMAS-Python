@@ -5,11 +5,8 @@
 
 from packaging.version import Version as _V
 
-from . import _version
-
-__version__ = _version.get_versions()["version"]
-
-version = __version__
+from ._version import version as __version__  # noqa: F401
+from ._version import version_tuple  # noqa: F401
 
 # Import logging _first_
 from . import setup_logging

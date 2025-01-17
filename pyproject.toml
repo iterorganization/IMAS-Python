@@ -1,7 +1,7 @@
 [build-system]
 # Minimum requirements for the build system to execute.
 # Keep this on a single line for the grep magic of build scripts to work
-requires = ["setuptools>=61", "wheel", "numpy", "gitpython", "packaging", "tomli;python_version<'3.11'", "versioneer[toml]"]
+requires = ["setuptools>=61", "wheel", "numpy", "gitpython", "packaging", "tomli;python_version<'3.11'", "setuptools_scm>8"]
 # needs saxon9he.jar in CLASSPATH
 
 build-backend = "setuptools.build_meta"
@@ -119,17 +119,9 @@ markers = [
 ]
 testpaths = "imas"
 
-[tool.versioneer]
-VCS = "git"
-style = "pep440"
-versionfile_source = "imas/_version.py"
-versionfile_build = "imas/_version.py"
-tag_prefix = ""
-parentdir_prefix = ""
-
-[tool.black]
-# Exclude versioneer-generated file
-extend-exclude = "imas/_version.py"
+[tool.setuptools_scm]
+write_to = "imas/_version.py"
+local_scheme = "no-local-version"
 
 [tool.isort]
 profile = "black"

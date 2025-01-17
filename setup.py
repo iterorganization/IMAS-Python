@@ -25,11 +25,10 @@ import importlib
 import importlib.util
 import site
 import traceback
-
+from setuptools_scm import get_version
 # Allow importing local files, see https://snarky.ca/what-the-heck-is-pyproject-toml/
 import sys
 import warnings
-
 # Import other stdlib packages
 from pathlib import Path
 
@@ -49,7 +48,6 @@ except ImportError:
 
 # Ensure the current folder is on the import path:
 sys.path.append(str(Path(__file__).parent.resolve()))
-import versioneer  # noqa
 
 cannonical_python_command = "module load Python/3.8.6-GCCcore-10.2.0"
 
@@ -114,8 +112,7 @@ class BuildDDCommand(setuptools.Command):
 # - `pip install -e .`` (from git clone)
 # - `python -m build``
 # - Source tarball from git-archive. Note: version only picked up when doing git-archive
-#   from a tagged release, otherwise version will be "0+unknown" (expected versioneer
-#   behaviour).
+#   from a tagged release, 
 #   `git archive HEAD -v -o imas.tar.gz && pip install imas.tar.gz`
 cmd_class = {}
 build_overrides = {"build_ext": build_ext, "build_py": build_py, "sdist": sdist}
@@ -139,7 +136,7 @@ for name, cls in build_overrides.items():
 
 if __name__ == "__main__":
     setup(
-        version=versioneer.get_version(),
+        version = get_version(),
         zip_safe=False,  # https://mypy.readthedocs.io/en/latest/installed_packages.html
-        cmdclass=versioneer.get_cmdclass({"build_DD": BuildDDCommand, **cmd_class}),
+        cmdclass={"build_DD": BuildDDCommand}
     )
