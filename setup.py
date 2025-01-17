@@ -25,7 +25,6 @@ import importlib
 import importlib.util
 import site
 import traceback
-from setuptools_scm import get_version
 # Allow importing local files, see https://snarky.ca/what-the-heck-is-pyproject-toml/
 import sys
 import warnings
@@ -136,7 +135,6 @@ for name, cls in build_overrides.items():
 
 if __name__ == "__main__":
     setup(
-        version = get_version(),
         zip_safe=False,  # https://mypy.readthedocs.io/en/latest/installed_packages.html
         cmdclass={"build_DD": BuildDDCommand}
     )
