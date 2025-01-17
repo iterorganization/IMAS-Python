@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "imas-python"
 authors = [
-  {name = "imas-python Developers"},
+  {name = "imas-python developers"},
   {name = "Olivier Hoenen", email = "olivier.hoenen@iter.org"},
 ]
 description = "Pythonic wrappers for the IMAS Access Layer"
@@ -78,6 +78,7 @@ docs = [
     "sphinx-click",
 ]
 
+# TODO enable when imas-core is available on pypi
 # imas-core = [ "imas-core@git+https://github.com/iterorganization/imas-core.git@main" ]
 
 netcdf = [

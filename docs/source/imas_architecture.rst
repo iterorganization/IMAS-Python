@@ -1,4 +1,4 @@
-imas-python Architecture
+imas-python architecture
 ========================
 
 This document provides a brief overview of the components of imas-python, grouped into

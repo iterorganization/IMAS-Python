@@ -3,7 +3,7 @@
    define TOC here, but it'll be put in the sidebar by the theme
 
 ==================
-imas-python Manual
+imas-python manual
 ==================
 
 imas-python is a pure-python library to handle arbitrarily nested
