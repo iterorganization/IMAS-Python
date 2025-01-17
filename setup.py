@@ -136,5 +136,5 @@ for name, cls in build_overrides.items():
 if __name__ == "__main__":
     setup(
         zip_safe=False,  # https://mypy.readthedocs.io/en/latest/installed_packages.html
-        cmdclass={"build_DD": BuildDDCommand}
+        cmdclass={"build_DD": BuildDDCommand, **cmd_class}
     )
