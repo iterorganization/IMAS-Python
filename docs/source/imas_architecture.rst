@@ -56,7 +56,7 @@ immutable.
 
         Although an :py:class:`~imas.ids_path.IDSPath` in imas-python implements roughly
         the same concept as `the "IDS Path syntax" in the Data Dictionary
-        <https://github.com/iterorganization/imas-data-dictionary/browse/html_documentation/utilities/IDS-path-syntax.md?at=refs%2Fheads%2Fdevelop%2F3>`__,
+        <https://github.com/iterorganization/imas-data-dictionary/blob/develop/html_documentation/utilities/IDS-path-syntax.md>`__,
         they are not necessarily the same thing!
 
         At the moment of writing this (January 2024), the IDS path definition in the
