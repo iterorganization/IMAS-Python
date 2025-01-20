@@ -82,8 +82,7 @@ def test_dbentry_constructor():
     assert get_entry_attrs(entry) == (1, 2, 3, 4, None, 6)
 
 
-@pytest.mark.skipif(not has_imas, reason="Requires IMAS Core.")
-def test_ignore_unknown_dd_version(monkeypatch, worker_id, tmp_path):
+def test_ignore_unknown_dd_version(monkeypatch, worker_id, tmp_path, requires_imas):
     entry = open_dbentry(imaspy.ids_defs.MEMORY_BACKEND, "w", worker_id, tmp_path)
     ids = entry.factory.core_profiles()
     ids.ids_properties.homogeneous_time = 0
