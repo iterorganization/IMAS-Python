@@ -153,10 +153,8 @@ Exercise 5
             pulse = 1
             run = 1
 
-        After a successful ``put``, the ids file will be created. If you are using
-        AL4, you should see a file ``imas-course_1_1_core_profiles.ids`` in your 
-        working directory with the contents of the IDS. 
-        If you are using AL5, this file can be found under
+        After a successful ``put``, the ids file will be created. 
+        this file can be found under
         ``~/public/imasdb/imas-course/3/1/1/core_profiles.ids`` 
 
         .. hint::

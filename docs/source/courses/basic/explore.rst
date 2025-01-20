@@ -30,8 +30,7 @@ Exercise 1
         Find out the names of the available IDSs.
 
         .. hint::
-            The module ``imas.ids_names`` contains information on the available IDSs in
-            AL4.
+            The module ``imas.ids_names`` contains information on the available IDSs.
 
             In imas-python, you can use :py:class:`~imas.ids_factory.IDSFactory` to figure
             out which IDSs are avaible.

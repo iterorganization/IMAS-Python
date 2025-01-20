@@ -55,13 +55,13 @@ class DBEntry:
 
         import imas
 
-        # AL4-style constructor:
+        # old constructor:
         with imas.DBEntry(imas.ids_defs.HDF5_BACKEND, "test", 1, 12) as dbentry:
             # dbentry is now opened and can be used for reading data:
             ids = dbentry.get(...)
         # The dbentry is now closed
 
-        # AL5-style constructor also allows creating the Data Entry with the mode
+        # new constructor also allows creating the Data Entry with the mode
         # argument
         with imas.DBEntry("imas:hdf5?path=testdb", "w") as dbentry:
             # dbentry is now created and can be used for writing data:
