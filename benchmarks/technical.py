@@ -1,5 +1,4 @@
 import imas
-import imas
 
 
 def timeraw_create_default_imas_factory():
@@ -7,12 +6,6 @@ def timeraw_create_default_imas_factory():
     return """
     import imas
     imas.IDSFactory()
-    """
-
-
-def timeraw_import_imas():
-    return """
-    import imas
     """
 
 

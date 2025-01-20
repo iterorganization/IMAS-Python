@@ -95,10 +95,8 @@ imas/_version.py
 
 # IMAS DD
 data-dictionary
-access-layer
 containers/arch/imas/
 containers/arch/data-dictionary/
-containers/arch/access-layer/
 imas/assets/IDSDef.zip
 
 # IDS files

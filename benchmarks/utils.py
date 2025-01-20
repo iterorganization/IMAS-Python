@@ -6,10 +6,6 @@ from pathlib import Path
 import imas
 import imas.exception
 
-# Don't directly import imas: code analyzers break on the huge code base
-imas = importlib.import_module("imas")
-
-
 # Backend constants
 HDF5 = "HDF5"
 MDSPLUS = "MDSplus"
@@ -60,13 +56,11 @@ available_slicing_backends = [
     backend for backend in available_backends if backend not in [ASCII, NETCDF]
 ]
 
-hlis = ["imas", "imas"]
+hlis = ["imas"]
 DBEntry = {
-    "imas": imas.DBEntry,
     "imas": imas.DBEntry,
 }
 factory = {
-    "imas": imas,
     "imas": imas.IDSFactory(),
 }
 available_serializers = [imas.ids_defs.ASCII_SERIALIZER_PROTOCOL]
@@ -74,9 +68,6 @@ available_serializers = [imas.ids_defs.ASCII_SERIALIZER_PROTOCOL]
 
 def create_dbentry(hli, backend):
     if backend == NETCDF:
-        if hli == "imas":
-            # Raising NotImplementedError will skip the benchmarks for this combination
-            raise NotImplementedError("AL-Python HLI doesn't implement netCDF.")
         if hli == "imas":  # check if netcdf backend is available
             try:
                 assert (
