@@ -50,7 +50,6 @@ def test_prepare_data_dictionaries():
 
     if _build_dir.exists():
         shutil.rmtree(_idsdef_unzipped_relpath)
-        print(f"Removed directory: {_idsdef_unzipped_relpath}")
 
 
 if __name__ == "__main__":
