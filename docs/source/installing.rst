@@ -4,33 +4,19 @@ Installing imas-python
 ======================
 
 imas-python is a pure Python package. For full functionality of the package you need
-an installation of `the IMAS Access Layer <https://imas.iter.org/>`_. See
+an installation of `the IMAS Core library <https://imas.iter.org/>`_. See
 :ref:`imas-python 5 minute introduction` for an overview of functionality which does
-(not) require the IMAS Access Layer available.
+(not) require the IMAS Core library available.
 
-
-imas-python modules on the ITER cluster and EuroFusion gateway
---------------------------------------------------------------
-
-There is a `module` available on the ITER and Eurofusion Gateway clusters, so
-you can run:
+To get started, you can install it from `pypi.org <https://pypi.org/project/imas-python>`_:
 
 .. code-block:: bash
 
-    module load imas-python
-
-Additionally, if you wish to use the MDSPlus backend, you should load:
-
-.. code-block:: bash
-
-    module load MDSplus-Java/7.96.17-GCCcore-10.2.0-Java-11
-
-If you're using a different cluster, please contact your system administrator to see
-if imas-python is available (or can be made available) on the system.
+    pip install imas-python
 
 
-Local installation
-------------------
+Local installation from sources
+-------------------------------
 
 We recommend using a :external:py:mod:`venv`. Then, clone the imas-python repository
 and run `pip install`:
@@ -81,13 +67,3 @@ And to build the imas-python documentation, execute:
     make -C docs html
 
 
-Installation without ITER access
---------------------------------
-
-The installation script tries to access the `ITER IMAS Core Data Dictionary
-repository <https://github.com/iterorganization/imas-data-dictionary>`_
-to fetch the latest versions. If you do not have git+ssh access there, you can
-try to find this repository elsewhere, and do a ``git fetch --tags``.
-
-Alternatively you could try to obtain an ``IDSDef.zip`` and place it in
-``~/.config/imas/``.
