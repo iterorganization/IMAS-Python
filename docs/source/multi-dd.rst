@@ -205,7 +205,7 @@ fetches all tags from the data dictionary git repository and builds the ``IDSDef
 
 imas-python searches for an ``IDSDef.zip`` in the following locations:
 
-1.  The environment variable ``$IMASPY_DDZIP`` (path to a zip file)
+1.  The environment variable ``$IMAS_DDZIP`` (path to a zip file)
 2.  The file ``./IDSDef.zip`` in the current working directory
 3.  In the local configuration folder: ``~/.config/imas/IDSDef.zip``, or
     ``$XDG_CONFIG_DIR/imas/IDSDef.zip`` (if the environment variable

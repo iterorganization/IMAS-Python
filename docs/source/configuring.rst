@@ -30,7 +30,7 @@ This page provides an overview of available variables.
         <logging.Logger.setLevel>` to change the log level programmatically.
 
 
-``IMASPY_DISABLE_NC_VALIDATE``
+``IMAS_DISABLE_NC_VALIDATE``
     Disables validation of netCDF files when loading an IDS from an IMAS netCDF file.
 
     .. caution::

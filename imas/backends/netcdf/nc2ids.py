@@ -164,7 +164,7 @@ class NC2IDS:
 
     def validate_variables(self) -> None:
         """Validate that all variables in the netCDF Group exist and match the DD."""
-        disable_validate = os.environ.get("IMASPY_DISABLE_NC_VALIDATE")
+        disable_validate = os.environ.get("IMAS_DISABLE_NC_VALIDATE")
         if disable_validate and disable_validate != "0":
             logger.info(
                 "NetCDF file validation disabled: "

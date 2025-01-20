@@ -1,4 +1,4 @@
-.. _`benchmarking IMASPY`:
+.. _`benchmarking IMAS`:
 
 Benchmarking imas-python
 ========================

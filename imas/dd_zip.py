@@ -7,13 +7,13 @@ The zip file contains files as
 * `data-dictionary/3.29.0.xml`
 
 multiple paths are checked. See `ZIPFILE_LOCATIONS`.
-First the environment variable IMASPY_DDZIP is checked.
+First the environment variable IMAS_DDZIP is checked.
 If that exists and points to a file we will attempt to open it.
 Then, IDSDef.zip is searched in site-packages, the current folder,
 in .config/imas/ (`$$XDG_CONFIG_HOME`) and in
 the assets/ folder within the imas-python package.
 
-1. `$$IMASPY_DDZIP`
+1. `$$IMAS_DDZIP`
 2. The virtual environment
 3. USER_BASE`imas/IDSDef.zip`
 4. All `site-packages/imas/IDSDef.zip`
@@ -70,14 +70,14 @@ def _get_xdg_config_dir():
 
 def _generate_zipfile_locations() -> Iterator[Union[Path, Traversable]]:
     """Build a list of potential data dictionary locations.
-    We start with the path (if any) of the IMASPY_DDZIP env var.
+    We start with the path (if any) of the IMAS_DDZIP env var.
     Then we look for IDSDef.zip in the current folder, in the
     default XDG config dir (~/.config/imas/IDSDef.zip) and
     finally in the assets distributed with this package.
     """
     zip_name = "IDSDef.zip"
 
-    environ = os.environ.get("IMASPY_DDZIP")
+    environ = os.environ.get("IMAS_DDZIP")
     if environ:
         yield Path(environ).resolve()
 
