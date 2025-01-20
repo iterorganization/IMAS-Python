@@ -46,7 +46,7 @@ def test_pretty_print(ids):
     assert pprint.pformat(ids) == "<IDSToplevel (IDS:gyrokinetics)>"
 
 
-def test_serialize_nondefault_dd_version():
+def test_serialize_nondefault_dd_version(requires_imas):
     ids = IDSFactory("3.31.0").core_profiles()
     fill_with_random_data(ids)
     data = ids.serialize()

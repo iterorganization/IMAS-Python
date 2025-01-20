@@ -21,7 +21,7 @@ def test_ids_valid_type():
     assert ids_types in ({IDSType.NONE}, {IDSType.CONSTANT, IDSType.DYNAMIC})
 
 
-def test_constant_ids(caplog):
+def test_constant_ids(caplog, requires_imas):
     ids = imaspy.IDSFactory().new("amns_data")
     if ids.metadata.type is IDSType.NONE:
         pytest.skip("IDS definition has no constant IDSs")
