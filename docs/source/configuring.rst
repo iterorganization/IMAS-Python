@@ -12,12 +12,12 @@ This page provides an overview of available variables.
     <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/ACCESS-LAYER-doc/python/5.1/conf.html#environment-variables-controlling-access-layer-plugins>`_
 
 
-``IMASPY_LOGLEVEL``
+``IMAS_LOGLEVEL``
     Sets the log level used by the imas-python logger.
     
     By default (when this environment variable is not set), all log messages of ``INFO``
     or more severe are logged. You may set this to, for example,
-    ``IMASPY_LOGLEVEL=WARNING``, to suppress some of the log messages.
+    ``IMAS_LOGLEVEL=WARNING``, to suppress some of the log messages.
 
     See the Python documentation for the :external:py:mod:`logging` module which log
     levels are available.

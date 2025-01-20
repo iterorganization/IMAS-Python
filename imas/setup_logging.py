@@ -57,7 +57,7 @@ def connect_formatter(logger):
 logger = logging.getLogger("imas")
 connect_formatter(logger)
 
-loglevel = os.getenv("IMASPY_LOGLEVEL") or "INFO"
+loglevel = os.getenv("IMAS_LOGLEVEL") or "INFO"
 logger.setLevel(loglevel)
 
 if __name__ == "__main__":
