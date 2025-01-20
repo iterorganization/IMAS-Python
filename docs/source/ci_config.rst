@@ -9,7 +9,7 @@ of the CI Plan and deployment projects.
 CI Plan
 -------
 
-The `imas-python CI plan <https://ci.iter.org/browse/IC-PYM>`_ consists of 4 types of jobs:
+The `imas-python CI plan <https://ci.iter.org/browse/IC-IG>`_ consists of 4 types of jobs:
 
 Linting and DD ZIP
     This job is responsible for three things:
