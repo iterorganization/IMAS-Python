@@ -1,14 +1,9 @@
 imas-python development and release process
 ===========================================
 
-imas-python development follows the `Gitflow workflow
-<https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow>`_:
-
-1.  New features, bug fixes, etc. are developed in a separate branch. Typically named
-    ``feature/<feature_description>``, ``bugfix/IMAS-XXXX``, etc.
-2.  When the feature is finished, a Pull Request to the ``develop`` branch is created.
-3.  The PR is reviewed and, after approval, changes are merged to ``develop``.
-4.  The ``main`` branch is updated only on releases, see below.
+imas-python development follows the a fork-based model described in
+`the contributing guidelines
+<https://github.com/iterorganization/imas-python/blob/develop/CONTRIBUTING.md>`_.
 
 
 Creating an imas-python release
@@ -16,10 +11,8 @@ Creating an imas-python release
 
 1.  Create a Pull Request using fork based workflow from ``develop`` to ``main``.
 2.  Add a change log to the Pull Request, briefly describing new features, bug fixes,
-    etc. See, for example, `this PR for version 0.8.0
-    <https://github.com/iterorganization/imas-python/pulls>`_.
-3.  The PR is reviewed and merged by IO (currently Olivier Hoenen, who also creates the
-    release tags).
+    and update accordingly the :ref:`changelog`.
+3.  The PR is reviewed and merged by the maintainers who also create the release tags.
 4.  After the release PR is merged, update the Easybuild configurations for SDCC modules
     in the `easybuild-easyconfigs repository
     <https://git.iter.org/projects/IMEX/repos/easybuild-easyconfigs/browse/easybuild/easyconfigs/i/imas-python>`_.
