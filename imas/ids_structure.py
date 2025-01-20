@@ -252,8 +252,8 @@ class IDSStructure(IDSBase):
                 "Iterating over non-empty nodes of a lazy loaded IDS will skip nodes "
                 "that are not loaded. Set accept_lazy=True to continue. "
                 "See the documentation for more information: "
-                "https://sharepoint.iter.org/departments/POP/CM/IMDesign/"
-                "Code%20Documentation/imas-python-doc/generated/imas.ids_structure."
+                "https://imas-python.readthedocs.io/en/latest"
+                "/generated/imas.ids_structure."
                 "IDSStructure.html#imas.ids_structure.IDSStructure.iter_nonempty_"
             )
         for child in self._children:

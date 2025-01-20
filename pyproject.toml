@@ -1,8 +1,7 @@
 [build-system]
 # Minimum requirements for the build system to execute.
 # Keep this on a single line for the grep magic of build scripts to work
-requires = ["setuptools>=61", "wheel", "numpy", "gitpython", "packaging", "tomli;python_version<'3.11'", "setuptools_scm>8"]
-# needs saxon9he.jar in CLASSPATH
+requires = ["setuptools>=61", "wheel", "numpy", "gitpython", "saxonche","packaging", "tomli;python_version<'3.11'", "setuptools_scm>8"]
 
 build-backend = "setuptools.build_meta"
 
@@ -64,6 +63,8 @@ dependencies = [
     "importlib_resources;python_version<'3.9'",
     "packaging",
     "xxhash >= 2",
+    "saxonche",
+    "gitpython"
 ]
 
 [project.optional-dependencies]

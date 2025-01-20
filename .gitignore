@@ -91,10 +91,7 @@ ENV/
 *.swo
 
 # SCM setuptools
-imas/version.py
-
-# Saxon symlink or downloaded file
-saxon*.jar
+imas/_version.py
 
 # IMAS DD
 data-dictionary

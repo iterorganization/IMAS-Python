@@ -76,8 +76,8 @@ Deployment projects
 There are two Bamboo deployment projects for imas-python:
 
 `Deploy imas-python-doc <https://ci.iter.org/deploy/viewDeploymentProjectEnvironments.action?id=1784709122>`_
-    Deploy the documentation created in the `Build docs and dists` job to `Sharepoint
-    <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/imas-python-doc/index.html>`_.
+    Deploy the documentation created in the `Build docs and dists` job to `readthedocs
+    <https://imas-python.readthedocs.io/en/latest/>`_.
 
     This deployment project runs for after each successful CI build of the imas-python main
     branch.
