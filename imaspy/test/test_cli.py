@@ -4,6 +4,7 @@ import pytest
 from click.testing import CliRunner
 from packaging.version import Version
 
+from imaspy.backends.imas_core.imas_interface import has_imas
 from imaspy.backends.imas_core.imas_interface import ll_interface
 from imaspy.command.cli import print_version
 from imaspy.command.db_analysis import analyze_db, process_db_analysis
@@ -12,6 +13,7 @@ from imaspy.test.test_helpers import fill_with_random_data
 
 
 @pytest.mark.cli
+@pytest.mark.skipif(not has_imas, reason="Requires IMAS Core.")
 def test_imaspy_version():
     runner = CliRunner()
     result = runner.invoke(print_version)
@@ -19,8 +21,8 @@ def test_imaspy_version():
 
 
 @pytest.mark.cli
-@pytest.mark.skipif(ll_interface._al_version < Version("5.0"), reason="Needs AL >= 5")
-def test_db_analysis(tmp_path):
+@pytest.mark.skipif(not has_imas or ll_interface._al_version < Version("5.0"), reason="Needs AL >= 5 AND Requires IMAS Core.")
+def test_db_analysis(tmp_path,):
     # This only tests the happy flow, error handling is not tested
     db_path = tmp_path / "test_db_analysis"
     with DBEntry(f"imas:hdf5?path={db_path}", "w") as entry:

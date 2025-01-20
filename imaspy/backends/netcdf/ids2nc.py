@@ -7,6 +7,7 @@ from typing import Iterator, Tuple
 
 import netCDF4
 import numpy
+from packaging import version
 
 from imaspy.backends.netcdf.nc_metadata import NCMetadata
 from imaspy.ids_base import IDSBase
@@ -187,7 +188,10 @@ class IDS2NC:
                 dtype = dtypes[metadata.data_type]
                 kwargs = {}
                 if dtype is not str:  # Enable compression:
-                    kwargs.update(compression="zlib", complevel=1)
+                    if version.parse(netCDF4.__version__) > version.parse("1.4.1"):
+                        kwargs.update(compression="zlib", complevel=1)
+                    else:
+                        kwargs.update(zlib=True, complevel=1)
                 if dtype is not dtypes[IDSDataType.CPX]:  # Set fillvalue
                     kwargs.update(fill_value=default_fillvals[metadata.data_type])
                 # Create variable

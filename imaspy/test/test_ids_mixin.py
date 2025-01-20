@@ -1,7 +1,10 @@
 # This file is part of IMASPy.
 # You should have received the IMASPy LICENSE file with this project.
+import pytest
+from imaspy.backends.imas_core.imas_interface import has_imas
 
 
+@pytest.mark.skipif(has_imas, reason="Requires IMAS Core.")
 def test_toplevel(fake_filled_toplevel):
     top = fake_filled_toplevel
     assert top.wavevector._toplevel == top

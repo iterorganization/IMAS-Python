@@ -23,23 +23,24 @@ def validate_netcdf_file(filename: str) -> None:
         # additional variables are smuggled inside:
         groups = [dataset] + [dataset[group] for group in dataset.groups]
         for group in groups:
+            group_name = group.path.split('/')[-1]
             if group.variables or group.dimensions:
                 raise InvalidNetCDFEntry(
                     "NetCDF file should not have variables or dimensions in the "
-                    f"{group.name} group."
+                    f"{group_name} group."
                 )
             if group is dataset:
                 continue
-            if group.name not in ids_names:
+            if group_name not in ids_names:
                 raise InvalidNetCDFEntry(
-                    f"Invalid group name {group.name}: there is no IDS with this name."
+                    f"Invalid group name {group_name}: there is no IDS with this name."
                 )
             for subgroup in group.groups:
                 try:
                     int(subgroup)
                 except ValueError:
                     raise InvalidNetCDFEntry(
-                        f"Invalid group name {group.name}/{subgroup}: "
+                        f"Invalid group name {group_name}/{subgroup}: "
                         f"{subgroup} is not a valid occurrence number."
                     )
 
