@@ -1,134 +1,57 @@
+from pathlib import Path
+import shutil
 import pytest
+import os
+import zipfile
 
-from imas.dd_helpers import find_saxon_classpath
+from imas.dd_helpers import prepare_data_dictionaries, _idsdef_zip_relpath, _build_dir
 
-# TODO: Write tests!
-# def prepare_data_dictionaries():
-# def get_saxon():
-# def find_saxon_jar():
-
-# Quadruplets of (cluster, module, real path, name)
-saxon_binary_quadruplets = (
-    (
-        "SDCC",
-        "Saxon-HE/10.3-Java-1.8",
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-1.8/saxon-he-10.3.jar",
-        "saxon-he-10.3.jar",
-    ),
-    (
-        "SDCC",
-        "Saxon-HE/10.3-Java-11",
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/saxon-he-10.3.jar",
-        "saxon-he-10.3.jar",
-    ),
-    (
-        "HPC",
-        "Saxon-HE/9.7.0.14-Java-1.6.0_45",
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/9.7.0.14-Java-1.6.0_45/saxon9he.jar",
-        "saxon9he.jar",
-    ),
-    (
-        "HPC",
-        "Saxon-HE/9.7.0.4-Java-1.7.0_79",
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/9.7.0.4-Java-1.7.0_79/saxon9he.jar",
-        "saxon9he.jar",
-    ),
-    (
-        "HPC",
-        "Saxon-HE/9.7.0.21-Java-1.8.0_162",
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/9.7.0.21-Java-1.8.0_162/saxon9he.jar",
-        "saxon9he.jar",
-    ),
-    (
-        "HPC",
-        "Saxon-HE/9.9.1.7-Java-13",
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/9.9.1.7-Java-13/saxon9he.jar",
-        "saxon9he.jar",
-    ),
-    (
-        "HPC",
-        "Saxon-HE/10.3-Java-11",
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/saxon-he-10.3.jar",
-        "saxon-he-10.3.jar",
-    ),
-)
-
-saxon_nonmatches = (
-    "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/saxon-he-test-10.3.jar",
-)
+_idsdef_unzipped_relpath = Path("idsdef_unzipped")
 
 
-# find_saxon_bin tries to find saxon in the CLASSPATH env variable
-# It is thus per definition environment dependent
-def test_empty_classpath(monkeypatch):
-    monkeypatch.setenv("CLASSPATH", "")
-    saxon_jar_path = find_saxon_classpath()
-    assert saxon_jar_path is None
+def test_prepare_data_dictionaries():
+    prepare_data_dictionaries()
+    assert os.path.exists(
+        _idsdef_zip_relpath
+    ), f"IDSDef.zip file does not exist at path: {_idsdef_zip_relpath}"
+
+    expected_xml_files = [
+        _build_dir / "3.40.0.xml",
+        _build_dir / "3.41.0.xml",
+        _build_dir / "3.42.0.xml",
+        _build_dir / "4.0.0.xml",
+    ]
+
+    for xml_file in expected_xml_files:
+        assert os.path.exists(xml_file), f"{xml_file} does not exist"
+
+    with zipfile.ZipFile(_idsdef_zip_relpath, "r") as zip_ref:
+        zip_ref.extractall(_idsdef_unzipped_relpath)
+
+    expected_ids_directories = [
+        _idsdef_unzipped_relpath / "data-dictionary" / "3.40.0.xml",
+        _idsdef_unzipped_relpath / "data-dictionary" / "3.41.0.xml",
+        _idsdef_unzipped_relpath / "data-dictionary" / "3.42.0.xml",
+        _idsdef_unzipped_relpath / "data-dictionary" / "4.0.0.xml",
+        _idsdef_unzipped_relpath
+        / "identifiers"
+        / "core_sources"
+        / "core_source_identifier.xml",
+        _idsdef_unzipped_relpath
+        / "identifiers"
+        / "equilibrium"
+        / "equilibrium_profiles_2d_identifier.xml",
+    ]
+
+    for file_path in expected_ids_directories:
+        assert os.path.exists(
+            file_path
+        ), f"Expected_ids_directories {file_path} does not exist"
+
+    if _build_dir.exists():
+        shutil.rmtree(_idsdef_unzipped_relpath)
+        print(f"Removed directory: {_idsdef_unzipped_relpath}")
 
 
-@pytest.mark.parametrize("cluster,module,path,name", saxon_binary_quadruplets)
-def test_classpath(monkeypatch, cluster, module, path, name):
-    monkeypatch.setenv("CLASSPATH", path)
-    saxon_jar_path = find_saxon_classpath()
-    assert saxon_jar_path == path
-
-
-@pytest.mark.parametrize("path", saxon_nonmatches)
-def test_classpath_do_not_match(monkeypatch, path):
-    monkeypatch.setenv("CLASSPATH", path)
-    saxon_jar_path = find_saxon_classpath()
-    assert saxon_jar_path is None
-
-
-# ITER SDCC login01 20210617
-# module load GCCcore/10.2.0
-# module load Python/3.8.6-GCCcore-10.2.0
-# module load MDSplus/7.96.17-GCCcore-10.2.0
-# module load HDF5/1.10.7-iimpi-2020b  # todo: Intel MPI version?
-# module load Boost/1.74.0-GCCcore-10.2.0
-# module load MDSplus-Java/7.96.17-GCCcore-10.2.0-Java-11
-# module load Saxon-HE/10.3-Java-11
-def test_classpath_sdcc(monkeypatch):
-    monkeypatch.setenv(
-        "CLASSPATH",
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/saxon-xqj-10.3.jar:"
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/saxon-he-test-10.3.jar:"
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/jline-2.9.jar:"
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/saxon-he-10.3.jar:"
-        "/work/imas/opt/EasyBuild/software/MDSplus-Java/7.96.17-GCCcore-10.2.0-Java-11/java/classes/*",
-    )
-    saxon_jar_path = find_saxon_classpath()
-    assert (
-        saxon_jar_path
-        == "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/saxon-he-10.3.jar"
-    )
-
-
-# ITER HPC login01 20210617
-# module load GCCcore/10.2.0
-# module load Python/3.8.6-GCCcore-10.2.0
-# module load MDSplus/7.96.17-GCCcore-10.2.0
-# module load HDF5/1.10.7-iimpi-2020b  # todo: Intel MPI version?
-# module load Boost/1.74.0-GCCcore-10.2.0
-# module load MDSplus-Java/7.96.17-GCCcore-10.2.0-Java-11
-# module load Saxon-HE/10.3-Java-11
-def test_classpath_hpc(monkeypatch):
-    monkeypatch.setenv(
-        "CLASSPATH",
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/saxon-xqj-10.3.jar:"
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/saxon-he-test-10.3.jar:"
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/jline-2.9.jar:"
-        "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/saxon-he-10.3.jar:"
-        "/work/imas/opt/EasyBuild/software/MDSplus-Java/7.96.17-GCCcore-10.2.0-Java-11/java/classes/*",
-    )
-    saxon_jar_path = find_saxon_classpath()
-    assert (
-        saxon_jar_path
-        == "/work/imas/opt/EasyBuild/software/Saxon-HE/10.3-Java-11/saxon-he-10.3.jar"
-    )
-
-
-# TODO: Write tests!
-# def find_saxon_bin():
-# def get_data_dictionary_repo():
-# def build_data_dictionary():
+if __name__ == "__main__":
+    pytest.main()

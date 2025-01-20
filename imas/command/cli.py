@@ -77,9 +77,7 @@ def print_version():
     grid.add_row("Available data dictionary versions:", dd_versions)
     grid.add_section()
     try:
-        grid.add_row(
-            "Access Layer core version:", ll_interface.get_al_version() or "N/A"
-        )
+        grid.add_row("Access Layer core version:", ll_interface.get_al_version())
     except Exception:
         grid.add_row("Access Layer core version:", "N/A")
     console.Console().print(grid)

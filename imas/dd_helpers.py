@@ -25,7 +25,6 @@ def prepare_data_dictionaries():
     3. Generate IDSDef.xml and rename to IDSDef_${version}.xml
     4. Zip all these IDSDefs together and include in wheel
     """
-    print("prepare_data_dictionaries")
     from git import Repo
 
     repo: Repo = get_data_dictionary_repo()
