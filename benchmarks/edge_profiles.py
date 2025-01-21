@@ -46,7 +46,13 @@ def fill_ggd(edge_profiles, times):
         grid.space[i].identifier.index = 1
         grid.space[i].identifier.description = "Description...."
         grid.space[i].geometry_type.index = 0
-    grid.space[0].coordinates_type = np.array([4, 5], dtype=np.int32)
+    grid.space[0].coordinates_type.resize(1)
+    if imas.__version__ >= "4.0.0":
+        grid.space[0].coordinates_type = np.array([4, 5], dtype=np.int32)
+    else:
+        grid.space[0].coordinates_type[0].name = "coordinates type"
+        grid.space[0].coordinates_type[0].index = 0
+        grid.space[0].coordinates_type[0].name = "example coordinates type"
     grid.space[0].objects_per_dimension.resize(3)  # points, lines, surfaces
     points = grid.space[0].objects_per_dimension[0].object
     points.resize(N_POINTS)
@@ -61,7 +67,13 @@ def fill_ggd(edge_profiles, times):
     for i in range(N_SURFACES):
         surfaces[i].nodes = np.random.randint(1, N_LINES + 1, 4, dtype=np.int32)
 
-    grid.space[1].coordinates_type = np.array([6], dtype=np.int32)
+    grid.space[1].coordinates_type.resize(1)
+    if imas.__version__ >= "4.0.0":
+        grid.space[1].coordinates_type = np.array([6], dtype=np.int32)
+    else:
+        grid.space[1].coordinates_type[0].name = "coordinates type"
+        grid.space[1].coordinates_type[0].index = 0
+        grid.space[1].coordinates_type[0].name = "example coordinates type"
     grid.space[1].objects_per_dimension.resize(2)
     obp = grid.space[1].objects_per_dimension[0]
     obp.object.resize(2)
