@@ -13,6 +13,7 @@ import tempfile
 import time
 import uuid
 from pathlib import Path
+from saxonche import PySaxonProcessor
 from subprocess import CalledProcessError, check_output
 from zlib import crc32
 
@@ -22,7 +23,6 @@ except ImportError:  # Python 3.8 support
     from importlib_resources import as_file, files
 
 import imas
-from imas.dd_helpers import get_saxon
 from imas.dd_zip import get_dd_xml, get_dd_xml_crc
 from imas.exception import MDSPlusModelError
 from imas.ids_factory import IDSFactory
@@ -241,35 +241,84 @@ def model_exists(path: Path) -> bool:
     )
 
 
-def create_model_ids_xml(cache_dir_path, fname, version):
-    """Use saxon to compile an ids.xml suitable for creating an mdsplus model."""
+# def create_model_ids_xml(cache_dir_path, fname, version):
+#     """Use saxon to compile an ids.xml suitable for creating an mdsplus model."""
 
+#     try:
+#         # we have to be careful to have the same version of this file as in the access
+#         # layer:
+#         with as_file(files(imas) / "assets" / "IDSDef2MDSpreTree.xsl") as xslfile:
+#             check_output(
+#                 [
+#                     "java",
+#                     "net.sf.saxon.Transform",
+#                     "-s:" + str(fname),
+#                     "-o:" + str(Path(cache_dir_path) / "ids.xml"),
+#                     "DD_GIT_DESCRIBE=" + str(version or fname),
+#                     # if this is expected as git describe it might break
+#                     # if we just pass a filename
+#                     "AL_GIT_DESCRIBE=" + os.environ.get("AL_VERSION", "0.0.0"),
+#                     "-xsl:" + str(xslfile),
+#                 ],
+#                 input=get_dd_xml(version) if version else None,
+#                 env={"CLASSPATH": get_saxon(), "PATH": os.environ.get("PATH", "")},
+#             )
+#     except CalledProcessError as e:
+#         if fname:
+#             logger.error("Error making MDSPlus model IDS.xml for %s", fname)
+#         else:
+#             logger.error("Error making MDSplus model IDS.xml for %s", version)
+#         raise e
+
+
+def create_model_ids_xml(cache_dir_path, fname, version):
+    """Use Saxon/C to compile an ids.xml suitable for creating an MDSplus model."""
     try:
-        # we have to be careful to have the same version of this file as in the access
-        # layer:
-        with as_file(files(imas) / "assets" / "IDSDef2MDSpreTree.xsl") as xslfile:
-            check_output(
-                [
-                    "java",
-                    "net.sf.saxon.Transform",
-                    "-s:" + str(fname),
-                    "-o:" + str(Path(cache_dir_path) / "ids.xml"),
-                    "DD_GIT_DESCRIBE=" + str(version or fname),
-                    # if this is expected as git describe it might break
-                    # if we just pass a filename
-                    "AL_GIT_DESCRIBE=" + os.environ.get("AL_VERSION", "0.0.0"),
-                    "-xsl:" + str(xslfile),
-                ],
-                input=get_dd_xml(version) if version else None,
-                env={"CLASSPATH": get_saxon(), "PATH": os.environ.get("PATH", "")},
-            )
-    except CalledProcessError as e:
+        # Locate the XSL file within the package
+        with as_file(files("imas") / "assets" / "IDSDef2MDSpreTree.xsl") as xslfile:
+            output_file = Path(cache_dir_path) / "ids.xml"
+            
+            # Initialize Saxon/C processor
+            with PySaxonProcessor(license=False) as proc:
+                xslt_processor = proc.new_xslt30_processor()
+
+                # Set the XSLT stylesheet
+                xslt_processor.compile_stylesheet(stylesheet_file=str(xslfile))
+
+                # Prepare the input XML source
+                input_xml = get_dd_xml(version) if version else None
+                if fname:
+                    source_file = str(fname)
+                elif input_xml:
+                    source_file = "-"  # Use standard input for the XML string
+                else:
+                    raise ValueError("Either 'fname' or 'version' must be provided to generate XML.")
+
+                # xdm_ddgit = proc.make_string_value(str(version or fname))
+                # xsltproc.set_parameter("DD_GIT_DESCRIBE", xdm_ddgit)
+                # xdm_algit = proc.make_string_value(os.environ.get("AL_VERSION", "0.0.0"))
+                # xsltproc.set_parameter("AL_GIT_DESCRIBE", xdm_algit)
+                # Transform XML
+                result = xslt_processor.transform_to_file(
+                    source_file=source_file,
+                    output_file=str(output_file),
+                    initial_template_params={
+                        "DD_GIT_DESCRIBE": str(version or fname),
+                        "AL_GIT_DESCRIBE": os.environ.get("AL_VERSION", "0.0.0"),
+                    },
+                )
+
+                if result is False:
+                    logger.error("Transformation failed: Check Saxon/C logs for details.")
+                    raise RuntimeError("Saxon/C XSLT transformation failed.")
+
+    except Exception as e:
         if fname:
-            logger.error("Error making MDSPlus model IDS.xml for %s", fname)
+            logger.error("Error making MDSplus model IDS.xml for %s", fname)
         else:
             logger.error("Error making MDSplus model IDS.xml for %s", version)
         raise e
-
+    
 
 def create_mdsplus_model(cache_dir_path: Path) -> None:
     """Use jtraverser to compile a valid MDS model file."""

@@ -50,7 +50,14 @@ def fill_slices(core_profiles, times):
         profiles_1d.ion.resize(len(ions))
         profiles_1d.neutral.resize(len(ions))
         for i, ion in enumerate(ions):
-            profiles_1d.ion[i].label = profiles_1d.neutral[i].label = ion
+            if hasattr(profiles_1d.ion[i], 'label'):
+                profiles_1d.ion[i].label = ion
+                profiles_1d.neutral[i].label = ion
+            if hasattr(profiles_1d.ion[i], 'name'):
+                profiles_1d.ion[i].name = ion
+                profiles_1d.neutral[i].name = ion
+            
+            # profiles_1d.ion[i].label = profiles_1d.neutral[i].label = ion
             profiles_1d.ion[i].z_ion = 1.0
             profiles_1d.ion[i].neutral_index = profiles_1d.neutral[i].ion_index = i + 1
 
