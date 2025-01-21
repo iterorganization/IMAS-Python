@@ -187,8 +187,14 @@ class IDS2NC:
 
             else:
                 dtype = dtypes[metadata.data_type]
-                if version.parse(netCDF4.__version__) < version.parse("1.7.0") and dtype is dtypes[IDSDataType.CPX]:
-                    raise InvalidNetCDFEntry(f"Found complex data in {var_name}, NetCDF 1.7.0 or later is required for complex data types")
+                if (
+                    version.parse(netCDF4.__version__) < version.parse("1.7.0")
+                    and dtype is dtypes[IDSDataType.CPX]
+                ):
+                    raise InvalidNetCDFEntry(
+                        f"Found complex data in {var_name}, NetCDF 1.7.0 or"
+                        f" later is required for complex data types"
+                    )
                 kwargs = {}
                 if dtype is not str:  # Enable compression:
                     if version.parse(netCDF4.__version__) > version.parse("1.4.1"):

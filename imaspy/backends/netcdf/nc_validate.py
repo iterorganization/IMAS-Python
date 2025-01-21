@@ -23,7 +23,7 @@ def validate_netcdf_file(filename: str) -> None:
         # additional variables are smuggled inside:
         groups = [dataset] + [dataset[group] for group in dataset.groups]
         for group in groups:
-            group_name = group.path.split('/')[-1]
+            group_name = group.path.split("/")[-1]
             if group.variables or group.dimensions:
                 raise InvalidNetCDFEntry(
                     "NetCDF file should not have variables or dimensions in the "
