@@ -2,7 +2,7 @@
 # You should have received the IMASPy LICENSE file with this project.
 
 
-def test_toplevel(fake_filled_toplevel, requires_imas):
+def test_toplevel(fake_filled_toplevel):
     top = fake_filled_toplevel
     assert top.wavevector._toplevel == top
     assert top.wavevector[0].radial_component_norm._toplevel == top
