@@ -8,15 +8,18 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "imas-python"
 authors = [
-  {name = "imas-python developers"},
-  {name = "Olivier Hoenen", email = "olivier.hoenen@iter.org"},
+  {name = "Karel Lucas van de Plassche", email = "karelvandeplassche@gmail.com"},
+  {name = "Daan van Vugt", email = "dvanvugt@ignitioncomputing.com"},
+  {name = "Maarten Sebregts", email = "msebregts@ignitioncomputing.com"},
+  {name = "ITER Organization"},
+  {email = "imas-support@iter.org"},
 ]
 description = "Pythonic wrappers for the IMAS Access Layer"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.7"
 license = {file = "LICENSE.txt"}
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Environment :: Plugins",
     "Environment :: X11 Applications",
@@ -31,9 +34,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Intended Audience :: System Administrators",
-# The license is prepended by private which makes it a valid trove classifier,
-# it will also prevent uploading to package indices such as PyPI
-    "License :: Other/Proprietary License",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Natural Language :: English",
     "Operating System :: POSIX",
     "Operating System :: POSIX :: Linux",
