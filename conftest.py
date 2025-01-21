@@ -7,7 +7,6 @@
 # - Fixtures that are useful across test modules
 
 import functools
-import importlib
 import logging
 import os
 import sys
@@ -73,10 +72,6 @@ _BACKENDS = {
 }
 
 
-# This is a dummy fixture, usually provided by pytest-xdist that isn't available
-# in google3.
-# The `worker_id` is only used by tests that require IMAS Core which we never
-# run
 try:
     import pytest_xdist
 except ImportError:
