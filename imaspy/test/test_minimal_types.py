@@ -64,7 +64,7 @@ def test_assign_str_1d(minimal, caplog):
 # Prevent the expected numpy ComplexWarnings from cluttering pytest output
 @pytest.mark.filterwarnings(
     "ignore::numpy.ComplexWarning"
-    if version.parse(np.__version__) < version.parse("2.0.0")
+    if version.parse(np.__version__) < version.parse("1.25")
     else "ignore::numpy.exceptions.ComplexWarning"
 )
 @pytest.mark.parametrize("typ, max_dim", [("flt", 6), ("cpx", 6), ("int", 3)])
@@ -94,7 +94,7 @@ def test_assign_numeric_types(minimal, caplog, typ, max_dim):
                     # np allows casting of complex to float or int, but warns:
                     with pytest.warns(
                         np.ComplexWarning
-                        if version.parse(np.__version__) < version.parse("2.0.0")
+                        if version.parse(np.__version__) < version.parse("1.25")
                         else np.exceptions.ComplexWarning
                     ):
                         caplog.clear()
