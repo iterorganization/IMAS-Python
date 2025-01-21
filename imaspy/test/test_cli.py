@@ -13,7 +13,8 @@ from imaspy.test.test_helpers import fill_with_random_data
 
 
 @pytest.mark.cli
-def test_imaspy_version(requires_imas):
+@pytest.mark.skipif(not has_imas, reason="Requires IMAS Core.")
+def test_imaspy_version():
     runner = CliRunner()
     result = runner.invoke(print_version)
     assert result.exit_code == 0
@@ -24,7 +25,9 @@ def test_imaspy_version(requires_imas):
     not has_imas or ll_interface._al_version < Version("5.0"),
     reason="Needs AL >= 5 AND Requires IMAS Core.",
 )
-def test_db_analysis(tmp_path):
+def test_db_analysis(
+    tmp_path,
+):
     # This only tests the happy flow, error handling is not tested
     db_path = tmp_path / "test_db_analysis"
     with DBEntry(f"imas:hdf5?path={db_path}", "w") as entry:

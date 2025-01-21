@@ -79,7 +79,7 @@ docs = [
 ]
 imas-core = [ "imas-core@git+ssh://git@git.iter.org/imas/al-core.git@main" ]
 netcdf = [
-    "netCDF4>=1.7.0",
+    "netCDF4>=1.4.1",
 ]
 h5py = [
     "h5py",
