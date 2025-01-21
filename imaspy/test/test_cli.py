@@ -21,7 +21,7 @@ def test_imaspy_version(requires_imas):
 
 @pytest.mark.cli
 @pytest.mark.skipif(not has_imas or ll_interface._al_version < Version("5.0"), reason="Needs AL >= 5 AND Requires IMAS Core.")
-def test_db_analysis(tmp_path,):
+def test_db_analysis(tmp_path):
     # This only tests the happy flow, error handling is not tested
     db_path = tmp_path / "test_db_analysis"
     with DBEntry(f"imas:hdf5?path={db_path}", "w") as entry:
