@@ -13,8 +13,7 @@ from imaspy.test.test_helpers import fill_with_random_data
 
 
 @pytest.mark.cli
-@pytest.mark.skipif(not has_imas, reason="Requires IMAS Core.")
-def test_imaspy_version():
+def test_imaspy_version(requires_imas):
     runner = CliRunner()
     result = runner.invoke(print_version)
     assert result.exit_code == 0
