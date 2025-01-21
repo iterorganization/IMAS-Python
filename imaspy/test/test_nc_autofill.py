@@ -22,7 +22,9 @@ def test_nc_latest_dd_autofill_put_get_skip_complex(ids_name, tmp_path):
     version.parse(netCDF4.__version__) < version.parse("1.7.0"),
     reason="NetCDF4 versions < 1.7.0 do not support complex numbers",
 )
-def test_nc_latest_dd_autofill_put_get_with_complex(ids_name, tmp_path):
+def test_nc_latest_dd_autofill_put_get_with_complex_older_netCDF4(
+    ids_name, tmp_path
+):
     with DBEntry(f"{tmp_path}/test-{ids_name}.nc", "x") as entry:
         ids = entry.factory.new(ids_name)
         fill_consistent(ids, leave_empty=0.5, skip_complex=False)
@@ -43,7 +45,9 @@ def test_nc_latest_dd_autofill_put_get_with_complex(ids_name, tmp_path):
     version.parse(netCDF4.__version__) >= version.parse("1.7.0"),
     reason="NetCDF4 versions >= 1.7.0 support complex numbers",
 )
-def test_nc_latest_dd_autofill_put_get_with_complex(ids_name, tmp_path):
+def test_nc_latest_dd_autofill_put_get_with_complex_newer_netCDF4(
+    ids_name, tmp_path
+):
     with DBEntry(f"{tmp_path}/test-{ids_name}.nc", "x") as entry:
         ids = entry.factory.new(ids_name)
         fill_consistent(ids, leave_empty=0.5, skip_complex=False)
