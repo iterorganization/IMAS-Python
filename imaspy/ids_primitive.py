@@ -481,7 +481,10 @@ class IDSNumericArray(IDSPrimitive, np.lib.mixins.NDArrayOperatorsMixin):
         value = np.asanyarray(value)
         if value.dtype != dtype:
             logger.info(_CONVERT_MSG, value.dtype, self)
-        value = np.asarray(value, dtype=dtype,)
+        value = np.asarray(
+            value,
+            dtype=dtype,
+        )
         if value.ndim != self.metadata.ndim:
             raise ValueError(f"Trying to assign a {value.ndim}D value to {self!r}.")
         return value
