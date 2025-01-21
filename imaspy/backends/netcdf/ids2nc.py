@@ -10,6 +10,7 @@ import numpy
 from packaging import version
 
 from imaspy.backends.netcdf.nc_metadata import NCMetadata
+from imaspy.exception import InvalidNetCDFEntry
 from imaspy.ids_base import IDSBase
 from imaspy.ids_data_type import IDSDataType
 from imaspy.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
@@ -186,6 +187,8 @@ class IDS2NC:
 
             else:
                 dtype = dtypes[metadata.data_type]
+                if version.parse(netCDF4.__version__) < version.parse("1.7.0") and dtype is dtypes[IDSDataType.CPX]:
+                    raise InvalidNetCDFEntry(f"Found complex data in {var_name}, NetCDF 1.7.0 or later is required for complex data types")
                 kwargs = {}
                 if dtype is not str:  # Enable compression:
                     if version.parse(netCDF4.__version__) > version.parse("1.4.1"):
