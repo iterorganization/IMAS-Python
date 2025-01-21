@@ -7,6 +7,7 @@
 # - Fixtures that are useful across test modules
 
 import functools
+import importlib
 import logging
 import os
 import sys
@@ -70,6 +71,19 @@ _BACKENDS = {
     "hdf5": HDF5_BACKEND,
     "mdsplus": MDSPLUS_BACKEND,
 }
+
+
+# This is a dummy fixture, usually provided by pytest-xdist that isn't available
+# in google3.
+# The `worker_id` is only used by tests that require IMAS Core which we never
+# run
+try:
+    import pytest_xdist
+except ImportError:
+    # If pytest-xdist is not available we provide a dummy worker_id fixture.
+    @pytest.fixture()
+    def worker_id():
+        return "master"
 
 
 @pytest.fixture(params=_BACKENDS)
