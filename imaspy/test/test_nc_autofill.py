@@ -19,7 +19,7 @@ def test_nc_latest_dd_autofill_put_get_skip_complex(ids_name, tmp_path):
 
 
 @pytest.mark.skipif(
-    version.parse(netCDF4.__version__) < version.parse("1.7.0"),
+    version.parse(netCDF4.__version__) >= version.parse("1.7.0"),
     reason="NetCDF4 versions < 1.7.0 do not support complex numbers",
 )
 def test_nc_latest_dd_autofill_put_get_with_complex_older_netCDF4(
@@ -42,7 +42,7 @@ def test_nc_latest_dd_autofill_put_get_with_complex_older_netCDF4(
 
 
 @pytest.mark.skipif(
-    version.parse(netCDF4.__version__) >= version.parse("1.7.0"),
+    version.parse(netCDF4.__version__) < version.parse("1.7.0"),
     reason="NetCDF4 versions >= 1.7.0 support complex numbers",
 )
 def test_nc_latest_dd_autofill_put_get_with_complex_newer_netCDF4(
