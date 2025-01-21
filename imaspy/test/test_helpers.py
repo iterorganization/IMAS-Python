@@ -315,9 +315,7 @@ def unset_coordinate(coordinate):
     visit_children(callback, parent)
 
 
-def compare_children(
-    st1, st2, deleted_paths=set(), accept_lazy=False, skip_complex=False
-):
+def compare_children(st1, st2, deleted_paths=set(), accept_lazy=False):
     """Perform a deep compare of two structures using asserts.
 
     All paths in ``deleted_paths`` are asserted that they are deleted in st2.
