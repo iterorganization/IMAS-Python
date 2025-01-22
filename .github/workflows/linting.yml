@@ -10,8 +10,6 @@ jobs:
     steps:
       - name: Checkout imas-python sources
         uses: actions/checkout@v4
-        with:
-          ref: rename-imaspy-to-imas
 
       - name: Set up Python
         uses: actions/setup-python@v5
