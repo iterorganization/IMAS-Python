@@ -3,6 +3,26 @@
 Changelog
 =========
 
+What's new in IMASPy 1.2.0
+--------------------------
+
+New features and improvements
+'''''''''''''''''''''''''''''
+
+- Add :py:func:`imaspy.DBEntry.get_sample` (requires imas_core >= 5.4.0)
+- Improved validation of netCDF files
+- Improve compatibility with the UDA backend in imas_core
+- Extend the support of netCDF to >= 1.4.1 (without complex numbers)
+- Allow running test without imas_core
+  
+Bug fixes
+'''''''''
+
+- Fix a bug when lazy loading multiple IDSs from the same HDF5 DBEntry
+- Fix a bug when lazy loading a child quantity that was added in a newer DD version than stored on disk
+
+
+
 What's new in IMASPy 1.1.1
 --------------------------
 
