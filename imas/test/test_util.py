@@ -54,7 +54,7 @@ def test_inspect():
     inspect(cp.profiles_1d[1].grid.rho_tor_norm)  # IDSPrimitive
 
 
-def test_inspect_lazy():
+def test_inspect_lazy(requires_imas):
     with get_training_db_entry() as entry:
         cp = entry.get("core_profiles", lazy=True)
         inspect(cp)
@@ -141,7 +141,7 @@ def test_idsdiffgen():
     assert diff[0] == ("profiles_1d/time", -1, 0)
 
 
-def test_idsdiff():
+def test_idsdiff(requires_imas):
     # Test the diff rendering for two sample IDSs
     with get_training_db_entry() as entry:
         imas.util.idsdiff(entry.get("core_profiles"), entry.get("equilibrium"))
@@ -179,7 +179,7 @@ def test_get_toplevel():
     assert get_toplevel(cp) is cp
 
 
-def test_is_lazy_loaded():
+def test_is_lazy_loaded(requires_imas):
     with get_training_db_entry() as entry:
         assert is_lazy_loaded(entry.get("core_profiles")) is False
         assert is_lazy_loaded(entry.get("core_profiles", lazy=True)) is True

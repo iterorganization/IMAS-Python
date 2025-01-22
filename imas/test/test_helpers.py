@@ -93,7 +93,9 @@ def fill_with_random_data(structure, max_children=3):
                 child.value = random_data(child.metadata.data_type, child.metadata.ndim)
 
 
-def maybe_set_random_value(primitive: IDSPrimitive, leave_empty: float) -> None:
+def maybe_set_random_value(
+    primitive: IDSPrimitive, leave_empty: float, skip_complex: bool
+) -> None:
     """Set the value of an IDS primitive with a certain chance.
 
     If the IDSPrimitive has coordinates, then the size of the coordinates is taken into
@@ -153,7 +155,7 @@ def maybe_set_random_value(primitive: IDSPrimitive, leave_empty: float) -> None:
                 # Scale chance of not setting a coordinate by our number of dimensions,
                 # such that overall there is roughly a 50% chance that any coordinate
                 # remains empty
-                maybe_set_random_value(coordinate_element, 0.5**ndim)
+                maybe_set_random_value(coordinate_element, 0.5**ndim, skip_complex)
             size = coordinate_element.shape[0 if coordinate.references else dim]
 
             if coordinate.size:  # coordinateX = <path> OR 1...1
@@ -176,13 +178,18 @@ def maybe_set_random_value(primitive: IDSPrimitive, leave_empty: float) -> None:
     elif primitive.metadata.data_type is IDSDataType.FLT:
         primitive.value = np.random.random_sample(size=shape)
     elif primitive.metadata.data_type is IDSDataType.CPX:
+        if skip_complex:
+            # If we are skipping complex numbers then leave the value empty.
+            return
         val = np.random.random_sample(shape) + 1j * np.random.random_sample(shape)
         primitive.value = val
     else:
         raise ValueError(f"Invalid IDS data type: {primitive.metadata.data_type}")
 
 
-def fill_consistent(structure: IDSStructure, leave_empty: float = 0.2):
+def fill_consistent(
+    structure: IDSStructure, leave_empty: float = 0.2, skip_complex: bool = False
+):
     """Fill a structure with random data, such that coordinate sizes are consistent.
 
     Sets homogeneous_time to heterogeneous (always).
@@ -196,6 +203,9 @@ def fill_consistent(structure: IDSStructure, leave_empty: float = 0.2):
         exclusive_coordinates: list of IDSPrimitives that have exclusive alternative
             coordinates. These are initially not filled, and only at the very end of
             filling an IDSToplevel, a choice is made between the exclusive coordinates.
+        skip_complex: Whether to skip over populating complex numbers. This is
+            useful for maintaining compatibility with older versions of netCDF4
+            (<1.7.0) where complex numbers are not supported.
     """
     if isinstance(structure, IDSToplevel):
         unsupported_ids_name = (
@@ -218,7 +228,9 @@ def fill_consistent(structure: IDSStructure, leave_empty: float = 0.2):
 
     for child in structure:
         if isinstance(child, IDSStructure):
-            exclusive_coordinates.extend(fill_consistent(child, leave_empty))
+            exclusive_coordinates.extend(
+                fill_consistent(child, leave_empty, skip_complex)
+            )
 
         elif isinstance(child, IDSStructArray):
             if child.metadata.coordinates[0].references:
@@ -230,7 +242,7 @@ def fill_consistent(structure: IDSStructure, leave_empty: float = 0.2):
                     if isinstance(coor, IDSPrimitive):
                         # maybe fill with random data:
                         try:
-                            maybe_set_random_value(coor, leave_empty)
+                            maybe_set_random_value(coor, leave_empty, skip_complex)
                         except (RuntimeError, ValueError):
                             pass
                         child.resize(len(coor))
@@ -244,7 +256,9 @@ def fill_consistent(structure: IDSStructure, leave_empty: float = 0.2):
             else:
                 child.resize(child.metadata.coordinates[0].size or 1)
             for ele in child:
-                exclusive_coordinates.extend(fill_consistent(ele, leave_empty))
+                exclusive_coordinates.extend(
+                    fill_consistent(ele, leave_empty, skip_complex)
+                )
 
         else:  # IDSPrimitive
             coordinates = child.metadata.coordinates
@@ -256,7 +270,7 @@ def fill_consistent(structure: IDSStructure, leave_empty: float = 0.2):
                 exclusive_coordinates.append(child)
             else:
                 try:
-                    maybe_set_random_value(child, leave_empty)
+                    maybe_set_random_value(child, leave_empty, skip_complex)
                 except (RuntimeError, ValueError):
                     pass
 
@@ -278,7 +292,7 @@ def fill_consistent(structure: IDSStructure, leave_empty: float = 0.2):
                     coor = filled_refs.pop()
                     unset_coordinate(coor)
 
-            maybe_set_random_value(element, leave_empty)
+            maybe_set_random_value(element, leave_empty, skip_complex)
     else:
         return exclusive_coordinates
 

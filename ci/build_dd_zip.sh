@@ -17,4 +17,9 @@ echo "Done loading modules"
 set -x
 
 # Build the DD zip
+rm -rf venv  # Environment should be clean, but remove directory to be sure
+python -m venv venv
+source venv/bin/activate
+pip install gitpython saxonche packaging
 python imas/dd_helpers.py
+deactivate

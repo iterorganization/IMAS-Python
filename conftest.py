@@ -72,6 +72,15 @@ _BACKENDS = {
 }
 
 
+try:
+    import pytest_xdist
+except ImportError:
+    # If pytest-xdist is not available we provide a dummy worker_id fixture.
+    @pytest.fixture()
+    def worker_id():
+        return "master"
+
+
 @pytest.fixture(params=_BACKENDS)
 def backend(pytestconfig: pytest.Config, request: pytest.FixtureRequest):
     backends_provided = any(map(pytestconfig.getoption, _BACKENDS))

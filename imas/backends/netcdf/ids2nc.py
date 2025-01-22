@@ -7,6 +7,7 @@ from typing import Iterator, Tuple
 
 import netCDF4
 import numpy
+from packaging import version
 
 from imas.backends.netcdf.nc_metadata import NCMetadata
 from imas.ids_base import IDSBase
@@ -185,9 +186,20 @@ class IDS2NC:
 
             else:
                 dtype = dtypes[metadata.data_type]
+                if (
+                    version.parse(netCDF4.__version__) < version.parse("1.7.0")
+                    and dtype is dtypes[IDSDataType.CPX]
+                ):
+                    raise InvalidNetCDFEntry(
+                        f"Found complex data in {var_name}, NetCDF 1.7.0 or"
+                        f" later is required for complex data types"
+                    )
                 kwargs = {}
                 if dtype is not str:  # Enable compression:
-                    kwargs.update(compression="zlib", complevel=1)
+                    if version.parse(netCDF4.__version__) > version.parse("1.4.1"):
+                        kwargs.update(compression="zlib", complevel=1)
+                    else:
+                        kwargs.update(zlib=True, complevel=1)
                 if dtype is not dtypes[IDSDataType.CPX]:  # Set fillvalue
                     kwargs.update(fill_value=default_fillvals[metadata.data_type])
                 # Create variable
