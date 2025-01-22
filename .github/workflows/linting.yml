@@ -1,0 +1,31 @@
+name: imas-python
+
+on: push
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout imas-python sources
+        uses: actions/checkout@v4
+        with:
+          ref: rename-imaspy-to-imas
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Install the code linting and formatting tools
+        run: pip install --upgrade 'black >=24,<25' flake8
+
+      - name: Check formatting of code with black
+        run: black --check imas
+
+      - name: Check linting with flake8
+        run: flake8 imas
