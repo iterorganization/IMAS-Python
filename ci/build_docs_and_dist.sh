@@ -3,7 +3,9 @@
 # Note: this script should be run from the root of the git repository
 
 # Debuggging:
-set -e -o pipefail
+if [[ "$(uname -n)" == *"bamboo"* ]]; then
+    set -e -o pipefail
+fi
 echo "Loading modules:" $@
 
 # Set up environment such that module files can be loaded
@@ -14,8 +16,6 @@ module load $@
 
 # Debuggging:
 echo "Done loading modules"
-set -x
-
 
 # Set up the testing venv
 rm -rf venv  # Environment should be clean, but remove directory to be sure
@@ -41,3 +41,5 @@ export SPHINXOPTS='-W -n --keep-going'
 
 # Run sphinx to create the documentation
 make -C docs clean html
+
+deactivate

@@ -17,12 +17,16 @@ source /etc/profile.d/modules.sh
 module purge
 # Modules are supplied as arguments in the CI job:
 # IMAS-AL-Python/5.2.1-intel-2023b-DD-3.41.0 Saxon-HE/12.4-Java-21
-module load IMAS-AL-Core/5.4.3-intel-2023b Saxon-HE/12.4-Java-21
+if [ -z "$@" ]; then
+    module load IMAS-AL-Core
+else
+    module load $@
+fi
+
 
 
 # Debuggging:
 echo "Done loading modules"
-set -x
 
 # Export current PYTHONPATH so ASV benchmarks can import imas
 export ASV_PYTHONPATH="$PYTHONPATH"
@@ -70,4 +74,6 @@ asv publish
 
 # And persistently store them
 cp -rf .asv/{results,html} "$BENCHMARKS_DIR"
+
+deactivate
 

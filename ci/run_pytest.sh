@@ -3,19 +3,23 @@
 # Note: this script should be run from the root of the git repository
 
 # Debuggging:
-set -e -o pipefail
+if [[ "$(uname -n)" == *"bamboo"* ]]; then
+    set -e -o pipefail
+fi
 echo "Loading modules:" $@
 
 # Set up environment such that module files can be loaded
 source /etc/profile.d/modules.sh
 module purge
 # Modules are supplied as arguments in the CI job:
-module load $@
+if [ -z "$@" ]; then
+    module load IMAS-AL-Core
+else
+    module load $@
+fi
 
 # Debuggging:
 echo "Done loading modules"
-set -x
-
 
 # Set up the testing venv
 rm -rf venv  # Environment should be clean, but remove directory to be sure
@@ -33,5 +37,8 @@ pip freeze
 # Clean artifacts created by pytest
 rm -f junit.xml
 rm -rf htmlcov
+mkdir -p ~/tmp
+export PYTEST_DEBUG_TEMPROOT=~/tmp
+python -m pytest -n=auto --cov=imas --cov-report=term-missing --cov-report=html --junit-xml=junit.xml -x
 
-python -m pytest -n=auto --cov=imas --cov-report=term-missing --cov-report=html --junit-xml=junit.xml
+deactivate

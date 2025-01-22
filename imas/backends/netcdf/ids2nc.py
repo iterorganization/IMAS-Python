@@ -10,6 +10,7 @@ import numpy
 from packaging import version
 
 from imas.backends.netcdf.nc_metadata import NCMetadata
+from imas.exception import InvalidNetCDFEntry
 from imas.ids_base import IDSBase
 from imas.ids_data_type import IDSDataType
 from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
