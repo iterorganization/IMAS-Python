@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<constants name="e_field_critical" identifier="yes" create_mapping_function="yes">
+<header>
+Definition of e_field_critical
+</header>
+
+<ddInstance xpath="/runaway_electrons/e_field_critical_definition"/>
+
+<int name="free"        description="Critical electric field calculated from free electrons only (“Connor-Hastie” critical field). See eq (1) in M.N. Rosenbluth and S.V. Putvinski 1997 Nucl. Fusion 37 1355"       >1</int>
+<int name="all"   description="Critical electric field calculated with total (free+bound) electrons. See eq (19) in M.N. Rosenbluth and S.V. Putvinski 1997 Nucl. Fusion 37 1355"         >2</int>
+
+</constants>

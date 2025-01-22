@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<constants name="materials" identifier="yes" create_mapping_function="yes">
+<header>
+Materials used in the device mechanical structures
+</header>
+
+<ddInstance xpath="summary/wall/material"/>
+<ddInstance xpath="summary/limiter/material"/>
+
+<int name="unspecified"   description="unspecified"  >0</int>
+<int name="C"                      description="Carbon"   >1</int>
+<int name="W"                     description="Tungsten"  >2</int>
+<int name="C_W_coating"      description="Carbon with tungsten coating"   >3</int>
+<int name="SS"                     description="Stainless steel"  >4</int>
+<int name="SS_C_coating"      description="Stainless steel with carbon coating"  >5</int>
+<int name="IN"                     description="Inconel"  >6</int>
+<int name="IN_C_coating"      description="Inconel with carbon coating"  >7</int>
+<int name="BC"                      description="Boron carbide"   >8</int>
+<int name="BN"                 description="Boron nitride"   >17</int>
+<int name="Ti_C_coating"         description="Titanium with carbon coating"   >9</int>
+<int name="Be"                      description="Beryllium"   >10</int>
+<int name="Mo"                      description="Molybdenum"   >11</int>
+<int name="Quartz"                 description="Quartz"   >12</int>
+<int name="Ge"                 description="Germanium"   >13</int>
+<int name="Si"                 description="Silicon"   >14</int>
+<int name="LiF"                 description="Lithium fluoride"   >15</int>
+<int name="InSb"                 description="Indium antimonide"   >16</int>
+<int name="Cu"              description="Copper"   >18</int>
+<int name="CuCrZr"              description="Copper Chromium Zirconium alloy"   >19</int>
+<int name="U_235"              description="Uranium 235 isotope">20</int>
+<int name="U_238"              description="Uranium 238 isotope">21</int>
+<int name="Diamond"            description="Diamond">22</int>
+<int name="CxHy"              description="Organic molecule">23</int>
+<int name="LaCl3"              description="Lanthanum chloride">24</int>
+<int name="LaBr"              description="Lanthanum bromide">25</int>
+<int name="HPGe"              description="High Purity Germanium">26</int>
+<int name="CeBr"              description="Cesium bromide">27</int>
+<int name="CZT"              description="Cadmium zinc telluride">28</int>
+<int name="In_115"              description="Indium 115 isotope">29</int>
+<int name="He_4"                 description="Helium 4 isotope">30</int>
+
+
+</constants>

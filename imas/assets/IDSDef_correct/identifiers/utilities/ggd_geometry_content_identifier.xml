@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<constants create_mapping_function="yes" identifier="yes" name="ggd_space_identifier">
+<header> Translation table for ggd_space_identifier_definitions. </header>
+<ddInstance xpath="/utilities/complexType:generic_grid_dynamic_space_dimension/geometry_content"/>
+<ddInstance xpath="/distribution_sources/source/ggd/grid/space/objects_per_dimension/geometry_content"/>
+<ddInstance xpath="/distributions/distribution/ggd/grid/space/objects_per_dimension/geometry_content"/>
+<ddInstance xpath="/equilibrium/grids_ggd/grid/space/objects_per_dimension/geometry_content"/>
+<ddInstance xpath="/transport_solver_numerics/boundary_conditions_ggd/grid/space/objects_per_dimension/geometry_content"/>
+<ddInstance xpath="/waves/coherent_wave/full_wave/grid/space/objects_per_dimension/geometry_content"/>
+<ddInstance xpath="/edge_profiles/grid_ggd/space/objects_per_dimension/geometry_content"/>
+<ddInstance xpath="/edge_sources/grid_ggd/space/objects_per_dimension/geometry_content"/>
+<ddInstance xpath="/edge_transport/grid_ggd/space/objects_per_dimension/geometry_content"/>
+<ddInstance xpath="/radiation/grid_ggd/space/objects_per_dimension/geometry_content"/>
+
+<int name="unspecified"  description="unspecified">0</int>
+<int name="node_coordinates"  description="For nodes : node coordinates">1</int>
+<int name="node_coordinates_connection"  description="For nodes : node coordinates, then connection length, and distance in the poloidal plane to the nearest solid surface outside the separatrix">11</int>
+<int name="edge_areas"  description="For edges : contains 3 surface areas after uniform extension in the third dimension of the edges. Geometry(1) and geometry(2) are the projections of that area along the local poloidal and radial coordinate respectively. Geometry(3) is the full surface area of the extended edge">21</int>
+<int name="face_indices_volume"  description="For faces : coordinates indices (ix, iy) of the face within the structured grid of the code. The third element contains the volume after uniform extension in the third dimension of the faces">31</int>
+<int name="face_indices_volume_connection"  description="For faces : coordinates indices (ix, iy) of the face within the structured grid of the code. The third element contains the volume after uniform extension in the third dimension of the faces. The fourth element is the connection length. The fifth element is the distance in the poloidal plane to the nearest solid surface outside the separatrix">32</int>
+</constants>

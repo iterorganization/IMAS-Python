@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<constants name="mhd_linear_model" identifier="yes" create_mapping_function="yes">
+<header>
+Type of the MHD model used
+</header>
+<!-- Some lines and indices are common with the edge_sources/source/identifier --> 
+
+<ddInstance xpath="/mhd_linear/equations/identifier"/>
+
+<int name="reduced"                 description="Reduced MHD"       >1</int>
+<int name="reduced_kinetic"            description="Reduced MHD and kinetic hybrid"     >11</int>
+<int name="full"                   description="Full MHD"         >2</int>
+<int name="full_kinetic"            description="Full MHD and kinetic hybrid"     >21</int>
+
+</constants>

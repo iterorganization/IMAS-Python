@@ -1,18 +1,11 @@
-import imaspy
 import imas
 
 
-def timeraw_create_default_imaspy_factory():
+def timeraw_create_default_imas_factory():
     # timeraw to ensure that nothing is cached
     return """
-    import imaspy
-    imaspy.IDSFactory()
-    """
-
-
-def timeraw_import_imaspy():
-    return """
-    import imaspy
+    import imas
+    imas.IDSFactory()
     """
 
 
@@ -38,6 +31,6 @@ def track_imas_versions():
     )
 
 
-def track_imaspy_dd_version():
-    return imaspy.IDSFactory().version
+def track_imas_dd_version():
+    return imas.IDSFactory().version
 """

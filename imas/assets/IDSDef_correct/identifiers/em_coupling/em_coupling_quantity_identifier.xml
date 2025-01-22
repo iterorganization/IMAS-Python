@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<constants name="em_coupling_quantity_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+  Physical quantity described in the user-defined em_coupling matrix
+</header>
+
+<ddInstance xpath="/em_coupling/coupling_matrix/quantity"/>
+
+<int name="magnetic_flux"      description="Magnetic flux"     >1</int>
+<int name="b_field"   description="Magnetic field, in the direction set by each target of the coupling matrix"  >2</int>
+<int name="b_field_x"   description="Magnetic field, X component"  >3</int>
+<int name="b_field_y"   description="Magnetic field, Y component"  >4</int>
+<int name="b_field_z"   description="Magnetic field, Z component"  >5</int>
+<int name="b_field_r"   description="Magnetic field, major radius component"  >6</int>
+<int name="db_field_x_dx"   description="Gradient of magnetic field X component along the X coordinate"  >7</int>
+<int name="db_field_x_dy"   description="Gradient of magnetic field X component along the Y coordinate"  >8</int>
+<int name="db_field_x_dz"   description="Gradient of magnetic field X component along the Z coordinate"  >9</int>
+<int name="db_field_y_dx"   description="Gradient of magnetic field Y component along the X coordinate"  >10</int>
+<int name="db_field_y_dy"   description="Gradient of magnetic field Y component along the Y coordinate"  >11</int>
+<int name="db_field_y_dz"   description="Gradient of magnetic field Y component along the Z coordinate"  >12</int>
+<int name="db_field_z_dx"   description="Gradient of magnetic field Z component along the X coordinate"  >13</int>
+<int name="db_field_z_dy"   description="Gradient of magnetic field Z component along the Y coordinate"  >14</int>
+<int name="db_field_z_dz"   description="Gradient of magnetic field Z component along the Z coordinate"  >15</int>
+<int name="db_field_r_dr"   description="Gradient of magnetic field major radius component along the major radius coordinate"  >16</int>
+<int name="db_field_r_dz"   description="Gradient of magnetic field major radius component along the Z coordinate"  >17</int>
+<int name="db_field_z_dr"   description="Gradient of magnetic field Z component along the major radius coordinate"  >18</int>
+</constants>

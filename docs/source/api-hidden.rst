@@ -11,4 +11,4 @@ API autosummary
    :recursive:
    :template: custom-module-template.rst
 
-   imaspy
+   imas

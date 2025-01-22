@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<constants create_mapping_function="yes" identifier="yes" name="ggd_identifier">
+<header> Translation table for ggd_identifier_definitions. </header>
+<ddInstance xpath="/utilities/complexType:generic_grid_dynamic/identifier"/>
+<ddInstance xpath="/utilities/complexType:generic_aos3_root/identifier"/>
+<ddInstance xpath="/distribution_sources/source/ggd/grid/identifier"/>
+<ddInstance xpath="/distributions/distribution/ggd/grid/identifier"/>
+<ddInstance xpath="/equilibrium/grids_ggd/grid/identifier"/>
+<ddInstance xpath="/transport_solver_numerics/boundary_conditions_ggd/grid/identifier"/>
+<ddInstance xpath="/waves/coherent_wave/full_wave/grid/identifier"/>
+<ddInstance xpath="/edge_profiles/grid_ggd/identifier"/>
+<ddInstance xpath="/edge_sources/grid_ggd/identifier"/>
+<ddInstance xpath="/edge_transport/grid_ggd/identifier"/>
+
+<int name="unspecified"  description="unspecified">0</int>
+<int name="linear"  description="Linear">1</int>
+<int name="cylinder"  description="Cylindrical geometry (straight in axial direction)">2</int>
+<int name="limiter"  description="Limiter">3</int>
+<int name="SN"  description="Single null">4</int>
+<int name="CDN"  description="Connected double null">5</int>
+<int name="DDN_bottom"  description="Disconnected double null with inner X-point below the midplane">6</int>
+<int name="DDN_top"  description="Disconnected double null with inner X-point above the midplane">7</int>
+<int name="annulus"  description="Annular geometry (not necessarily with straight axis)">8</int>
+<int name="stellarator_island"  description="Stellarator island geometry">9</int>
+<int name="structured_spaces"  description="Structured grid represented with multiple spaces of dimension 1">10</int>
+<int name="LFS_snowflake_minus"  description="Snowflake grid with secondary x point on the low field side, and the secondary separatrix on top of the primary">11</int>
+<int name="LFS_snowflake_plus"  description="Snowflake grid with secondary x point to the right of the primary, and the secondary separatrix below the primary">12</int>
+<int name="reference"  description="Refers to a GGD described in another IDS indicated by grid_path. In such a case, do not fill the grid_ggd node of this IDS">100</int>
+</constants>

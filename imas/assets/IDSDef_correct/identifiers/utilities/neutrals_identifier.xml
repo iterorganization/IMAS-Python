@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<constants name="neutrals_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+  Translation table for identifying different types of neutral.
+  The neutrals are characterised by their energy and source of the neutrals.
+</header>
+
+<ddInstance xpath="/core_sources/source/profiles_1d/neutral/state/neutral_type"/>
+<ddInstance xpath="/distributions/distribution/species/neutral/state/neutral_type"/>
+<ddInstance xpath="/core_instant_changes/change/profiles_1d/neutral/state/neutral_type"/>
+<ddInstance xpath="/core_profiles/profiles_1d/neutral/state/neutral_type"/>
+<ddInstance xpath="/edge_profiles/profiles_1d/neutral/state/neutral_type"/>
+<ddInstance xpath="complexType:core_instant_changes_change_profiles/neutral/state/neutral_type"/>
+
+<int name="cold"      description="Cold neutrals"     >1</int>
+<int name="thermal"   description="Thermal neutrals"  >2</int>
+<int name="fast"      description="Fast neutrals"     >3</int>
+<int name="nbi"       description="NBI neutrals"      >4</int>
+
+</constants>

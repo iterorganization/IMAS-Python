@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<constants create_mapping_function="yes" identifier="yes" name="pf_active_coil_function">
+<header>Functions of PF coils</header>
+<ddInstance xpath="/pf_active/coil/function"/>
+
+<int name="flux"  description="Generate flux (drive toroidal current)">0</int>
+<int name="b_field_shaping"  description="Generate magnetic field for shaping">1</int>
+<int name="b_field_fb"  description="Generate magnetic field for vertical force balance">2</int>
+
+</constants>

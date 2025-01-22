@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<constants name="mhd_linear_model" identifier="yes" create_mapping_function="yes">
+<header>
+Type of the MHD model used
+</header>
+<!-- Some lines and indices are common with the edge_sources/source/identifier --> 
+
+<ddInstance xpath="/mhd_linear/model_type/identifier"/>
+
+<int name="global"                 description="Global calculation"       >1</int>
+<int name="local"                   description="Local calculation"         >2</int>
+<int name="analytical"            description="Analytical estimate"     >3</int>
+
+</constants>

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<constants name="distribution_source_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for Heating and Current Drive (HCD) distsource types, i.e. types particles source in Fokker-Planck equation (from NBI and nuclear reactions).
+</header>
+
+<ddInstance xpath="/distribution_source/source/process/type"/>
+<ddInstance xpath="/distributions/distribution/process/type"/>
+
+<int name="unspecified"                description="unspecified"                                                               >0</int>
+<int name="NBI"                        description="Source from neutral beam injection"                                        >1</int>
+
+<int name="nuclear"                    description="Source from nuclear reaction (reaction type unspecified)"                  >100</int>
+
+<int name="H_H_to_D_positron_nu"       description="Source from nuclear reaction: H+H->D+positron+neutrino"                    >101</int>
+<int name="H_D_to_He3_gamma"           description="Source from nuclear reaction: H+D->He3+gamma"                              >102</int>
+<int name="H_T_to_He3_n"               description="Source from nuclear reaction: H+T->He3+neutron"                            >103</int>
+<int name="H_He3_to_He4_positron_nu"   description="Source from nuclear reaction: H+He3->He4+positron+neutrino"                >104</int>
+
+<int name="D_D_to_T_H"                 description="Source from nuclear reaction: D+D->T+H"                                    >105</int>
+<int name="D_D_to_He3_n"               description="Source from nuclear reaction: D+D->He3+neutron"                            >106</int>
+<int name="D_T_to_He4_n"               description="Source from nuclear reaction: T+D->He4+neutron"                            >107</int>
+<int name="D_He3_to_He4_H"             description="Source from nuclear reaction: He3+D->He4+H"                                >108</int>
+
+<int name="T_T_to_He4_n_n"             description="Source from nuclear reaction: T+T->He4+neutron+neutron"                    >109</int>
+<int name="T_He3_to_He4_H_n"           description="Source from nuclear reaction: He3+T->He4+H+neutron"                        >110</int>
+
+<int name="He3_He3_to_He4_H_H"         description="Source from nuclear reaction: He3+He3->He4+neutron+neutron"                >111</int>
+<int name="He3_He4_to_Be7_gamma"       description="Source from nuclear reaction: He3+He4->Be7+gamma"                          >112</int>
+
+<int name="Li6_n_to_He4_T"             description="Source from nuclear reaction: Li6+n->He4+T"                                >113</int>
+<int name="Li7_n_to_He4_T_n"           description="Source from nuclear reaction: Li7+n->He4+T+n"                              >114</int>
+ 
+<int name="runaway"                    description="Source from runaway processes"                                             >1000</int>
+
+</constants>

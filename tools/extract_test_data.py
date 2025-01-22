@@ -1,5 +1,5 @@
-# This file is part of IMASPy.
-# You should have received the IMASPy LICENSE file with this project.
+# This file is part of imas-python.
+# You should have received the imas-python LICENSE file with this project.
 import os
 
 import imas

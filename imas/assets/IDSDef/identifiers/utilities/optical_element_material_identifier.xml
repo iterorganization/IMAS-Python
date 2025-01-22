@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<constants name="optical_element_material_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+  Translation table for identifying optical element types
+</header>
+
+<ddInstance xpath="camera_visible/channel/optical_element/material/type"/>
+
+<int name="metal"      description="Metal"     >1</int>
+<int name="dielectric"   description="Dielectric"  >2</int>
+
+</constants>

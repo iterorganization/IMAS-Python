@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<constants name="neutron_event" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for type of events measured in the neutron detector
+</header>
+<!-- Some lines and indices are common with the edge_sources/source/identifier --> 
+
+<ddInstance xpath="/neutron_diagnostic/detectors/green_functions/event_in_detector/type"/>
+
+<int name="energy_neutron"          description="Neutron energy in the detector [eV]"                                              >1</int>
+<int name="voltage"                     description="Voltage in the detector [V]"                                              >2</int>
+<int name="time_of_flight"        description="Time of flight [s]"               >3</int>
+<int name="trajectory_length"     description="Particle trajectory length [m]"                             >4</int>
+<int name="energy_deposited"     description="Deposited energy [eV]"                  >5</int>
+<int name="light_yield"               description="Light yield [eVee]"                      >6</int>
+<int name="count_rate"              description="Number of events/reactions per second [s^-1]"   >7</int>
+
+</constants>

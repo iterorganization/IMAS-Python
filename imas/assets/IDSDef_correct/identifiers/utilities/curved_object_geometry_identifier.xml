@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<constants name="spectrometer_x_reflector_geometry" identifier="yes" create_mapping_function="yes">
+<header>
+Geometry of the contour of a planar or curved object
+</header>
+
+<ddInstance xpath="/spectrometer_x_crystal/channel/reflector/geometry_type"/>
+<ddInstance xpath="/spectrometer_x_crystal/channel/crystal/geometry_type"/>
+
+<int name="polygonal"        description="Contour described by a polygonal outline in the (X1, X2) plane"       >1</int>
+<int name="circular"           description="Circle in the (X1, X2) plane, defined by its centre and radius"         >2</int>
+<int name="rectangle"         description="Rectangle in the (X1, X2) plane, defined by its centre and widths in the X1 and X2 directions" >3</int>
+
+</constants>

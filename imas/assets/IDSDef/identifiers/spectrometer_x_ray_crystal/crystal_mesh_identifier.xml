@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<constants name="spectrometer_x_reflector_geometry" identifier="yes" create_mapping_function="yes">
+<header>
+Crystal mesh type
+</header>
+
+<ddInstance xpath="/spectrometer_x_crystal/channel/crystal/mesh_type"/>
+
+<int name="hexagonal"        description="Hexagonal mesh"       >1</int>
+<int name="cubic"   description="Cubic mesh"         >2</int>
+
+</constants>

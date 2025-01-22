@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<constants name="mechanics_sensor_type" identifier="yes" create_mapping_function="yes">
+<header>
+Type of mechanics sensor
+</header>
+
+<ddInstance xpath="/mechanics_diagnostics/sensor/type"/>
+
+<int name="displacement"              description="Displacement sensor"         unique="yes">0</int>
+<int name="accelerometer"        description="Accelerometer sensor"                  unique="yes">1</int>
+<int name="strain"           description="Strain gauge, measuring in one direction"      unique="yes">2</int>
+<int name="strain_rosette"           description="Strain gauge, rosette measuring in a plane"      unique="yes">3</int>
+<int name="thermocouple"           description="Thermocouple"      unique="yes">4</int>
+
+</constants>

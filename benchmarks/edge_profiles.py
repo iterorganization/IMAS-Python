@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-import imaspy
+import imas
 
 from .utils import available_backends, create_dbentry, factory, hlis
 
@@ -17,18 +17,18 @@ def fill_ggd(edge_profiles, times):
     """Fill nested arrays of structures in grids_ggd and ggd substructures.
 
     Args:
-        edge_profiles: edge_profiles IDS object (either from IMASPy or AL HLI)
+        edge_profiles: edge_profiles IDS object (either from imas-python or AL HLI)
         times: time values to fill
     """
     edge_profiles.ids_properties.homogeneous_time = (
-        imaspy.ids_defs.IDS_TIME_MODE_HETEROGENEOUS
+        imas.ids_defs.IDS_TIME_MODE_HETEROGENEOUS
     )
-    edge_profiles.ids_properties.comment = "Generated for IMASPy benchmark suite"
+    edge_profiles.ids_properties.comment = "Generated for imas-python benchmark suite"
     edge_profiles.ids_properties.creation_date = datetime.date.today().isoformat()
-    edge_profiles.code.name = "IMASPy ASV benchmark"
-    edge_profiles.code.version = imaspy.__version__
+    edge_profiles.code.name = "imas-python ASV benchmark"
+    edge_profiles.code.version = imas.__version__
     edge_profiles.code.repository = (
-        "https://git.iter.org/projects/IMAS/repos/imaspy/browse"
+        "https://github.com/iterorganization/imas-python"
     )
 
     # This GGD grid is not a valid description, but it's a good stress test for the
@@ -46,7 +46,13 @@ def fill_ggd(edge_profiles, times):
         grid.space[i].identifier.index = 1
         grid.space[i].identifier.description = "Description...."
         grid.space[i].geometry_type.index = 0
-    grid.space[0].coordinates_type = np.array([4, 5], dtype=np.int32)
+    grid.space[0].coordinates_type.resize(1)
+    if imas.__version__ >= "4.0.0":
+        grid.space[0].coordinates_type = np.array([4, 5], dtype=np.int32)
+    else:
+        grid.space[0].coordinates_type[0].name = "coordinates type"
+        grid.space[0].coordinates_type[0].index = 0
+        grid.space[0].coordinates_type[0].name = "example coordinates type"
     grid.space[0].objects_per_dimension.resize(3)  # points, lines, surfaces
     points = grid.space[0].objects_per_dimension[0].object
     points.resize(N_POINTS)
@@ -61,7 +67,13 @@ def fill_ggd(edge_profiles, times):
     for i in range(N_SURFACES):
         surfaces[i].nodes = np.random.randint(1, N_LINES + 1, 4, dtype=np.int32)
 
-    grid.space[1].coordinates_type = np.array([6], dtype=np.int32)
+    grid.space[1].coordinates_type.resize(1)
+    if imas.__version__ >= "4.0.0":
+        grid.space[1].coordinates_type = np.array([6], dtype=np.int32)
+    else:
+        grid.space[1].coordinates_type[0].name = "coordinates type"
+        grid.space[1].coordinates_type[0].index = 0
+        grid.space[1].coordinates_type[0].name = "example coordinates type"
     grid.space[1].objects_per_dimension.resize(2)
     obp = grid.space[1].objects_per_dimension[0]
     obp.object.resize(2)

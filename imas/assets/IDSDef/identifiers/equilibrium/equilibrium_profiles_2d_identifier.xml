@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<constants name="equilibrium_profiles_2d_identifier" identifier="yes" create_mapping_function="yes">
+<header>Various contributions to the B, j, and psi 2D maps</header>
+<ddInstance xpath="/equilibrium/time_slice/profiles_2d/type"/>
+
+<int name="total"
+     description="Total fields"
+     >0</int>
+<int name="vacuum"
+     description="Vacuum fields (without contribution from plasma)"
+     >1</int>
+<int name="pf_active"
+     description="Contribution from active coils only to the fields (pf_active IDS)"
+     >2</int>
+<int name="pf_passive"
+     description="Contribution from passive elements only to the fields (pf_passive IDS)"
+     >3</int>
+<int name="plasma"
+     description="Plasma contribution to the fields"
+     >4</int>
+</constants>

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<constants name="orbit_type" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for orbit_type_identifier definitions.
+</header>
+
+<ddInstance xpath="complexType:ids_distributions_d_ggd_orbit_type/identifier"/>
+
+<int name="unspecified"  description="Unspecified"                                                                 >0</int>
+<int name="none"         description="No possible trajectories"                                                    >1</int>
+<int name="lost_co"      description="Trajectories leave confined region moving co-current"                        >2</int>
+<int name="lost_counter" description="Trajectories leave confined region moving counter-current"                   >3</int>
+<int name="co"           description="Trajectories in co-current direction"                                        >4</int>
+<int name="counter"      description="Trajectories in counter-current direction"                                   >5</int>
+<int name="co_counter"   description="Trajectories in co- and counter-current directions"                          >6</int>
+<int name="stagnation"   description="Co-passing (only), non-axis encircling trajectories"                         >7</int>
+<int name="banana"       description="Non-axis encircling trajectories that reverse parallel motion (are trapped)" >8</int>
+<int name="potato"       description="Axis encircling trajectories that reverse parallel motion (are trapped)"     >9</int>
+
+</constants>

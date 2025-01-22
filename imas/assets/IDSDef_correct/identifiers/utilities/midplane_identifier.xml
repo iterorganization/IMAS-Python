@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<constants name="midplane_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+  Translation table for identifying different midplane definitions
+</header>
+
+<ddInstance xpath="/langmuir_probes/"/>
+
+<int name="magnetic_axis"      description="Midplane defined by the height of magnetic axis equilibrium/time_slice/global_quantities/magnetic_axis/z"     >1</int>
+<int name="dr_dz_zero_sep"   description="Midplane defined by the height of the outboard point on the separatrix on which dr/dz = 0 (local maximum of the major radius of the separatrix). In case of multiple local maxima, the closest one from z=z_magnetic_axis is chosen. equilibrium/time_slice/boundary_separatrix/dr_dz_zero_point/z"  >2</int>
+<int name="z_zero"   description="Midplane defined by z = 0"  >3</int>
+<int name="ggd_subset" description="Midplane location is specified by means of the GGD grid subset for the inner and outer midplanes, if the midplane choice is different from the other available options. If the GGD midplane subset corresponds to one of the other available options, select that particular option to indicate it" >4</int>
+
+</constants>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<constants name="wave_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for wave field types.
+</header>
+
+<ddInstance xpath="/waves/coherent_wave/identifier/type"/>
+<ddInstance xpath="/distributions/distribution/identifier/type"/>
+
+<int name="unspecified" description="unspecified"                                                      >0</int>
+<int name="EC"          description="Wave field for electron cyclotron heating and current drive"      >1</int>
+<int name="LH"          description="Wave field for lower hybrid heating and current drive"            >2</int>
+<int name="IC"          description="Wave field for ion cyclotron frequency heating and current drive" >3</int>
+
+</constants>

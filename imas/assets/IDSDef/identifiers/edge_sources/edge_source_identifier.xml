@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<constants name="edge_source" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for sources of particles, momentum and heat.
+</header>
+<!-- Some lines and indices are common with the core_sources/source/identifier --> 
+<ddInstance xpath="/edge_sources/source/identifier"/>
+
+<int name="unspecified"            	description="Unspecified source type"                                       >0</int>
+
+<int name="total"               	description="Combined source excluding time derivative"                     >1</int>
+<int name="neutrals"    			description="Combined source from all plasma-neutrals interactions"        >701</int>
+<int name="total_linearized"    description="Combined source (linearized) excluding time derivative"        >702</int>
+<int name="background"             description="Background source"                                             >703</int>
+<int name="database"               description="Source from database entry"                                    >801</int>
+<int name="prescribed"             description="Source prescribed from code input parameters"                  >705</int>
+<int name="time_derivative"        description="Source associated with time derivative"                        >706</int>
+<int name="atomic_ionization"      description="Source from atomic ionization"                                 >707</int>
+<int name="molecular_ionization"   description="Source from molecular ionization/dissociation"                 >708</int>
+<int name="ionization"             description="Source from ionization (combined)"                             >709</int>
+<int name="recombination"          description="Source from recombination"                                     >710</int>
+
+<int name="charge_exchange"        description="Source from charge exchange. Charge exchange losses are negative sources"  >305</int>
+<int name="collisional_equipartition" description="Collisional equipartition"                                                     >11</int>
+<int name="ohmic"                   description="Source from ohmic heating"                                                       >7</int>
+<int name="radiation"              description="Source from line + recombination assisted + bremsstrahlung"     >200</int>
+
+<int name="compression"            description="Internal energy source from compression"                       >715</int>
+<int name="bulk_motion"            description="Internal energy source correction for bulk motion"             >716</int>
+
+</constants>

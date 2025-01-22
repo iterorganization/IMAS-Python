@@ -3,25 +3,25 @@
 CI configuration
 ================
 
-IMASPy uses `ITER Bamboo <https://ci.iter.org/>`_ for CI. This page provides an overview
+imas-python uses `ITER Bamboo <https://ci.iter.org/>`_ for CI. This page provides an overview
 of the CI Plan and deployment projects.
 
 CI Plan
 -------
 
-The `IMASPy CI plan <https://ci.iter.org/browse/IC-PYM>`_ consists of 4 types of jobs:
+The `imas-python CI plan <https://ci.iter.org/browse/IC-IG>`_ consists of 4 types of jobs:
 
 Linting and DD ZIP
     This job is responsible for three things:
 
     1.  Verify that the ``IDSDef2MDSplusPreTree.xsl`` file matches the one in the Access
         Layer repository. This file is required for building MDSplus models and the
-        models built by IMASPy should match those built by the Access Layer.
-    2.  Linting: run ``black`` and ``flake8`` on the IMASPy code base. See :ref:`code
+        models built by imas-python should match those built by the Access Layer.
+    2.  Linting: run ``black`` and ``flake8`` on the imas-python code base. See :ref:`code
         style and linting`.
     3.  Build the Data Dictionary zip file. This Task builds the Data Dictionary for all
         tagged releases since DD version ``3.22.0``. These are combined into the
-        ``IDSDef.zip`` file, which is distributed with IMASPy.
+        ``IDSDef.zip`` file, which is distributed with imas-python.
 
         The ZIP file is built in a separate job, such that the subsequent test jobs can
         reuse this.
@@ -32,11 +32,9 @@ Linting and DD ZIP
     - ``ci/build_dd_zip.sh``
 
 Test with AL<version>
-    This runs all unit tests with pytest. There are multiple (at the time of writing 3)
-    Access Layer versions that we test against: AL4.11.7 (from SDCC module
-    ``IMAS/3.39.0-4.11.7-intel-2020b``), AL5.0.0 (from SDCC module
-    ``IMAS/3.39.0-5.0.0-intel-2020b``) and AL5.1.0 (from SDCC module
-    ``IMAS/3.40.0-5.1.0-intel-2020b``).
+    This runs all unit tests with pytest.
+    Access Layer version that we test against: 
+    IMAS-AL-Core/5.4.3-intel-2023b
 
     The CI script executed in this job is ``ci/run_pytest.sh``, which expects the
     modules it needs to load as arguments.
@@ -51,7 +49,7 @@ Test with AL<version>
     5.  In the "Script" Task, update the module(s) in the Argument field
 
 Benchmark
-    This job runs the :ref:`ASV benchmarks <benchmarking IMASPY>` on the CI server. It
+    This job runs the :ref:`ASV benchmarks <benchmarking IMAS>` on the CI server. It
     is configured such that it can only run on a single CI agent
     (`io-ls-bamboowk6.iter.org`). There are two reasons for this:
 
@@ -64,7 +62,7 @@ Benchmark
     The CI script executed in this job is: ``ci/run_benchmark.sh``.
 
 Build docs and dists
-    This job builds the Sphinx documentation and python packages for IMASPy (``sdist``
+    This job builds the Sphinx documentation and python packages for imas-python (``sdist``
     and ``wheel``).
 
     The CI script executed in this job is: ``ci/build_docs_and_dist.sh``.
@@ -73,18 +71,14 @@ Build docs and dists
 Deployment projects
 -------------------
 
-There are two Bamboo deployment projects for IMASPy:
+There is github workflow for imas-python:
 
-`Deploy IMASPy-doc <https://ci.iter.org/deploy/viewDeploymentProjectEnvironments.action?id=1784709122>`_
-    Deploy the documentation created in the `Build docs and dists` job to `Sharepoint
-    <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/IMASPy-doc/index.html>`_.
+`imas-python-PyPi <https://github.com/iterorganization/imas-python/blob/main/.github/workflows/publish.yml>`_
+    Deploy the python packages job to the  https://pypi.org/ server and https://test.pypi.org/ server.
+    You can find link here : `imas-python <https://pypi.org/project/imas-python/>`_
 
-    This deployment project runs for after each successful CI build of the IMASPy main
-    branch.
 
-`IMASPy-PyPi <https://ci.iter.org/deploy/viewDeploymentProjectEnvironments.action?id=1792933890>`_
-    Deploy the python packages created in the `Build docs and dists` job to the
-    https://pypi.iter.org/ server.
+`Deploy imas-python-doc <https://app.readthedocs.org/projects/imas-python/>`_
+    Deploy the documentation using `readthedocs
+    <https://imas-python.readthedocs.io/en/latest/>`_.
 
-    This deployment project runs for after each successful CI build of the IMASPy main
-    branch.

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<constants name="refractometer_formula" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for analytical formulas used by refractometer post-processing
+</header>
+
+<ddInstance xpath="/refractometer/channel/n_e_profile_approximation"/>
+
+<int name="flat"          description="ne [m^-3] = 1e20 * alpha1"                                              >1</int>
+<int name="rho_tor_norm_1" description="ne [m^-3] = 1e20 * alpha1 * (exp(-(rho_tor_norm / alpha2)^2) * (1 + tanh(100 * ((1-rho_tor_norm) / alpha3))) / 2)"                        >2</int>
+
+</constants>

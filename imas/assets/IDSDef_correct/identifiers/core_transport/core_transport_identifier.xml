@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<constants name="core_transport_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+  Translation table for different types of transport coefficients.
+</header>
+<!-- Some lines and indices are common with the edge_transport/model/identifier --> 
+
+<ddInstance xpath="/core_transport/model/"/>
+
+<int name="unspecified"             description="Unspecified transport type" >0</int>
+<int name="combined"                description="Combination of data from available transport models. Representation of the total transport in the system" >1</int>
+<int name="transport_solver"        description="Output from a transport solver" >2</int>
+<int name="background"              description="Background transport level, ad-hoc transport model not directly related to a physics model" >3</int>
+<int name="database"                description="Transport specified by a database entry external to the dynamic evolution of the plasma" >4</int>
+<int name="neoclassical"            description="Neoclassical" >5</int>
+<int name="anomalous"               description="Representation of turbulent transport" >6</int>
+<int name="mhd"                     description="Transport arising from MHD frequency modes" >19</int>
+<int name="ntm"                     description="Transport arising from the presence of NTMs" >20</int>
+<int name="sawteeth"                description="Transport arising from the presence of sawteeth" >21</int>
+<int name="elm_continuous"          description="Continuous ELM model --- gives the ELM averaged profile" >22</int>
+<int name="elm_resolved"            description="Time resolved ELM model" >23</int>
+<int name="pedestal"                description="Transport level to give edge pedestal" >24</int>
+<int name="not_provided"            description="No data provided" >25</int>
+
+</constants>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<constants name="spectrometer_visible_emissivity_grid_identifier.xml" identifier="yes" create_mapping_function="yes">
+<header>List of coordinate systems for describing the poloidal plane</header>
+<ddInstance xpath="/spectrometer_visible/channel/geometry_matrix/emission_grid/grid_type"/>
+<ddInstance xpath="/camera_visible/channel/detector/geometry_matrix/emission_grid/grid_type"/>
+
+<int name="r_z_phi"
+     description="Cylindrical r,z,phi grid : r=dim1, z=dim2, phi=dim3" >1</int>
+</constants>

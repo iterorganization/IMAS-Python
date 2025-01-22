@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<constants name="magnetics_rogowski_measured" identifier="yes" create_mapping_function="yes">
+<header>
+Quantity measured by the Rogowski coil
+</header>
+<ddInstance xpath="/magnetics/rogowski_coil/measured_quantity"/>
+
+<int name="plasma"        description="Plasma current"                                 >1</int>
+<int name="plasma_eddy" description="Plasma and eddy currents"              >2</int>
+<int name="eddy" description="Eddy currents"                   >3</int>
+<int name="halo" description="Halo currents"                  >4</int>
+<int name="compound" description="Sensor composed of multiple partial Rogowskis" >5</int>
+</constants>

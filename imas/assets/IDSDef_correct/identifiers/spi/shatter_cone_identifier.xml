@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<constants name="shatter_cone" identifier="yes" create_mapping_function="yes">
+<header>
+Definition of the shatter cone
+</header>
+
+<ddInstance xpath="/spi/shatter_cone_definition"/>
+
+<int name="mass_95"        description="Elliptical cone with minimal angles to effectively enclose 95% of the total mass of the fragments prior to their entry into the plasma"       >1</int>
+
+</constants>

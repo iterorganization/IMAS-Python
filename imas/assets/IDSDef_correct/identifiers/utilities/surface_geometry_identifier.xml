@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<constants name="surface_geometry" identifier="yes" create_mapping_function="yes">
+<header>
+Geometry of the contour of surface in a local coordinate system
+</header>
+
+<ddInstance xpath="/coils_non_axisymmetric/conductor/cross_section/geometry_type"/>
+
+<int name="polygon"        description="Contour described by a polygonal outline" >1</int>
+<int name="circle"           description="Circle" >2</int>
+<int name="rectangle"      description="Rectangle" >3</int>
+<int name="square"         description="Square" >4</int>
+<int name="annulus"        description="Annulus" >5</int>
+
+
+</constants>

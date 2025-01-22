@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<constants name="statistics_type_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+  Translation table for statistics types
+</header>
+
+<ddInstance xpath="statistics_type/identifier"/>
+
+<int name="mean"           description="Mean" >1</int>
+<int name="sigma"          description="Standard deviation" >2</int>
+<int name="skewness"       description="Skewness" >3</int>
+<int name="kurtosis"       description="Pearson (full) kurtosis" >4</int>
+<int name="sobol_1"        description="First order Sobol index" >5</int>
+<int name="percentile_10"  description="10% percentile" >6</int>
+<int name="percentile_90"  description="90% percentile" >7</int>
+
+</constants>

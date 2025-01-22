@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<constants name="midplane_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+  Dataset type table
+</header>
+
+<ddInstance xpath="/dataset_description/type"/>
+
+<int name="experimental"      description="Data coming from an experiment (contains only data from an experimental database)"     unique="yes">1</int>
+<int name="simulation"   description="Data coming from a simulation (may still use or refer to an experiment)"  unique="yes">2</int>
+
+</constants>

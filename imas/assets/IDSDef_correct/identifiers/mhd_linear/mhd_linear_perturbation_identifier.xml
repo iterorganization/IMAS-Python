@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<constants name="mhd_linear_perturbation" identifier="yes" create_mapping_function="yes">
+<header>
+Type of the perturbation
+</header>
+
+<ddInstance xpath="/mhd_linear/perturbation_type/identifier"/>
+
+<int name="TAE"   description="Toroidal Alfven Eigenmode"                                        >1</int>
+<int name="EAE"   description="Ellipticity-induced Alfven Eigenmode"                         >2</int>
+<int name="NAE"   description="Non-circular triangularity induced Alfven Eigenmode"   >3</int>
+<int name="RSAE"  description="Reversed Shear Alfven Eigenmode"                           >4</int>
+<int name="BAE"   description="Beta induced Alfven Eigenmode"                               >5</int>
+<int name="BAAE"  description="Beta induced Alfven Acoustic Eigenmode"                 >6</int>
+<int name="EPM"   description="Energetic particle mode, outside any shear Alfven gap" >7</int>
+<int name="GAE"    description="Global Alfven Eingenmode"                                       >8</int>
+<int name="GAM"   description="Geodesic Acoustic Mode"                                         >9</int>
+<int name="EGAM"  description="Energetic particle-driven Geodesic Acoustic Mode"    >10</int>
+<int name="iKINK" description="Internal KINK mode"                                                   >11</int>
+<int name="eKINK" description="External KINK mode"                                                >12</int>
+<int name="Tearing" description="Tearing mode"                                                         >13</int>
+<int name="Double_Tearing" description="Double Tearing mode"                                   >14</int>
+
+</constants>

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<constants name="mhd_linear_model" identifier="yes" create_mapping_function="yes">
+<header>
+Balooning type of the MHD mode
+</header>
+
+<ddInstance xpath="/mhd_linear/time_slice/toroidal_mode/ballooning_type"/>
+
+<int name="ballooning"          description="Ballooning type"       >1</int>
+<int name="anti_ballooning"   description="Anti-ballooning type" >2</int>
+<int name="flute_like"            description="Flute type"               >3</int>
+
+</constants>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<constants name="magnetics_flux_loop_type" identifier="yes" create_mapping_function="yes">
+<header>
+Type of flux loop
+</header>
+<ddInstance xpath="/magnetics/flux_loop/type"/>
+
+<int name="poloidal_flux"              description="Poloidal flux loop"                            >1</int>
+<int name="saddle"                     description="Saddle loop"                                       >2</int>
+<int name="diamagnetic_internal" description="Diamagnetic internal loop"                   >3</int>
+<int name="diamagnetic_external" description="Diamagnetic external loop"                  >4</int>
+<int name="diamagnetic_compensation" description="Diamagnetic compensation loop" >5</int>
+<int name="diamagnetic_differential"   description="Diamagnetic differential loop"          >6</int>
+</constants>

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<constants name="optical_element_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+  Translation table for identifying optical element types
+</header>
+
+<ddInstance xpath="camera_visible/channel/optical_element"/>
+
+<int name="mirror"      description="Mirror"     >1</int>
+<int name="lens"   description="Lens"  >2</int>
+<int name="diaphragm"   description="Diaphragm"  >3</int>
+
+</constants>

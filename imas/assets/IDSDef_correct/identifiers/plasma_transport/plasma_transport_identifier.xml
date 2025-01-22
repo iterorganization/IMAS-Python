@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<constants name="plasma_transport" identifier="yes" create_mapping_function="yes">
+<header>
+  Translation table for different types of transport coefficients.
+</header>
+<!-- Some lines and indices are common with the core_transport/model/identifier --> 
+
+<ddInstance xpath="/plasma_transport/model/"/>
+
+<int name="unspecified"                    description="Unspecified transport type"                                                                >0</int>
+<int name="combined"                       description="Combination of data from all available transport models"                                             >1</int>
+
+<int name="transport_solver"        description="Output from a transport solver" >2</int>
+<int name="background"              description="Background transport level, ad-hoc transport model not directly related to a physics model" >3</int>
+<int name="database"                description="Transport specified by a database entry external to the dynamic evolution of the plasma" >4</int>
+<int name="neoclassical"            description="Neoclassical" >5</int>
+<int name="anomalous"               description="Representation of turbulent transport" >6</int>
+<int name="mhd"                     description="Transport arising from MHD frequency modes" >19</int>
+<int name="ntm"                     description="Transport arising from the presence of NTMs" >20</int>
+<int name="sawteeth"                description="Transport arising from the presence of sawteeth" >21</int>
+<int name="elm_continuous"          description="Continuous ELM model --- gives the ELM averaged profile" >22</int>
+<int name="elm_resolved"            description="Time resolved ELM model" >23</int>
+<int name="pedestal"                description="Transport level to give edge pedestal" >24</int>
+<int name="not_provided"            description="No data provided" >25</int>
+              
+<int name="combined_radial"                description="Combination of data from all available radial transport models"                            >100</int>
+<int name="background_radial"              description="Background radial transport level"                                                         >101</int>
+<int name="database_radial"                description="Radial transport specified by a database entry"                                            >102</int>
+<int name="prescribed_radial"              description="Radial transport model prescribed from code input parameters"                              >103</int>
+
+<int name="combined_parallel"              description="Combination of data from all available radial transport models"                            >200</int>
+<int name="background_parallel"            description="Background radial transport level"                                                         >201</int>
+<int name="database_parallel"              description="Parallel transport specified by a database entry"                                            >202</int>
+<int name="prescribed_parallel"            description="¨Parallel transport model prescribed from code input parameters"                              >203</int>
+<int name="twenty_one_moment_parallel"     description="21 moment fluid closure model"                                                             >204</int>
+<int name="braginskii_parallel"            description="Braginskii fluid transport model"                                                          >205</int>
+
+</constants>

@@ -1,5 +1,5 @@
-Transform with IMASPy
-=====================
+Transform with imas-python
+==========================
 
 In this part of the course we'll perform a coordinate transformation. Our input data is
 in rectilinear :math:`R, Z` coordinates, which we will transform into poloidal polar
@@ -27,15 +27,9 @@ Exercise 1: Check which time slices exist
         .. hint::
             You can use :ref:`lazy loading` to avoid loading all data in memory.
 
-    .. md-tab-item:: AL4
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :start-at: # Open input data entry
-            :end-before: # Create output data entry
-
-    .. md-tab-item:: IMASPy
-
-        .. literalinclude:: imaspy_snippets/transform_grid.py
+        .. literalinclude:: imas_snippets/transform_grid.py
             :start-at: # Open input data entry
             :end-before: # Create output data entry
 
@@ -50,15 +44,9 @@ Exercise 2: Load a time slice
         Loop over each available time in the IDS and load the time slice inside the
         loop.
 
-    .. md-tab-item:: AL4
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :start-at: # Loop over each time slice
-            :end-before: # Update comment
-
-    .. md-tab-item:: IMASPy
-
-        .. literalinclude:: imaspy_snippets/transform_grid.py
+        .. literalinclude:: imas_snippets/transform_grid.py
             :start-at: # Loop over each time slice
             :end-before: # Update comment
 
@@ -86,15 +74,9 @@ We will apply the transformation of the data as follows:
 
 .. md-tab-set::
 
-    .. md-tab-item:: AL4
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :start-at: # Loop over each time slice
-            :end-before: # Finally, put the slice to disk
-
-    .. md-tab-item:: IMASPy
-
-        .. literalinclude:: imaspy_snippets/transform_grid.py
+        .. literalinclude:: imas_snippets/transform_grid.py
             :start-at: # Loop over each time slice
             :end-before: # Finally, put the slice to disk
 
@@ -108,26 +90,14 @@ Exercise 4: Store a time slice
 
         Store the time slice after the transformation.
 
-    .. md-tab-item:: AL4
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: al4_snippets/transform_grid.py
+        .. literalinclude:: imas_snippets/transform_grid.py
             :start-at: # Create output data entry
             :end-at: output_entry.create()
             :caption: The data entry is created once, outside the time slice loop
 
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :start-at: # Finally, put the slice to disk
-            :end-at: output_entry.put_slice
-            :caption: Store the time slice inside the loop
-
-    .. md-tab-item:: IMASPy
-
-        .. literalinclude:: imaspy_snippets/transform_grid.py
-            :start-at: # Create output data entry
-            :end-at: output_entry.create()
-            :caption: The data entry is created once, outside the time slice loop
-
-        .. literalinclude:: imaspy_snippets/transform_grid.py
+        .. literalinclude:: imas_snippets/transform_grid.py
             :start-at: # Finally, put the slice to disk
             :end-at: output_entry.put_slice
             :caption: Store the time slice inside the loop
@@ -144,14 +114,9 @@ Exercise 5: Plotting data before and after the transformation
         :math:`\rho,\theta` plane (transformed data) to verify that the transformation
         is correct.
 
-    .. md-tab-item:: AL4
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :start-at: # Create a plot
-
-    .. md-tab-item:: IMASPy
-
-        .. literalinclude:: imaspy_snippets/transform_grid.py
+        .. literalinclude:: imas_snippets/transform_grid.py
             :start-at: # Create a plot
 
 
@@ -160,12 +125,7 @@ Bringing it all together
 
 .. md-tab-set::
 
-    .. md-tab-item:: AL4
+    .. md-tab-item:: imas-python
 
-        .. literalinclude:: al4_snippets/transform_grid.py
-            :caption: Source code for the complete exercise
-
-    .. md-tab-item:: IMASPy
-
-        .. literalinclude:: imaspy_snippets/transform_grid.py
+        .. literalinclude:: imas_snippets/transform_grid.py
             :caption: Source code for the complete exercise

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<constants name="radiation" identifier="yes" create_mapping_function="yes">
+	<header>
+Translation table for radiation processes
+</header>
+	<ddInstance xpath="/radiation/process/identifier"/>
+	<int name="unspecified" description="Unspecified emission process" >0</int>
+	<int name="nuclear_decay" description="Emission from nuclear decay" >6</int>
+	<int name="bremsstrahlung" description="Emission from bremsstrahlung" >8</int>
+	<int name="synchrotron_radiation" description="Emission from synchrotron radiation" >9</int>
+	<int name="line_radiation" description="Emission from line radiation" >10</int>
+	<int name="recombination" description="Emission from recombination" >11</int>
+	<int name="runaways" description="Emission from run-away processes; includes both electron and ion run-away" >501</int>
+	<int name="custom_1" description="Custom emission 1; content to be decided by data provided" >901</int>
+	<int name="custom_2" description="Custom emission 2; content to be decided by data provided" >902</int>
+	<int name="custom_3" description="Custom emission 3; content to be decided by data provided" >903</int>
+	<int name="custom_4" description="Custom emission 4; content to be decided by data provided" >904</int>
+	<int name="custom_5" description="Custom emission 5; content to be decided by data provided" >905</int>
+	<int name="custom_6" description="Custom emission 6; content to be decided by data provided" >906</int>
+	<int name="custom_7" description="Custom emission 7; content to be decided by data provided" >907</int>
+	<int name="custom_8" description="Custom emission 8; content to be decided by data provided" >908</int>
+	<int name="custom_9" description="Custom emission 9; content to be decided by data provided" >909</int>
+</constants>

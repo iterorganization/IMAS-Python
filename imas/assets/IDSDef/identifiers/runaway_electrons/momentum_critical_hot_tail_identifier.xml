@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<constants name="momentum_critical_hot_tail" identifier="yes" create_mapping_function="yes">
+<header>
+Definition of momentum_critical_hot_tail
+</header>
+
+<ddInstance xpath="/runaway_electrons/momentum_critical_hot_tail_definition"/>
+
+<int name="putvinski97"        description="Critical momentum for hot tail, see M.N. Rosenbluth and S.V. Putvinski 1997 Nucl. Fusion 37 1355, the definition is given by Eq. (6)"       >1</int>
+
+</constants>

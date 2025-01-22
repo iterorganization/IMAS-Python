@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<constants name="edge_source" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for sources of particles, momentum and heat.
+</header>
+<!-- Some lines and indices are common with the core_sources/source/identifier --> 
+<ddInstance xpath="/edge_sources/source/identifier"/>
+
+<int name="unspecified"            	description="Unspecified source type"                                       >0</int>
+
+<int name="total"               	description="Combined source excluding time derivative"                     >1</int>
+<int name="nbi"                     description="Source from Neutral Beam Injection"                                              >2</int>
+<int name="ec"                      description="Sources from electron cyclotron heating and current drive"               >3</int>
+<int name="lh"                      description="Sources from lower hybrid heating and current drive"                             >4</int>
+<int name="ic"                      description="Sources from heating at the ion cyclotron range of frequencies"                  >5</int>
+<int name="fusion"                  description="Sources from fusion reactions, e.g. alpha particle heating"                      >6</int>
+<int name="ohmic"                   description="Source from ohmic heating"                                                       >7</int>
+<int name="bremsstrahlung"          description="Source from bremsstrahlung; radiation losses are negative sources"                >8</int>
+<int name="synchrotron_radiation"   description="Source from synchrotron radiation; radiation losses are negative sources"         >9</int>
+<int name="line_radiation"          description="Source from line radiation; radiation losses are negative sources"               >10</int>
+<int name="collisional_equipartition" description="Collisional equipartition"                                                     >11</int>
+<int name="cold_neutrals"           description="Source of cold neutrals"                                                         >12</int>
+<int name="bootstrap_current"       description="Bootstrap current"                                                               >13</int>
+<int name="pellet"                  description="Sources from injection"                                                          >14</int>
+
+<int name="auxiliary"               description="Source from auxiliary systems, e.g. heating and current drive systems"           >100</int>
+<int name="ic_nbi"                  description="A combination of the ic and nbi sources"                                         >101</int>
+<int name="ic_fusion"               description="A combination of the ic and fusion sources"                                      >102</int>
+<int name="ic_nbi_fusion"           description="A combination of the ic and fusion sources"                                      >103</int>
+<int name="ec_lh"                   description="A combination of the ec and lh sources"                                          >104</int>
+<int name="ec_ic"                   description="A combination of the ec and ic sources"                                          >105</int>
+<int name="lh_ic"                   description="A combination of the lh and ic sources"                                          >106</int>
+<int name="ec_lh_ic"                description="A combination of the ec, lh and ic sources"                                      >107</int>
+<int name="gas_puff"                description="Gas puff"                                                                        >108</int>
+<int name="killer_gas_puff"         description="Killer gas puff"                                                                 >109</int>
+
+<int name="radiation"               description="Total radiation source; radiation losses are negative sources"                         >200</int>
+<int name="cyclotron_radiation"     description="Source from cyclotron radiation; radiation losses are negative sources"          >201</int>
+<int name="cyclotron_synchrotron_radiation" description="Source from combined cyclotron and synchrotron radiation; radiation losses are negative sources"  >202</int>
+<int name="impurity_radiation"      description="Line radiation and Bremsstrahlung source; radiation losses are negative sources." >203</int>
+
+<int name="particles_to_wall"       description="Particle pumping by the wall; negative source for plasma and positive source for the wall" >303</int>
+<int name="particles_to_pump"       description="Particle pumping by external pump; negative source for plasma and positive source for the pump" >304</int>
+<int name="charge_exchange"        description="Source from charge exchange. Charge exchange losses are negative sources"                                   >305</int>
+
+<int name="transport"               description="Source term related to transport processes"                                      >400</int>
+<int name="neoclassical"            description="Source term related to neoclassical processes"                                   >401</int>
+<int name="equipartition"           description="Equipartition due to collisions and turbulence"                                  >402</int>
+<int name="turbulent_equipartition" description="Turbulent equipartition"                                                         >403</int>
+
+<int name="runaways"                description="Source from run-away processes; includes both electron and ion run-away"         >501</int>
+
+<int name="excitation"            description="Source from excitation processes"            >603</int>
+
+<int name="neutrals"    			description="Combined source from all plasma-neutrals interactions"        >701</int>
+<int name="total_linearized"    description="Combined source (linearized) excluding time derivative"        >702</int>
+<int name="background"             description="Background source"                                             >703</int>
+<int name="prescribed"             description="Source prescribed from code input parameters"                  >705</int>
+<int name="time_derivative"        description="Source associated with time derivative"                        >706</int>
+<int name="atomic_ionization"      description="Source from atomic ionization (not accounting for charge exchange)">707</int>
+<int name="molecular_ionization"   description="Source from molecular ionization/dissociation (not accounting for charge exchange)">708</int>
+<int name="ionization"             description="Source from ionization (combined, but not accounting for charge exchange)">709</int>
+<int name="recombination"          description="Source from recombination (not accounting for charge exchange)">710</int>
+<int name="compression"            description="Internal energy source from compression"                       >715</int>
+<int name="bulk_motion"            description="Internal energy source correction for bulk motion"             >716</int>
+
+<int name="database"                description="Source from database entry"                                                      >801</int>
+<int name="gaussian"                description="Artificial source with a gaussian profile"                                       >802</int>
+
+</constants>

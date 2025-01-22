@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<constants name="magnetics_probe_type" identifier="yes" create_mapping_function="yes">
+<header>
+Type of magnetic field probe
+</header>
+<!-- Some lines and indices are common with the edge_sources/source/identifier --> 
+
+<ddInstance xpath="/magnetics/bpol_probe/type"/>
+<ddInstance xpath="/magnetics/btor_probe/type"/>
+<int name="position"                   description="Position measurement probe"  >1</int>
+<int name="mirnov"                     description="Mirnov probe"                          >2</int>
+<int name="hall"                         description="Hall probe"                              >3</int>
+<int name="flux_gate"                 description="Flux gate probe"                      >4</int>
+<int name="faraday_fiber"            description="Faraday fiber"                         >5</int>
+<int name="differential"                description="Differential probe"                   >6</int>
+</constants>

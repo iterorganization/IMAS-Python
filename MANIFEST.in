@@ -1,6 +1,6 @@
-include imaspy/assets/IDSDef.zip
-include imaspy/assets/IDSDef2MDSpreTree.xsl
-include imaspy/assets/ITER_134173_106_equilibrium.ids
-include imaspy/assets/ITER_134173_106_core_profiles.ids
-include imaspy/assets/equilibrium.ids
-include imaspy/assets/core_profiles.ids
+include imas/assets/IDSDef.zip
+include imas/assets/IDSDef2MDSpreTree.xsl
+include imas/assets/ITER_134173_106_equilibrium.ids
+include imas/assets/ITER_134173_106_core_profiles.ids
+include imas/assets/equilibrium.ids
+include imas/assets/core_profiles.ids

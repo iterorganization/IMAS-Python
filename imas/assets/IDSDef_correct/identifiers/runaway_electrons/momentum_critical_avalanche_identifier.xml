@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<constants name="momentum_critical_avalanche" identifier="yes" create_mapping_function="yes">
+<header>
+Definition of momentum_critical_avalanche
+</header>
+
+<ddInstance xpath="/runaway_electrons/momentum_critical_avalanche_definition"/>
+
+<int name="hoppe21"        description="Critical momentum for avalanche, Compton and tritium, see M. Hoppe 2021 Computer Physics Communications 268 108098. Given by Eq. (C.24)"       >1</int>
+
+</constants>

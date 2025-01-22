@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<constants name="species_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for species_reference_identifier_definition.
+</header>
+
+<ddInstance xpath="/distributions/distribution/species/type"/>
+<ddInstance xpath="/distribution_sources/source/species/type"/>
+
+<int name="unspecified"   description="unspecified"                                                             >0</int>
+<int name="electron"      description="Electron"                                                                >1</int>
+<int name="ion"           description="Ion species in a single/average state; refer to ion-structure"           >2</int>
+<int name="ion_state"     description="Ion species in a particular state; refer to ion/state-structure"         >3</int>
+<int name="neutral"       description="Neutral species in a single/average state; refer to neutral-structure"   >4</int>
+<int name="neutral_state" description="Neutral species in a particular state; refer to neutral/state-structure" >5</int>
+<int name="neutron"       description="Neutron"                                                                 >6</int>
+<int name="photon"        description="Photon"                                                                  >7</int>
+
+</constants>

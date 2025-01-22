@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<constants create_mapping_function="yes" identifier="yes" name="ggd_subset_identifier">
+<header> Translation table for ggd_subset_identifier_definitions. </header>
+<ddInstance xpath="/utilities/complexType:generic_grid_dynamic_grid_subset/identifier"/>
+<ddInstance xpath="/distribution_sources/source/ggd/grid/grid_subset/identifier"/>
+<ddInstance xpath="/distributions/distribution/ggd/grid/grid_subset/identifier"/>
+<ddInstance xpath="/equilibrium/grids_ggd/grid/grid_subset/identifier"/>
+<ddInstance xpath="/transport_solver_numerics/boundary_conditions_ggd/grid/grid_subset/identifier"/>
+<ddInstance xpath="/waves/coherent_wave/full_wave/grid/grid_subset/identifier"/>
+<ddInstance xpath="/edge_profiles/grid_ggd/grid_subset/identifier"/>
+<ddInstance xpath="/edge_sources/grid_ggd/grid_subset/identifier"/>
+<ddInstance xpath="/edge_transport/grid_ggd/grid_subset/identifier"/>
+
+<int name="unspecified"  description="unspecified">0</int>
+<int name="nodes"  description="All nodes (0D) belonging to the associated spaces, implicit declaration (no need to replicate the grid elements in the grid_subset structure). In case of a structured grid represented with multiple 1D spaces, the order of the implicit elements in the grid_subset follows Fortran ordering, i.e. iterate always on nodes of the first space first, then move to the second node of the second space, ... : [((s1_1 to s1_end), s2_1, s3_1 ... sN_1), (((s1_1 to s1_end), s2_2, s3_1, ... sN_1)), ... ((s1_1 to s1_end), s2_end, s3_end ... sN_end)]">1</int>
+<int name="edges"  description="All edges (1D) belonging to the associated spaces, implicit declaration (no need to replicate the grid elements in the grid_subset structure)">2</int>
+<int name="x_aligned_edges"  description="All x-aligned (poloidally) aligned edges belonging to the associated spaces">3</int>
+<int name="y_aligned_edges"  description="All y-aligned (radially) aligned edges belonging to the associated spaces">4</int>
+<int name="cells"  description="All cells (2D) belonging to the associated spaces, implicit declaration (no need to replicate the grid elements in the grid_subset structure)">5</int>
+<int name="x_points"  description="Nodes defining x-points">6</int>
+<int name="core_cut"  description="y-aligned edges inside the separatrix connecting to the active x-point">7</int>
+<int name="PFR_cut"  description="y-aligned edges in the private flux region connecting to the active x-point">8</int>
+<int name="outer_throat"  description="y-aligned edges in the outer SOL connecting to the active x-point">9</int>
+<int name="inner_throat"  description="y-aligned edges in the inner SOL connecting to the active x-point">10</int>
+<int name="outer_midplane"  description="y-aligned edges connecting to the node closest to outer midplane on the separatrix">11</int>
+<int name="inner_midplane"  description="y-aligned edges connecting to the node closest to inner midplane on the separatrix">12</int>
+<int name="outer_target"  description="y-aligned edges defining the outer target">13</int>
+<int name="inner_target"  description="y-aligned edges defining the inner target">14</int>
+<int name="core_boundary"  description="Innermost x-aligned edges">15</int>
+<int name="separatrix"  description="x-aligned edges defining the active separatrix">16</int>
+<int name="main_chamber_wall"  description="x-aligned edges defining main chamber wall outside of the divertor regions">17</int>
+<int name="outer_baffle"  description="x-aligned edges defining the chamber wall of the outer active divertor region">18</int>
+<int name="inner_baffle"  description="x-aligned edges defining the chamber wall of the inner active divertor region">19</int>
+<int name="outer_PFR_wall"  description="x-aligned edges defining the private flux region wall of the outer active divertor region">20</int>
+<int name="inner_PFR_wall"  description="x-aligned edges defining the private flux region wall of the inner active divertor region">21</int>
+<int name="core"  description="Cells inside the active separatrix">22</int>
+<int name="sol"  description="Cells defining the main SOL outside of the divertor regions">23</int>
+<int name="outer_divertor"  description="Cells defining the outer divertor region">24</int>
+<int name="inner_divertor"  description="Cells defining the inner divertor region">25</int>
+<int name="core_sol"  description="x-aligned edges defining part of active separatrix separating core and sol">26</int>
+<int name="full_main_chamber_wall"  description="main_chamber_wall + outer_baffle(s) + inner_baffle(s)">27</int>
+<int name="full_PFR_wall"  description="outer_PFR__wall(s) + inner_PFR_wall(s)">28</int>
+<int name="core_cut_X2"  description="y-aligned edges inside the separatrix connecting to the non-active x-point">29</int>
+<int name="PFR_cut_X2"  description="y-aligned edges in the private flux region connecting to the non-active x-point">30</int>
+<int name="outer_throat_X2"  description="y-aligned edges in the outer SOL connecting to the non-active x-point">31</int>
+<int name="inner_throat_X2"  description="y-aligned edges in the inner SOL connecting to the non-active x-point">32</int>
+<int name="separatrix_2"  description="x-aligned edges defining the non-active separatrix">33</int>
+<int name="outer_baffle_2"  description="x-aligned edges defining the chamber wall of the outer non-active divertor region">34</int>
+<int name="inner_baffle_2"  description="x-aligned edges defining the chamber wall of the inner non-active divertor region">35</int>
+<int name="outer_PFR_wall_2"  description="x-aligned edges defining the private flux region wall of the outer non-active divertor region">36</int>
+<int name="inner_PFR_wall_2"  description="x-aligned edges defining the private flux region wall of the inner non-active divertor region">37</int>
+<int name="intra_sep"  description="Cells between the two separatrices">38</int>
+<int name="outer_divertor_2"  description="Cells defining the outer inactive divertor region">39</int>
+<int name="inner_divertor_2"  description="Cells defining the inner inactive divertor region">40</int>
+<int name="outer_target_2"  description="y-aligned edges defining the outer inactive target">41</int>
+<int name="inner_target_2"  description="y-aligned edges defining the inner inactive target">42</int>
+<int name="volumes"  description="All volumes (3D) belonging to the associated spaces, implicit declaration (no need to replicate the grid elements in the grid_subset structure)">43</int>
+<int name="full_wall"  description="All edges defining walls, baffles, and targets">44</int>
+<int name="outer_sf_leg_entrance_1"  description="y-aligned edges defining the SOL entrance of the first snowflake outer leg">45</int>
+<int name="outer_sf_leg_entrance_2"  description="y-aligned edges defining the SOL entrance of the third snowflake outer leg">46</int>
+<int name="outer_sf_pfr_connection_1"  description="y-aligned edges defining the connection between the outer snowflake entrance and third leg">47</int>
+<int name="outer_sf_pfr_connection_2"  description="y-aligned edges defining the connection between the outer snowflake first and second leg">48</int>
+<int name="magnetic_axis"  description="Point corresponding to the magnetic axis">100</int>
+<int name="outer_mid_plane_separatrix"  description="Point on active separatrix at outer mid-plane">101</int>
+<int name="inner_mid_plane_separatrix"  description="Point on active separatrix at inner mid-plane">102</int>
+<int name="outer_target_separatrix"  description="Point on active separatrix at outer active target">103</int>
+<int name="inner_target_separatrix"  description="Point on active separatrix at inner active target">104</int>
+<int name="outer_target_separatrix_2"  description="Point on non-active separatrix at outer non-active target">105</int>
+<int name="inner_target_separatrix_2"  description="Point on non-active separatrix at inner non-active target">106</int>
+</constants>

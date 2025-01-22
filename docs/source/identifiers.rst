@@ -20,25 +20,25 @@ representations:
 3. A description (long string)
 
 
-Identifiers in IMASPy
----------------------
+Identifiers in imas-python
+--------------------------
 
-IMASPy implements identifiers as an :py:class:`enum.Enum`. Identifiers are
+imas-python implements identifiers as an :py:class:`enum.Enum`. Identifiers are
 constructed on-demand from the loaded Data Dictionary definitions.
 
-All identifier enums can be accessed through ``imaspy.identifiers``. A list of
-the available identifiers is stored as ``imaspy.identifiers.identifiers``.
+All identifier enums can be accessed through ``imas.identifiers``. A list of
+the available identifiers is stored as ``imas.identifiers.identifiers``.
 
 .. code-block:: python
     :caption: Accessing identifiers
 
-    import imaspy
+    import imas
 
     # List all identifier names
-    for identifier_name in imaspy.identifiers.identifiers:
+    for identifier_name in imas.identifiers.identifiers:
         print(identifier_name)
     # Get a specific identifier
-    csid = imaspy.identifiers.core_source_identifier
+    csid = imas.identifiers.core_source_identifier
     # Get and print information of an identifier value
     print(csid.total)
     print(csid.total.index)
@@ -47,23 +47,23 @@ the available identifiers is stored as ``imaspy.identifiers.identifiers``.
     # Item access is also possible
     print(identifiers["edge_source_identifier"])
 
-    # You can use imaspy.util.inspect to list all options
-    imaspy.util.inspect(identifiers.ggd_identifier)
+    # You can use imas.util.inspect to list all options
+    imas.util.inspect(identifiers.ggd_identifier)
     # And also to get more details of a specific option
-    imaspy.util.inspect(identifiers.ggd_identifier.SN)
+    imas.util.inspect(identifiers.ggd_identifier.SN)
 
     # When an IDS node is an identifier, you can use
     # metadata.identifier_enum to get the identifier
-    core_sources = imaspy.IDSFactory().core_sources()
+    core_sources = imas.IDSFactory().core_sources()
     core_sources.source.resize(1)
     print(core_sources.source[0].identifier.metadata.identifier_enum)
 
 
-Assigning identifiers in IMASPy
--------------------------------
+Assigning identifiers in imas-python
+------------------------------------
 
-IMASPy implements smart assignment of identifiers. You may assign an identifier
-enum value (for example ``imaspy.identifiers.core_source_identifier.total``), a
+imas-python implements smart assignment of identifiers. You may assign an identifier
+enum value (for example ``imas.identifiers.core_source_identifier.total``), a
 string (for example ``"total"``) or an integer (for example ``"1"``) to an
 identifier structure (for example ``core_profiles.source[0].identifier``) to set
 all three child nodes ``name``, ``index`` and ``description`` in one go. See
@@ -72,12 +72,12 @@ below example:
 .. code-block:: python
     :caption: Assigning identifiers
 
-    import imaspy
+    import imas
 
-    core_sources = imaspy.IDSFactory().core_sources()
+    core_sources = imas.IDSFactory().core_sources()
     core_sources.source.resize(2)
 
-    csid = imaspy.identifiers.core_source_identifier
+    csid = imas.identifiers.core_source_identifier
     # We can set the identifier in three ways:
     # 1. Assign an instance of the identifier enum:
     core_sources.source[0].identifier = csid.total
@@ -87,18 +87,18 @@ below example:
     core_sources.source[0].identifier = 1
 
     # Inspect the contents of the structure
-    imaspy.util.inspect(core_sources.source[0].identifier)
+    imas.util.inspect(core_sources.source[0].identifier)
 
     # You can still assign any value to the individual name / index /
     # description nodes:
     core_sources.source[1].identifier.name = "total"
     # Only name is set, index and description are empty
-    imaspy.util.inspect(core_sources.source[1].identifier)
+    imas.util.inspect(core_sources.source[1].identifier)
     # This also allows to use not-yet-standardized identifier values
     core_sources.source[1].identifier.name = "my_custom_identifier"
     core_sources.source[1].identifier.index = -1
     core_sources.source[1].identifier.description = "My custom identifier"
-    imaspy.util.inspect(core_sources.source[1].identifier)
+    imas.util.inspect(core_sources.source[1].identifier)
 
 
 Compare identifiers
@@ -117,9 +117,9 @@ the Data Dictionary description:
 .. code-block:: python
     :caption: Comparing identifiers
 
-    >>> import imaspy
-    >>> csid = imaspy.identifiers.core_source_identifier
-    >>> core_sources = imaspy.IDSFactory().core_sources()
+    >>> import imas
+    >>> csid = imas.identifiers.core_source_identifier
+    >>> core_sources = imas.IDSFactory().core_sources()
     >>> core_sources.source.resize(1)
     >>> core_sources.source[0].identifier.index = 1
     >>> # Compares equal to csid.total, though name and description are empty
@@ -143,8 +143,8 @@ the Data Dictionary description:
 
 .. seealso::
 
-    -   :py:class:`imaspy.ids_identifiers.IDSIdentifier`: which is the base class
+    -   :py:class:`imas.ids_identifiers.IDSIdentifier`: which is the base class
         of all identifier enumerations.
-    -   :py:data:`imaspy.ids_identifiers.identifiers`: identifier accessor.
-    -   :py:attr:`imaspy.ids_metadata.IDSMetadata.identifier_enum`: get the
+    -   :py:data:`imas.ids_identifiers.identifiers`: identifier accessor.
+    -   :py:attr:`imas.ids_metadata.IDSMetadata.identifier_enum`: get the
         identifier enum from an IDS node.

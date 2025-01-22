@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<constants name="coordinate" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for coordinate_identifier_definitions.
+</header>
+
+<ddInstance xpath="complexType:ids_distribution_markers/coordinate_identifier"/>
+
+<int name="unspecified"            description="unspecified"                                                                                     units="m"    >0</int>
+<int name="x"                      description="First cartesian coordinate in the horizontal plane"                                              units="m"    >1</int>
+<int name="y"                      description="Second cartesian coordinate in the horizontal plane (grad(x) x grad(y) = grad(z))"               units="m"    >2</int>
+<int name="z"                      description="Vertical coordinate z"                                                                           units="m"    >3</int>
+<int name="r"                      description="Major radius"                                                                                    units="m"    >4</int>
+<int name="phi"                    description="Toroidal angle"                                                                                  units="rad"  >5</int>
+
+<int name="psi"                    description="Poloidal magnetic flux"                                                                          units="Tm^2">10</int>
+<int name="rho_tor"                description="The square root of the toroidal flux, sqrt((Phi-Phi_axis)/pi/B0), where Phi is the toroidal flux and B0 is the vacuum magnetic field" units="m">11</int>
+<int name="rho_tor_norm"           description="The square root of the normalised toroidal flux, sqrt((Phi-Phi_axis)/(Phi_lcf-Phi_axis)), where Phi is the toroidal flux" units="-">12</int>
+<int name="rho_pol"                description="The square root of the poloidal flux, sqrt(psi-psi_axis), where psi is the poloidal flux"        units="T^{1/2}m">13</int>
+<int name="rho_pol_norm"           description="The square root of the normalised poloidal flux, sqrt((psi-psi_axis)/(psi_lcf-psi_axis)), where psi is the poloidal flux" units="-">14</int>
+
+<int name="theta"                  description="Geometrical poloidal angle around the magnetic axis"                                             units="rad"  >20</int>
+<int name="theta_straight"         description="Straight field line poloidal angle"                                                              units="rad"  >21</int>
+<int name="theta_equal_arc"        description="Equal-arc poloidal angle; a differential of the angle is proportional to the length of the corresponding arc in the poloidal plane." units="rad"  >22</int>
+
+<int name="velocity"               description="Total velocity; modulus of the velocity vector"                                                  units="m/s"  >100</int>
+<int name="velocity_x"             description="Velocity component in the x-direction"                                                           units="m/s"  >101</int>
+<int name="velocity_y"             description="Velocity component in the y-direction"                                                           units="m/s"  >102</int>
+<int name="velocity_z"             description="Velocity component in the z-direction"                                                           units="m/s"  >103</int>
+<int name="velocity_phi"           description="Velocity component in the toroidal direction"                                                    units="m/s"  >104</int>
+<int name="velocity_parallel"      description="Velocity component parallel to the magnetic field"                                               units="m/s"  >105</int>
+<int name="velocity_perpendicular" description="Velocity perpendicular to the magnetic field"                                                    units="m/s"  >106</int>
+<int name="velocity_thermal"       description="Velocity normalised to the local thermal velocity of the thermal ions (of the relevant species)" units="m/s"  >107</int>
+<int name="velocity_radial"        description="Velocity component in the radial direction"                                                      units="m/s"  >108</int>
+<int name="momentum"               description="Modulus of the relativistic momentum vector"                                                     units="Ns"   >200</int>
+<int name="momentum_parallel"      description="Component of the relativistic momentum vector parallel to the magnetic field"                    units="Ns"   >201</int>
+<int name="momentum_perpendicular" description="Component of the relativistic momentum vector perpendicular to the magnetic field"               units="Ns"   >202</int>
+<int name="canonical_momentum_phi" description="Canonical toroidal angular momentum"                                                             units="Nms"  >203</int>
+
+<int name="energy_hamiltonian"     description="Hamiltonian energy, including both kinetic and potential energy"                                 units="eV"   >300</int>
+<int name="energy_kinetic"         description="Kinetic energy"                                                                                  units="eV"   >301</int>
+<int name="magnetic_moment"        description="magnetic moment"                                                                                 units="J/T"  >302</int>
+
+<int name="lambda"                 description="Ratio, magnetic moment over hamiltonian energy"                                                  units="1/T"  >400</int>
+<int name="pitch_angle"            description="Angle between the magnetic field and the velocity vector"                                        units="rad"     >402</int>
+<int name="pitch"                  description="Ratio, parallel velocity over total velocity"                                                    units="-"    >403</int>
+<int name="pitch_at_min_b"         description="Pitch, ratio of parallel over perp. velocity, at the minimum value of the magnetic field strength along the guiding centre orbit" units="-">404</int>
+
+<int name="n_phi"         description="Toroidal mode number, the wave vector toroidal component being defined as k_tor = n_tor grad phi where phi is the toroidal angle so that a positive n_tor means a wave propagating in the positive phi direction" units="-">500</int>
+
+</constants>

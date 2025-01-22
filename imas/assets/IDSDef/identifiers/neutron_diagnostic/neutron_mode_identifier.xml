@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<constants name="neutron_mode" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for counting mode in the neutron detector
+</header>
+
+<ddInstance xpath="/neutron_diagnostic/detectors/mode"/>
+
+<int name="count"          description="Pulse count mode" unique="yes">1</int>
+<int name="campbelling"  description="Campbelling mode" unique="yes">2</int>
+<int name="psq"        description="Pulse-squared fluctuation chain" unique="yes">3</int>
+<int name="current"     description="Current mode" unique="yes">4</int>
+<int name="spectrometric"     description="Spectrometry" unique="yes">5</int>
+
+</constants>

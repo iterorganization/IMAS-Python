@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<constants name="spectro_x_instrument_function" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for instrument function for X ray crystal spectrometer
+</header>
+
+<ddInstance xpath="/spectrometer_x_ray_crystal/channel/instrument_function/type"/>
+
+<int name="explicit"     description="Explicit values, use the values node"    >1</int>
+<int name="gaussian"  description="Gaussian : use parameters intensity, centre, and sigma"    >2</int>
+<int name="lorentzian" description="Lorentzian : use parameters intensity, centre, and scale"     >3</int>
+<int name="voigt" description="Voigt : use parameters intensity, centre, sigma, and scale"     >4</int>
+
+</constants>

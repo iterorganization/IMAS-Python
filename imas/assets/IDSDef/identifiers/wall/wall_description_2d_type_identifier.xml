@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<constants name="wall_description_2d_type" identifier="yes" create_mapping_function="yes">
+<header>
+Type of wall component
+</header>
+
+<ddInstance xpath="/wall/description_2d/type"/>
+
+<int name="single_unit_vessel"              description="Limiter structure is using a single unit, the vessel structure is filled"         >0</int>
+<int name="multiple_units_no_vessel"        description="Limiter is described with multiple units, no vessel description"                  >1</int>
+<int name="multiple_units_vessel"           description="Limiter is described with multiple units and the vessel structure is filled"      >2</int>
+
+</constants>

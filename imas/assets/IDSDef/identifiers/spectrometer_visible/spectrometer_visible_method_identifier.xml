@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<constants name="spectrometer_visible_method" identifier="yes" create_mapping_function="yes">
+<header>
+Fitting method used to calculate isotope ratios 
+</header>
+<!-- Some lines and indices are common with the edge_sources/source/identifier --> 
+
+<ddInstance xpath="/spectrometer_visible/channel/isotopes/method"/>
+
+<int name="multi_gaussian"     description="Multi-gaussian fitting"                                              >1</int>
+<int name="exp_times_multi_gaussian" description="Experimental signal multiplied by multi-gaussian ratio"       >2</int>
+
+</constants>

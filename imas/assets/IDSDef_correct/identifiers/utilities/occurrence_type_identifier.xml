@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<constants create_mapping_function="yes" identifier="yes" name="ggd_identifier">
+<header>List of possible occurrence types</header>
+<ddInstance xpath="ids_properties/occurrence_type"/>
+
+<!-- So far, we have defined an initial occurrence type list for the Equilibrium IDS only -->
+<int name="reconstruction"  description="Equilibrium reconstruction">1</int>
+<int name="prediction_fixed"  description="Equilibrium prediction, fixed boundary">2</int>
+<int name="prediction_free"  description="Equilibrium prediction, free boundary">3</int>
+<int name="mapping"  description="Used for mapping equilibrium results from one grid type / resolution to another, or for including variables not present in the first set such as the calculation of magnetic field of other derived parameters">4</int>
+</constants>

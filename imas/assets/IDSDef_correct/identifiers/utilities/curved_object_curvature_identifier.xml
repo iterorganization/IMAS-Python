@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<constants name="spectrometer_x_reflector_geometry" identifier="yes" create_mapping_function="yes">
+<header>
+Curvature of a curved object
+</header>
+
+<ddInstance xpath="/spectrometer_x_crystal/channel/reflector/curvature_type"/>
+<ddInstance xpath="/spectrometer_x_crystal/channel/crystal/curvature_type"/>
+
+<int name="planar"        description="Planar object, no curvature"       >1</int>
+<int name="cylindrical_x1"   description="Cylindrical in the X1 direction, use x1_curvature"         >2</int>
+<int name="cylindrical_x2"   description="Cylindrical in the X2 direction, use x2_curvature"         >3</int>
+<int name="spherical"   description="Spherical : same curvature radius in X1 and X2 directions, indicated in x1_curvature"         >4</int>
+<int name="toroidal"   description="Toroidal : x1_curvature in X1 direction and x2_curvature in X2 direction"         >5</int>
+
+</constants>

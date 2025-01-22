@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<constants name="poloidal_plane_coordinates_identifier" identifier="yes" create_mapping_function="yes">
+<header>List of coordinate systems for describing the poloidal plane</header>
+<ddInstance xpath="/equilibrium/time_slice/profiles_2d/grid_type"/>
+<ddInstance xpath="/mhd_linear/time_slice/toroidal_mode/vacuum/grid_type"/>
+<ddInstance xpath="/mhd_linear/time_slice/toroidal_mode/plasma/grid_type"/>
+
+<int name="rectangular"
+     description="Cylindrical R,Z ala eqdsk (R=dim1, Z=dim2). In this case the position arrays should not be filled since they are redundant with grid/dim1 and dim2."
+     >1</int>
+<int name="inverse"
+     description="Rhopolar_polar 2D polar coordinates (rho=dim1, theta=dim2) with magnetic axis as centre of grid; the polar angle is theta= -atan2(z-zaxis,r-raxis)."
+     >2</int>
+<int name="inverse_psi_straight_field_line"
+     description="Flux surface type with psi as radial label (dim1) and the straight-field line poloidal angle (mod(index,10)=1) (dim2); could be non-equidistant; magnetic axis as centre of grid"
+     >11</int>
+<int name="inverse_psi_equal_arc"
+     description="Flux surface type with psi as radial label (dim1) and the equal arc poloidal angle (mod(index,10)=2) (dim2)"
+     >12</int>
+<int name="inverse_psi_polar"
+     description="Flux surface type with psi as radial label (dim1) and the polar poloidal angle (mod(index,10)=3) (dim2); could be non-equidistant"
+     >13</int>
+
+<int name="inverse_psi_straight_field_line_fourier"
+     description="Flux surface type with psi as radial label (dim1) and Fourier modes in the straight-field line poloidal angle (mod(index,10)=4) (dim2), could be non-equidistant; magnetic axis as centre of grid"
+     >14</int>
+<int name="inverse_psi_equal_arc_fourier"
+     description="Flux surface type with psi as radial label (dim1) and Fourier modes in the equal arc poloidal angle (mod(index,10)=5) (dim2)"
+     >15</int>
+<int name="inverse_psi_polar_fourier"
+     description="Flux surface type with psi as radial label (dim1) and Fourier modes in the polar poloidal angle (mod(index,10)=6) (dim2); could be non-equidistant"
+     >16</int>
+
+<int name="inverse_rhopolnorm_straight_field_line"
+     description="Flux surface type with radial label sqrt[(psi-psi_axis)/(psi_edge-psi_axis)] (dim1) and the straight-field line poloidal angle (dim2)"
+     >21</int>
+<int name="inverse_rhopolnorm_equal_arc"
+     description="Flux surface type with radial label sqrt[(psi-psi_axis)/(psi_edge-psi_axis)] (dim1) and the equal arc poloidal angle (dim2)"
+     >22</int>
+<int name="inverse_rhopolnorm_polar"
+     description="Flux surface type with radial label sqrt[(psi-psi_axis)/(psi_edge-psi_axis)] (dim1) and the polar poloidal angle (dim2)"
+     >23</int>
+
+<int name="inverse_rhopolnorm_straight_field_line_fourier"
+     description="Flux surface type with radial label sqrt[(psi-psi_axis)/(psi_edge-psi_axis)] (dim1) and Fourier modes in the straight-field line poloidal angle (dim2)"
+     >24</int>
+<int name="inverse_rhopolnorm_equal_arc_fourier"
+     description="Flux surface type with radial label sqrt[(psi-psi_axis)/(psi_edge-psi_axis)] (dim1) and Fourier modes in the equal arc poloidal angle (dim2)"
+     >25</int>
+<int name="inverse_rhopolnorm_polar_fourier"
+     description="Flux surface type with radial label sqrt[(psi-psi_axis)/(psi_edge-psi_axis)] (dim1) and Fourier modes in the polar poloidal angle (dim2)"
+     >26</int>
+
+
+<int name="inverse_rhotornorm_straight_field_line"
+     description="Flux surface type with radial label sqrt[Phi/Phi_edge] (dim1) and the straight-field line poloidal angle (dim2)"
+     >31</int>
+<int name="inverse_rhotornorm_equal_arc"
+     description="Flux surface type with radial label sqrt[Phi/Phi_edge] (dim1) and the equal arc poloidal angle (dim2)"
+     >32</int>
+<int name="inverse_rhotornorm_polar"
+     description="Flux surface type with radial label sqrt[Phi/Phi_edge] (dim1) and the polar poloidal angle (dim2)"
+     >33</int>
+
+<int name="inverse_rhotornorm_straight_field_line_fourier"
+     description="Flux surface type with radial label sqrt[Phi/Phi_edge] (dim1) and Fourier modes in the straight-field line poloidal angle (dim2)"
+     >34</int>
+<int name="inverse_rhotornorm_equal_arc_fourier"
+     description="Flux surface type with radial label sqrt[Phi/Phi_edge] (dim1) and Fourier modes in the equal arc poloidal angle (dim2)"
+     >35</int>
+<int name="inverse_rhotornorm_polar_fourier"
+     description="Flux surface type with radial label sqrt[Phi/Phi_edge] (dim1) and Fourier modes in the polar poloidal angle (dim2)"
+     >36</int>
+
+<int name="inverse_rhopol_straight_field_line"
+     description="Flux surface type with radial label sqrt[psi-psi_axis] (dim1) and the straight-field line poloidal angle (dim2)"
+     >41</int>
+<int name="inverse_rhopol_equal_arc"
+     description="Flux surface type with radial label sqrt[psi-psi_axis] (dim1) and the equal arc poloidal angle (dim2)"
+     >42</int>
+<int name="inverse_rhopol_polar"
+     description="Flux surface type with radial label sqrt[psi-psi_axis] (dim1) and the polar poloidal angle (dim2)"
+     >43</int>
+
+<int name="inverse_rhopol_straight_field_line_fourier"
+     description="Flux surface type with radial label sqrt[psi-psi_axis] (dim1) and Fourier modes in the straight-field line poloidal angle (dim2)"
+     >44</int>
+<int name="inverse_rhopol_equal_arc_fourier"
+     description="Flux surface type with radial label sqrt[psi-psi_axis] (dim1) and Fourier modes in the equal arc poloidal angle (dim2)"
+     >45</int>
+<int name="inverse_rhopol_polar_fourier"
+     description="Flux surface type with radial label sqrt[psi-psi_axis] (dim1) and Fourier modes in the polar poloidal angle (dim2)"
+     >46</int>
+
+<int name="inverse_rhotor_straight_field_line"
+     description="Flux surface type with radial label sqrt[Phi/pi/B0] (dim1), Phi being toroidal flux, and the straight-field line poloidal angle (dim2)"
+     >51</int>
+<int name="inverse_rhotor_equal_arc"
+     description="Flux surface type with radial label sqrt[Phi/pi/B0] (dim1), Phi being toroidal flux, and the equal arc poloidal angle (dim2)"
+     >52</int>
+<int name="inverse_rhotor_polar"
+     description="Flux surface type with radial label sqrt[Phi/pi/B0] (dim1), Phi being toroidal flux, and the polar poloidal angle (dim2)"
+     >53</int>
+
+<int name="inverse_rhotor_straight_field_line_fourier"
+     description="Flux surface type with radial label sqrt[Phi/pi/B0] (dim1), Phi being toroidal flux, and Fourier modes in the straight-field line poloidal angle (dim2)"
+     >54</int>
+<int name="inverse_rhotor_equal_arc_fourier"
+     description="Flux surface type with radial label sqrt[Phi/pi/B0] (dim1), Phi being toroidal flux, and Fourier modes in the equal arc poloidal angle (dim2)"
+     >55</int>
+<int name="inverse_rhotor_polar_fourier"
+     description="Flux surface type with radial label sqrt[Phi/pi/B0] (dim1), Phi being toroidal flux, and Fourier modes in the polar poloidal angle (dim2)"
+     >56</int>
+
+<int name="irregular_rz_na"
+     description="Irregular grid, thus give list of vertices in dim1(1:ndim1), dim2(1:ndim1) and then all fields are on values(1:ndim1,1)"
+     >91</int> <!-- Use only for R,Z and fill volume_element / needs to know if R,Z, psi,theta for dim1, dim2? Used with connect and only for rz -->
+
+</constants>

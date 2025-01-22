@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<constants name="wall_component" identifier="yes" create_mapping_function="yes">
+<header>
+Type of wall component
+</header>
+
+<ddInstance xpath="/wall/description_2d/limiter/unit/component_type"/>
+
+<int name="other"          description="Other type of component not in the list yet" >0</int>
+<int name="port"           description="Port" >1</int>
+<int name="divertor"       description="Divertor" >2</int>
+<int name="baffle"         description="Baffle" >3</int>
+<int name="blanket"        description="Blanket for Tritium generation" >4</int>
+<int name="limiter"        description="Limiter" >5</int>
+<int name="panel"          description="First wall panel" >6</int>
+<int name="antenna"        description="Plasma facing element of an RF antenna" >7</int>
+
+</constants>

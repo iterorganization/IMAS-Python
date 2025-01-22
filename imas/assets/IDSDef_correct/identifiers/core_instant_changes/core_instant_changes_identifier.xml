@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<constants name="core_instant_changes_identifier" identifier="yes" create_mapping_function="yes">
+<header>
+Translation table for types of instant changes to the plasma state.
+</header>
+
+<idsInstance xpath="/core_instant_changes/change/identifier"/>
+
+<int name="unspecified"        description="Unspecified instant changes"                               >0</int>
+<int name="total"              description="Total instant changes; combines all types of events"       >1</int>
+<int name="pellet"             description="Instant changes from a pellet"                             >2</int>
+<int name="sawtooth"           description="Instant changes from a sawtooth"                           >3</int>
+<int name="elm"                description="Instant changes from an edge localised mode"               >4</int>
+
+</constants>

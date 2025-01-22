@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<constants create_mapping_function="yes" identifier="yes" name="ggd_space_identifier">
+<header> Translation table for ggd_space_identifier_definitions. </header>
+<ddInstance xpath="/utilities/complexType:generic_grid_dynamic_space/identifier"/>
+<ddInstance xpath="/distribution_sources/source/ggd/grid/space/identifier"/>
+<ddInstance xpath="/distributions/distribution/ggd/grid/space/identifier"/>
+<ddInstance xpath="/equilibrium/grids_ggd/grid/space/identifier"/>
+<ddInstance xpath="/transport_solver_numerics/boundary_conditions_ggd/grid/space/identifier"/>
+<ddInstance xpath="/waves/coherent_wave/full_wave/grid/space/identifier"/>
+<ddInstance xpath="/edge_profiles/grid_ggd/space/identifier"/>
+<ddInstance xpath="/edge_sources/grid_ggd/space/identifier"/>
+<ddInstance xpath="/edge_transport/grid_ggd/space/identifier"/>
+
+<int name="unspecified"  description="unspecified">0</int>
+<int name="primary_standard"  description="Primary space defining the standard grid">1</int>
+<int name="primary_staggered"  description="Primary space defining a grid staggered with respect to the primary standard space">2</int>
+<int name="secondary_structured"  description="Secondary space defining additional dimensions that extend the primary standard space in a structured way">3</int>
+</constants>

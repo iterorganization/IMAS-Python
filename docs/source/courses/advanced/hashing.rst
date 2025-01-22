@@ -1,14 +1,14 @@
 Calculating hashes of IMAS data
 ===============================
 
-IMASPy can calculate *hashes* of IMAS data. As `Wikipedia explains better than I could
+imas-python can calculate *hashes* of IMAS data. As `Wikipedia explains better than I could
 do <https://en.wikipedia.org/wiki/Hash_function>`__:
 
     A hash function is any function that can be used to map data of arbitrary size to
     fixed-size values, [...]. The values returned by a hash function are called *hash
     values*, *hash codes*, *hash digests*, *digests*, or simply *hashes*.
 
-IMASPy is using the XXH3 hash function from the `xxHash project
+imas-python is using the XXH3 hash function from the `xxHash project
 <https://github.com/Cyan4973/xxHash>`__. This is a *non-cryptographic* hash and returns
 64-bit hashes.
 
@@ -33,7 +33,7 @@ Exercise 1: Calculate some hashes
 
     .. md-tab-item:: Exercise
 
-        In this exercise we will use :py:func:`imaspy.util.calc_hash` to calculate
+        In this exercise we will use :py:func:`imas.util.calc_hash` to calculate
         hashes of some IDSs. Use :external:py:meth:`bytes.hex` to show a more readable
         hexidecimal format of the hash.
 
@@ -51,11 +51,11 @@ Exercise 1: Calculate some hashes
 
     .. md-tab-item:: Solution
 
-        .. literalinclude:: imaspy_snippets/hashing.py
+        .. literalinclude:: imas_snippets/hashing.py
 
 
-Properties of IMASPy's hashes
------------------------------
+Properties of imas-python's hashes
+----------------------------------
 
 The implementation of the hash function has the following properties:
 
@@ -91,4 +91,4 @@ Technical details and specification
 -----------------------------------
 
 You can find the technical details, and a specification for calculating the hashes, in
-the documentation of :py:meth:`imaspy.util.calc_hash`.
+the documentation of :py:meth:`imas.util.calc_hash`.
