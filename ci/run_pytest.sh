@@ -37,8 +37,10 @@ pip freeze
 # Clean artifacts created by pytest
 rm -f junit.xml
 rm -rf htmlcov
-mkdir -p ~/tmp
-export PYTEST_DEBUG_TEMPROOT=~/tmp
-python -m pytest -n=auto --cov=imas --cov-report=term-missing --cov-report=html --junit-xml=junit.xml -x
 
-deactivate
+# setups local directory to not to full /tmp directory with pytest temporary files
+# mkdir -p ~/tmp
+# export PYTEST_DEBUG_TEMPROOT=~/tmp
+python -m pytest -n=auto --cov=imas --cov-report=term-missing --cov-report=html --junit-xml=junit.xml
+
+

@@ -59,7 +59,7 @@ asv machine --yes
 # Run ASV for the current commit, develop and main
 asv run --skip-existing-successful HEAD^!
 asv run --skip-existing-successful develop^!
-# asv run --skip-existing-successful main^!
+asv run --skip-existing-successful main^!
 
 # Compare results
 if [ `git rev-parse --abbrev-ref HEAD` == develop ]
@@ -75,5 +75,5 @@ asv publish
 # And persistently store them
 cp -rf .asv/{results,html} "$BENCHMARKS_DIR"
 
-deactivate
+
 

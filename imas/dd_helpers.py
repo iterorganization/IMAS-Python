@@ -134,7 +134,6 @@ def _run_xsl_transformation(
             stylesheet_file=str(xsl_file),
             output_file=str(output_file),
         )
-        logger.info("Transformation complete: %s -> %s", xsd_file, output_file)
 
 
 def build_data_dictionary(repo, tag: str, rebuild=False) -> None:

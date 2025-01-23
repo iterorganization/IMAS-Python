@@ -49,7 +49,7 @@ Test with AL<version>
     5.  In the "Script" Task, update the module(s) in the Argument field
 
 Benchmark
-    This job runs the :ref:`ASV benchmarks <benchmarking IMAS>` on the CI server. It
+    This job runs the :ref:`ASV benchmarks <benchmarking IMAS-Python>` on the CI server. It
     is configured such that it can only run on a single CI agent
     (`io-ls-bamboowk6.iter.org`). There are two reasons for this:
 

@@ -1,4 +1,4 @@
-.. _`benchmarking IMAS`:
+.. _`benchmarking IMAS-Python`:
 
 Benchmarking IMAS-Python
 ========================
@@ -19,15 +19,14 @@ Technical benchmarks
     package.
 
 Basic functional benchmarks
-    These are for benchmarking functionality with an equivalent feature in the IMAS
-    Access Layer HLI. In addition to tracking the performance of the IMAS-Python features
-    over time, we can also benchmark the performance against the traditional HLI.
+    These are for benchmarking functionality with an addition to track the performance 
+    of the IMAS-Python features over time.
 
     For example: putting and getting IDSs.
 
 IMAS-Python-specific functional benchmarks
-    These are for benchmarking functionality without an equivalent feature in the IMAS
-    Access Layer HLI. We use these for tracking the IMAS-Python performance over time.
+    These are for benchmarking core functionalities for checking performance. We use these 
+    for tracking the IMAS-Python core features performance over time.
 
     For example: data conversion between DD versions.
 
@@ -62,33 +61,31 @@ contains tabular results. Some examples:
 .. code-block:: text
     :caption: Example output for a test parametrized in ``hli``
 
-    [ 58.33%] ··· core_profiles.Generate.time_create_core_profiles          ok
-    [ 58.33%] ··· ======== ============
-                    hli                
-                  -------- ------------
-                    imas    22.9±0.4μs 
-                   imas    408±8μs   
-                  ======== ============
+    [56.25%] ··· core_profiles.Generate.time_create_core_profiles                                                                                  ok
+    [56.25%] ··· ====== =============
+                hli                
+                ------ -------------
+                imas   2.04±0.01μs 
+                ====== =============
 
-Here we see the benchmark ``core_profiles.Generate.time_create_core_profiles`` was
-repeated for multiple values of ``hli``: once for the ``imas`` HLI, and once for the
-``imas`` HLI.
+
+Here we see the benchmark ``core_profiles.Generate.time_create_core_profiles`` for 
+imas-python ``imas-python``.
 
 Some benchmarks are parametrized in multiple dimensions, as in below example. This
 results in a 2D table of results.
 
 .. code-block:: text
-    :caption: Example output for a test parametrized in ``hli`` and ``backend``
+    :caption: Example output for a test parametrized in ``imas-python`` and ``backend``
 
-    [ 70.83%] ··· core_profiles.Get.time_get                                ok
-    [ 70.83%] ··· ======== ========== ============ =========
-                  --                    backend             
-                  -------- ---------------------------------
-                    hli        13          14          11   
-                  ======== ========== ============ =========
-                    imas    75.1±1ms   70.2±0.5ms   207±2ms 
-                   imas   241±4ms     229±2ms     364±6ms 
-                  ======== ========== ============ =========
+    [65.62%] ··· core_profiles.Get.time_get     ok
+    [65.62%] ··· ====== ========= ========== ============ ========= ============
+                --                             backend                         
+                ------ --------------------------------------------------------
+                hli      HDF5    MDSplus      memory      ASCII      netCDF   
+                ====== ========= ========== ============ ========= ============
+                imas   172±3ms   86.7±2ms   68.5±0.8ms   291±3ms   14.2±0.7ms 
+                ====== ========= ========== ============ ========= ============
 
 .. note::
     The backends are listed by their numerical IDS:
@@ -103,7 +100,7 @@ Running benchmarks (advanced)
 -----------------------------
 
 Running benchmarks quickly, as explained in the previous section, is great during
-development and for comparing the performance of IMAS-Python against the imas HLI. However,
+development and for comparing the performance of IMAS-Python. However,
 ``asv`` can also track the performance of benchmarks over various commits of IMAS-Python.
 Unfortunately this is a bit more tricky to set up.
 
@@ -113,22 +110,7 @@ Setup advanced benchmarking
 
 First, some background on how ``asv`` tracks performance: it creates an isolated virtual
 environment (using the ``virtualenv`` package) and installs IMAS-Python for each commit that
-will be benchmarked. However, because the virtual environment is isolated, the ``imas``
-package won't be available. We need to work around it by setting the environment
-variable ``ASV_PYTHONPATH``:
-
-.. code-block:: console
-    :caption: Setting up the ``ASV_PYTHONPATH`` on SDCC
-
-    $ module load IMAS
-    $ export ASV_PYTHONPATH="$PYTHONPATH"
-
-.. caution::
-
-    ``imas`` must not be available on the ``ASV_PYTHONPATH`` to avoid the interfering
-    of two imas modules (one on the ``PYTHONPATH``, and the other installed by ``asv``
-    in the virtual environment).
-
+will be benchmarked. 
 
 Deciding which commits to benchmark
 '''''''''''''''''''''''''''''''''''
@@ -184,19 +166,14 @@ Instead, you can submit a benchmark job to the compute nodes.
 .. code-block:: bash
     :caption: Benchmark run script (``run_benchmarks.sh``)
 
-    # Load IMAS module
+    # Load IMAS-AL-Core module
     module purge
-    module load IMAS
-    # Verify we can run python and import imas
+    module load IMAS-AL-Core
+    module load Python
+
+    # Verify we can run python
     echo "Python version:"
     python --version
-    echo "Import imas:"
-    python -c 'import imas; print(imas)'
-
-    # Set the ASV_PYTHONPATH so we can `import imas` in the benchmarks
-    export ASV_PYTHONPATH="$PYTHONPATH"
-    echo "ASV_PYTHONPATH=$ASV_PYTHONPATH"
-    echo
 
     # Activate the virtual environment which has asv installed
     . venv_imas/bin/activate

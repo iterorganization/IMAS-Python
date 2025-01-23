@@ -19,9 +19,10 @@ def timeraw_import_imas():
 # `asv compare` :(
 """
 def track_imas_versions():
-    equilibrium = imas.equilibrium()
-    equilibrium.ids_properties.homogeneous_time = imas.imasdef.IDS_TIME_MODE_INDEPENDENT
-    dbentry = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "test", 1, 1)
+    ids_factory = imas.IDSFactory()
+    equilibrium = ids_factory.equilibrium()
+    equilibrium.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_INDEPENDENT
+    dbentry = imas.DBEntry(imas.ids_defs.MEMORY_BACKEND, "test", 1, 1)
     dbentry.create()
     dbentry.put(equilibrium)
     equilibrium = dbentry.get("equilibrium")
