@@ -80,5 +80,5 @@ There is github workflow for IMAS-Python:
 
 `Deploy IMAS-Python-doc <https://app.readthedocs.org/projects/IMAS-Python/>`_
     Deploy the documentation using `readthedocs
-    <https://IMAS-Python.readthedocs.io/en/latest/>`_.
+    <https://imas-python.readthedocs.io/en/latest/>`_.
 

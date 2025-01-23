@@ -25,7 +25,7 @@ from . import (
     util,
 )
 
-PUBLISHED_DOCUMENTATION_ROOT = "https://IMAS-Python.readthedocs.io/en/latest/"
+PUBLISHED_DOCUMENTATION_ROOT = "https://imas-python.readthedocs.io/en/latest/"
 """URL to the published documentation."""
 OLDEST_SUPPORTED_VERSION = _V("3.22.0")
 """Oldest Data Dictionary version that is supported by IMAS-Python."""
