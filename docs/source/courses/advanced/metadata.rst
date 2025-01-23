@@ -3,7 +3,7 @@
 Using Data Dictionary metadata
 ==============================
 
-imas-python provides convenient access to Data Dictionary metadata of any IDS node through
+IMAS-Python provides convenient access to Data Dictionary metadata of any IDS node through
 the ``metadata`` attribute:
 
 .. code-block:: python
@@ -23,10 +23,10 @@ cases.
 Overview of available metadata
 ------------------------------
 
-The data dictionary metadata that is parsed by imas-python is listed in the API
+The data dictionary metadata that is parsed by IMAS-Python is listed in the API
 documentation for :py:class:`~imas.ids_metadata.IDSMetadata`.
 
-Note that not all metadata from the IMAS Data Dictionary is parsed by imas-python.
+Note that not all metadata from the IMAS Data Dictionary is parsed by IMAS-Python.
 This metadata is still accessible on the :code:`metadata` attribute. You can use
 :py:func:`imas.util.inspect` to get an overview of all metadata associated to an
 element in an IDS.
@@ -208,7 +208,7 @@ Units and dimensional analysis with Pint
     <https://pint.readthedocs.io/en/stable/getting/index.html>`_.
 
 The Data Dictionary specifies the units of stored quantities. This metadata is
-accessible in imas-python via :py:attr:`metadata.units
+accessible in IMAS-Python via :py:attr:`metadata.units
 <imas.ids_metadata.IDSMetadata.units>`. In most cases, these units are in a format
 that ``pint`` can understand (for example ``T``, ``Wb``, ``m^-3``, ``m.s^-1``).
 

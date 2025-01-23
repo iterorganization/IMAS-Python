@@ -1,6 +1,6 @@
 import imas
 
-# imas-python has multiple DD versions inside, which makes this exercise harder.
+# IMAS-Python has multiple DD versions inside, which makes this exercise harder.
 # We provide possible solutions here
 
 # Option 1: Print the IDSs in the default-selected DD version

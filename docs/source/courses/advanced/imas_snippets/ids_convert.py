@@ -12,7 +12,7 @@ print(get_data_dictionary_version(pulse_schedule))  # This should print 3.25.0
 pulse_schedule.ids_properties.homogeneous_time = \
     imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
 pulse_schedule.ids_properties.comment = \
-    "Testing renamed IDS nodes with imas-python"
+    "Testing renamed IDS nodes with IMAS-Python"
 pulse_schedule.time = [1., 1.1, 1.2]
 
 pulse_schedule.ec.antenna.resize(1)
@@ -41,7 +41,7 @@ pulse_schedule.ids_properties.comment = "Updated comment"
 print(pulse_schedule_3_39.ids_properties.comment)
 # What do you notice?
 #   This prints the original value of the comment ("Testing renamed IDS
-#   nodes with imas-python").
+#   nodes with IMAS-Python").
 # This is actually the same that you get when creating a shallow copy
 # with ``copy.copy`` of a regular Python dictionary:
 import copy

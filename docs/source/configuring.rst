@@ -1,7 +1,7 @@
-Configuring imas-python
+Configuring IMAS-Python
 =======================
 
-imas-python has a couple of environment variables that can be used to control its behaviour.
+IMAS-Python has a couple of environment variables that can be used to control its behaviour.
 This page provides an overview of available variables.
 
 .. note::
@@ -13,7 +13,7 @@ This page provides an overview of available variables.
 
 
 ``IMAS_LOGLEVEL``
-    Sets the log level used by the imas-python logger.
+    Sets the log level used by the IMAS-Python logger.
     
     By default (when this environment variable is not set), all log messages of ``INFO``
     or more severe are logged. You may set this to, for example,
@@ -44,7 +44,7 @@ Environment variables shared with the IMAS Python HLI
 -----------------------------------------------------
 
 ``IMAS_AL_DISABLE_VALIDATE``
-    By default, imas-python :ref:`validates <IDS validation>` IDSs to check that all data is
+    By default, IMAS-Python :ref:`validates <IDS validation>` IDSs to check that all data is
     consistent with their coordinates during a :py:meth:`~imas.db_entry.DBEntry.put`
     or :py:meth:`~imas.db_entry.DBEntry.put_slice`.
 

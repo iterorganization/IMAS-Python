@@ -3,13 +3,13 @@
 Working with multiple data dictionary versions
 ==============================================
 
-Contrary to most high level interface for IMAS, imas-python code is not tied to a specific
-version of the Data Dictionary. In this lesson we will explore how imas-python handles
+Contrary to most high level interface for IMAS, IMAS-Python code is not tied to a specific
+version of the Data Dictionary. In this lesson we will explore how IMAS-Python handles
 different DD versions (including development builds of the DD), and how we can convert
 IDSs between different versions of the Data Dictionary.
 
 .. note::
-    Most of the time you won't need to worry about DD versions and the default imas-python
+    Most of the time you won't need to worry about DD versions and the default IMAS-Python
     behaviour should be fine.
 
 
@@ -19,7 +19,7 @@ The default Data Dictionary version
 -----------------------------------
 
 In the other training lessons, we didn't explicitly work with Data Dictionary versions.
-Therefore imas-python was always using the `default` DD version. Let's find out what that
+Therefore IMAS-Python was always using the `default` DD version. Let's find out what that
 version is:
 
 
@@ -45,20 +45,20 @@ Exercise 1: The default DD version
 
         .. literalinclude:: imas_snippets/dd_versions.py
 
-Okay, so now you know what your default DD version is. But how is it determined? imas-python
+Okay, so now you know what your default DD version is. But how is it determined? IMAS-Python
 first checks if you have an IMAS environment loaded by checking the environment variable
 ``IMAS_VERSION``. If you are on a cluster and have used ``module load IMAS`` or similar,
 this environment variable will indicate what data dictionary version this module is
-using. imas-python will use that version as its default.
+using. IMAS-Python will use that version as its default.
 
-If the ``IMAS_VERSION`` environment is not set, imas-python will take the newest version of
+If the ``IMAS_VERSION`` environment is not set, IMAS-Python will take the newest version of
 the Data Dictionary that came bundled with it. Which brings us to the following topic:
 
 
 Bundled Data Dictionary definitions
 -----------------------------------
 
-imas-python comes bundled [#DDdefs]_ with many versions of the Data Dictionary definitions.
+IMAS-Python comes bundled [#DDdefs]_ with many versions of the Data Dictionary definitions.
 You can find out which versions are available by calling
 :py:meth:`imas.dd_zip.dd_xml_versions`.
 
@@ -74,7 +74,7 @@ things that could change:
 -   Change the data type of an IDS node
 -   Rename an IDS node
 
-imas-python can convert between different versions of the DD and will migrate the data as
+IMAS-Python can convert between different versions of the DD and will migrate the data as
 much as possible. Let's see how this works in the following exercise.
 
 
@@ -103,9 +103,9 @@ Exercise 2: Convert an IDS between DD versions
             convert the IDS to DD version 3.39.0. The ``antenna`` structure that we
             filled in the old version of the DD has since been renamed to ``launcher``,
             and the ``launching_angle_*`` structures to ``steering_angle``. Check that
-            imas-python has converted the data successfully (for example with
+            IMAS-Python has converted the data successfully (for example with
             :py:func:`imas.util.print_tree`).
-        5.  By default, imas-python creates a shallow copy of the data, which means that the
+        5.  By default, IMAS-Python creates a shallow copy of the data, which means that the
             underlying data arrays are shared between the IDSs of both versions. Update
             the ``time`` data of the original IDS (for example:
             :code:`pulse_schedule.time[1] = 3`) and print the ``time`` data of the
@@ -137,7 +137,7 @@ Automatic conversion between DD versions
 When loading data (with :py:meth:`~imas.db_entry.DBEntry.get` or
 :py:meth:`~imas.db_entry.DBEntry.get_slice`) or storing data (with
 :py:meth:`~imas.db_entry.DBEntry.put` or
-:py:meth:`~imas.db_entry.DBEntry.put_slice`), imas-python automatically converts the DD
+:py:meth:`~imas.db_entry.DBEntry.put_slice`), IMAS-Python automatically converts the DD
 version for you. In this section we will see how that works.
 
 
@@ -255,7 +255,7 @@ contain large changes between DD versions, such as:
 Using custom builds of the Data Dictionary
 ------------------------------------------
 
-In the previous sections we showed how you can direct imas-python to use a specific released
+In the previous sections we showed how you can direct IMAS-Python to use a specific released
 version of the Data Dictionary definitions. Sometimes it is useful to work with
 unreleased (development or custom) versions of the data dictionaries as well.
 
@@ -267,11 +267,11 @@ unreleased (development or custom) versions of the data dictionaries as well.
     might not be read properly in the future.
 
 If you build the Data Dictionary, a file called ``IDSDef.xml`` is created. This file
-contains all IDS definitions. To work with a custom DD build, you need to point imas-python
+contains all IDS definitions. To work with a custom DD build, you need to point IMAS-Python
 to this ``IDSDef.xml`` file:
 
 .. code-block:: python
-    :caption: Use a custom Data Dictionary build with imas-python
+    :caption: Use a custom Data Dictionary build with IMAS-Python
 
     my_idsdef_file = "path/to/IDSDef.xml"  # Replace with the actual path
 
@@ -291,5 +291,5 @@ build, you can use them like you normally would.
 .. rubric:: Footnotes
 
 .. [#DDdefs] To be more precise, the Data Dictionary definitions are generated when the
-    imas-python package is created. See :ref:`this reference <DD background>` for more
+    IMAS-Python package is created. See :ref:`this reference <DD background>` for more
     details.

@@ -1,6 +1,6 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
-"""Core of the imas-python interpreted IDS metadata
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
+"""Core of the IMAS-Python interpreted IDS metadata
 """
 import re
 import types
@@ -26,7 +26,7 @@ class IDSType(Enum):
     operation); ``dynamic`` data are those which vary in time within the context of the
     data.
 
-    As in the Python HLI, imas-python only distinguishes between dynamic and non-dynamic
+    As in the Python HLI, IMAS-Python only distinguishes between dynamic and non-dynamic
     nodes.
     """
 
@@ -154,7 +154,7 @@ class IDSMetadata:
         else:
             self._ctx_path = self.name
 
-        # These are special and used in imas-python logic,
+        # These are special and used in IMAS-Python logic,
         # so we need to ensure proper values
         maxoccur = attrib.get("maxoccur", "unbounded")
         self.maxoccur: Optional[int] = (

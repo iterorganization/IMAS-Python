@@ -1,5 +1,5 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 """Support module to run imas as a module:
 
 .. code-block:: bash

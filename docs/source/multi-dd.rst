@@ -4,9 +4,9 @@ Using multiple DD versions in the same environment
 ==================================================
 
 Whereas the default IMAS High Level Interface is built for a single Data Dictionary
-version, imas-python can transparently handle multiple DD versions.
+version, IMAS-Python can transparently handle multiple DD versions.
 
-By default, imas-python uses the same Data Dictionary version as the loaded IMAS environment
+By default, IMAS-Python uses the same Data Dictionary version as the loaded IMAS environment
 is using, as specified by the environment variable ``IMAS_VERSION``. If no IMAS
 environment is loaded, the last available DD version is used.
 
@@ -34,7 +34,7 @@ example:
 Conversion of IDSs between DD versions
 --------------------------------------
 
-imas-python can convert IDSs between different versions of the data dictionary. This uses the
+IMAS-Python can convert IDSs between different versions of the data dictionary. This uses the
 "non-backwards compatible changes" metadata from the DD definitions. There are
 two conversion modes:
 
@@ -75,8 +75,8 @@ the backend and the stored data), but it doesn't support all conversion logic
     be more efficient to convert the data to your DD version, store it and then
     use it. This avoids conversion every time you read the data.
 
-    Converting an entire Data Entry can also be done with the imas-python command
-    line interface. See :ref:`imas-python Command Line tool`.
+    Converting an entire Data Entry can also be done with the IMAS-Python command
+    line interface. See :ref:`IMAS-Python Command Line tool`.
 
 
 Explicit conversion
@@ -114,7 +114,7 @@ Explicit conversion
 .. note::
 
     Not all data may be converted. For example, when an IDS node is removed between DD
-    versions, the corresponding data is not copied. imas-python provides logging to indicate
+    versions, the corresponding data is not copied. IMAS-Python provides logging to indicate
     when this happens.
 
 
@@ -181,16 +181,16 @@ explicit conversion mechanisms.
 Background information
 ----------------------
 
-Since imas-python needs to have access to multiple DD versions it was chosen to
+Since IMAS-Python needs to have access to multiple DD versions it was chosen to
 bundle these with the code at build-time, in setup.py. If a git clone of the
 Data Dictionary succeeds, the setup tools automatically download saxon and
 generate ``IDSDef.xml`` for each of the tagged versions in the DD git
 repository. These are then gathered into ``IDSDef.zip``, which is
-distributed inside the imas-python package.
+distributed inside the IMAS-Python package.
 
 To update the set of data dictionaries new versions can be added to the zipfile.
 A reinstall of the package will ensure that all available versions are included
-in imas-python. Additionally an explicit path to an XML file can be specified, which
+in IMAS-Python. Additionally an explicit path to an XML file can be specified, which
 is useful for development.
 
 Automated tests have been provided that check the loading of all of the DD
@@ -203,14 +203,14 @@ Extending the DD set
 Use the command ``python setup.py build_DD`` to build a new ``IDSDef.zip``. This
 fetches all tags from the data dictionary git repository and builds the ``IDSDef.zip``.
 
-imas-python searches for an ``IDSDef.zip`` in the following locations:
+IMAS-Python searches for an ``IDSDef.zip`` in the following locations:
 
 1.  The environment variable ``$IMAS_DDZIP`` (path to a zip file)
 2.  The file ``./IDSDef.zip`` in the current working directory
 3.  In the local configuration folder: ``~/.config/imas/IDSDef.zip``, or
     ``$XDG_CONFIG_DIR/imas/IDSDef.zip`` (if the environment variable
     ``$XDG_CONFIG_DIR`` is set)
-4.  The zipfile bundled with the imas-python installation: ``assets/IDSDef.zip``
+4.  The zipfile bundled with the IMAS-Python installation: ``assets/IDSDef.zip``
 
 All paths are searched in order when loading the definitions of a specific data
 dictionary version: the first zip file that contains the definitions of the requested

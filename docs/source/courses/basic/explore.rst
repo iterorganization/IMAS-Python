@@ -1,6 +1,6 @@
 .. _`basic/explore`:
 
-Explore with imas-python
+Explore with IMAS-Python
 ========================
 
 In this part of the training, we will learn how to use Python to explore data
@@ -32,10 +32,10 @@ Exercise 1
         .. hint::
             The module ``imas.ids_names`` contains information on the available IDSs.
 
-            In imas-python, you can use :py:class:`~imas.ids_factory.IDSFactory` to figure
+            In IMAS-Python, you can use :py:class:`~imas.ids_factory.IDSFactory` to figure
             out which IDSs are avaible.
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
         
         .. literalinclude:: imas_snippets/print_idss.py
 
@@ -43,7 +43,7 @@ Exercise 1
 Explore the structure and contents of an IDS
 --------------------------------------------
 
-imas-python has several features and utilities for exploring an IDS. These are best used in
+IMAS-Python has several features and utilities for exploring an IDS. These are best used in
 an interactive Python console, such as the default python console or the `IPython
 <https://ipython.org/>`_ console.
 
@@ -51,7 +51,7 @@ an interactive Python console, such as the default python console or the `IPytho
 Tab completion
 ''''''''''''''
 
-As with most Python objects, you can use :kbd:`Tab` completion on imas-python objects.
+As with most Python objects, you can use :kbd:`Tab` completion on IMAS-Python objects.
 
 .. note::
     In the python console, you need to press :kbd:`Tab` twice to show suggestions.
@@ -74,7 +74,7 @@ As with most Python objects, you can use :kbd:`Tab` completion on imas-python ob
 Interactive help
 ''''''''''''''''
 
-Use the built-in :external:py:func:`help()` function to get more information on imas-python
+Use the built-in :external:py:func:`help()` function to get more information on IMAS-Python
 functions, objects, etc.
 
 .. code-block:: pycon
@@ -87,11 +87,11 @@ functions, objects, etc.
     [...]
 
 
-Inspecting imas-python objects
+Inspecting IMAS-Python objects
 ''''''''''''''''''''''''''''''
 
 :kbd:`Tab` completion is nice when you already know more or less what attribute you are
-looking for. For a more comprehensive overview of any imas-python node, you can use
+looking for. For a more comprehensive overview of any IMAS-Python node, you can use
 :py:meth:`imas.util.inspect` to show:
 
 1.  The path to the node (relative to the IDS it is contained in)
@@ -119,7 +119,7 @@ looking for. For a more comprehensive overview of any imas-python node, you can 
 Printing an IDS tree
 ''''''''''''''''''''
 
-Another useful utility function in imas-python is :py:meth:`imas.util.print_tree`. This
+Another useful utility function in IMAS-Python is :py:meth:`imas.util.print_tree`. This
 will print a complete tree structure of all non-empty quantities in the provided node.
 As an argument you can give a complete IDS, or any structure in the IDS such as
 ``ids_properties``:
@@ -138,7 +138,7 @@ As an argument you can give a complete IDS, or any structure in the IDS such as
 Find paths in an IDS
 ''''''''''''''''''''
 
-In imas-python you can also search for paths inside an IDS:
+In IMAS-Python you can also search for paths inside an IDS:
 :py:meth:`imas.util.find_paths`. This can be useful when you know what quantity you
 are looking for, but aren't sure exactly in which (sub)structure of the IDS it is
 located.

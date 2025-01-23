@@ -1,5 +1,5 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 """
 Helper module for providing a version-independent interface to the Access Layer.
 
@@ -44,7 +44,7 @@ class LLInterfaceError(RuntimeError):
 class LowlevelInterface:
     """Compatibility object.
 
-    Provides a stable API for the rest of imas-python even when the
+    Provides a stable API for the rest of IMAS-Python even when the
     `imas.lowlevel` interface changes.
 
     .. rubric:: Developer notes
@@ -213,4 +213,4 @@ for funcname in dir(LowlevelInterface):
         func.__doc__ = f"Wrapper function for AL lowlevel method ``{funcname}``"
 
 ll_interface = LowlevelInterface(lowlevel)
-"""imas-python <-> IMAS lowlevel interface"""
+"""IMAS-Python <-> IMAS lowlevel interface"""

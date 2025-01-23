@@ -9,9 +9,9 @@ IMAS netCDF files
     netcdf/conventions
 
 
-imas-python supports reading IDSs from and writing IDSs to IMAS netCDF files. This
+IMAS-Python supports reading IDSs from and writing IDSs to IMAS netCDF files. This
 feature is currently in alpha status, and its functionality may change in
-upcoming minor releases of imas-python.
+upcoming minor releases of IMAS-Python.
 
 A detailed description of the IMAS netCDF format and conventions can be found on
 the :ref:`IMAS conventions for the netCDF data format` page.
@@ -45,12 +45,12 @@ will be used for :py:meth:`~imas.db_entry.DBEntry.get` and
 Using IMAS netCDF files with 3rd-party tools
 --------------------------------------------
 
-The netCDF files produces by imas-python can be read with external tools. In this
+The netCDF files produces by IMAS-Python can be read with external tools. In this
 section we will show how to load data with the `xarray
 <https://docs.xarray.dev/en/stable/index.html>`__ package.
 
 Let's first create a small netCDF file in the current working directory based on
-the imas-python training data:
+the IMAS-Python training data:
 
 .. code-block:: python
     :caption: Store ``core_profiles`` training data in a netCDF file
@@ -107,6 +107,6 @@ your directory. Let's open this file with ``xarray.load_dataset``:
 Validating an IMAS netCDF file
 ------------------------------
 
-IMAS netCDF files can be validated with imas-python through the command line ``imas
-validate_nc <filename>``. See also :ref:`imas-python Command Line tool` or type
+IMAS netCDF files can be validated with IMAS-Python through the command line ``imas
+validate_nc <filename>``. See also :ref:`IMAS-Python Command Line tool` or type
 ``imas validate_nc --help`` in a command line.

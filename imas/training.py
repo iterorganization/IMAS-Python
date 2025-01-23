@@ -1,6 +1,6 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
-"""Functions that are useful for the imas-python training courses.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
+"""Functions that are useful for the IMAS-Python training courses.
 """
 
 import importlib

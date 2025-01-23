@@ -21,7 +21,7 @@ print(p2d.density.metadata.coordinates)
 # What do you notice: in both dimensions there are multiple options for the coordinate.
 
 # 3. Retrieve the coordinate values through the ``coordinates`` attribute.
-# This will raise a coordinate lookup error because imas-python cannot choose which of the
+# This will raise a coordinate lookup error because IMAS-Python cannot choose which of the
 # coordinates to use:
 try:
     print(p2d.density.coordinates[0])

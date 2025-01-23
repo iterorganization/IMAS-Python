@@ -24,7 +24,7 @@ print("sys.path:", sys.path)
 
 # -- Project information -----------------------------------------------------
 # The documented project’s name
-project = src_project = PROJECT = "imas-python"
+project = src_project = PROJECT = "IMAS-Python"
 PACKAGE = "imas"
 GROUP = "IMAS"
 
@@ -39,9 +39,9 @@ src_host = "https://github.com/iterorganization/"
 iter_projects = "https://github.com/iterorganization/"
 dd_url = urljoin(iter_projects, "imas-data-dictionary/")
 al_url = urljoin(iter_projects, "imas-core/")
-issue_url = jira_url = "https://github.com/iterorganization/imas-python/issues"
+issue_url = jira_url = "https://github.com/iterorganization/IMAS-Python/issues"
 
-# imas-python
+# IMAS-Python
 repository_url = f"{iter_projects}/{src_project}/"
 blob_url = repository_url
 mr_url = urljoin(repository_url, "/pulls")
@@ -134,8 +134,8 @@ html_theme = "sphinx_immaterial"
 # and
 # https://sphinx-immaterial.readthedocs.io/en/latest/customization.html#confval-html_theme_options
 html_theme_options = {
-    "repo_url": "https://github.com/iterorganization/imas-python",
-    "repo_name": "imas-python",
+    "repo_url": "https://github.com/iterorganization/IMAS-Python",
+    "repo_name": "IMAS-Python",
     "icon": {
         "repo": "fontawesome/brands/github",
     },

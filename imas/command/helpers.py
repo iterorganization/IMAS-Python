@@ -24,7 +24,7 @@ def setup_rich_log_handler(quiet: bool):
         root_logger.removeHandler(handler)
     # Install rich handler on the root logger:
     root_logger.addHandler(RichHandler())
-    if quiet:  # Silence imas-python INFO messages
+    if quiet:  # Silence IMAS-Python INFO messages
         # If loglevel is less than WARNING, set it to WARNING:
         imas_logger.setLevel(max(logging.WARNING, imas_logger.getEffectiveLevel()))
 

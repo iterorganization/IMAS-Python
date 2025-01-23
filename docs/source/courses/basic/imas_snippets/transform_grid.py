@@ -29,7 +29,7 @@ for time in input_times:
     eq = entry.get_slice("equilibrium", time, imas.ids_defs.CLOSEST_INTERP)
 
     # Update comment
-    eq.ids_properties.comment = "imas-python training: transform coordinate system"
+    eq.ids_properties.comment = "IMAS-Python training: transform coordinate system"
 
     p2d = eq.time_slice[0].profiles_2d[0]
     # Get `.value` so we can plot the original values after the IDS node is overwritten

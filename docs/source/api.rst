@@ -3,11 +3,11 @@
 API reference
 =============
 
-This page provides an auto-generated summary of imas-python's API. For more details
+This page provides an auto-generated summary of IMAS-Python's API. For more details
 and examples, refer to the relevant chapters in the main part of the
 documentation.
 
-imas-python IDS manipulation
+IMAS-Python IDS manipulation
 ----------------------------
 
 .. currentmodule:: imas

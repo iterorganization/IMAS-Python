@@ -11,7 +11,7 @@ cp = factory.core_profiles()
 
 # Set properties
 cp.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
-cp.ids_properties.comment = "Synthetic IDS created for the imas-python course"
+cp.ids_properties.comment = "Synthetic IDS created for the IMAS-Python course"
 cp.ids_properties.creation_date = datetime.date.today().isoformat()
 
 # Set a time array

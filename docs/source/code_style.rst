@@ -7,7 +7,7 @@ Code style and linting
 Code style
 ----------
 
-imas-python follows `The Black Code Style
+IMAS-Python follows `The Black Code Style
 <https://black.readthedocs.io/en/stable/the_black_code_style/index.html>`_. All Python
 files should be formatted with the ``black`` command line tool (this is checked in
 :ref:`CI <ci configuration>`).
@@ -48,7 +48,7 @@ with pre-commit hooks):
 Linting
 -------
 
-imas-python uses `flake8 <https://flake8.pycqa.org/en/latest/>`_ for linting (static code
+IMAS-Python uses `flake8 <https://flake8.pycqa.org/en/latest/>`_ for linting (static code
 analysis). Flake8 should not report any violations when running it on the ``imas``
 code base. Again, this is checked in CI.
 

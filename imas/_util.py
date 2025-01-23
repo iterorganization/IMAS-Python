@@ -1,5 +1,5 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 """This file contains the implementation of all utility functions that need external
 modules. Implementation has been removed from util.py to improve the performance of
 ``import imas``.

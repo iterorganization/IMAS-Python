@@ -1,14 +1,14 @@
 Calculating hashes of IMAS data
 ===============================
 
-imas-python can calculate *hashes* of IMAS data. As `Wikipedia explains better than I could
+IMAS-Python can calculate *hashes* of IMAS data. As `Wikipedia explains better than I could
 do <https://en.wikipedia.org/wiki/Hash_function>`__:
 
     A hash function is any function that can be used to map data of arbitrary size to
     fixed-size values, [...]. The values returned by a hash function are called *hash
     values*, *hash codes*, *hash digests*, *digests*, or simply *hashes*.
 
-imas-python is using the XXH3 hash function from the `xxHash project
+IMAS-Python is using the XXH3 hash function from the `xxHash project
 <https://github.com/Cyan4973/xxHash>`__. This is a *non-cryptographic* hash and returns
 64-bit hashes.
 
@@ -54,7 +54,7 @@ Exercise 1: Calculate some hashes
         .. literalinclude:: imas_snippets/hashing.py
 
 
-Properties of imas-python's hashes
+Properties of IMAS-Python's hashes
 ----------------------------------
 
 The implementation of the hash function has the following properties:

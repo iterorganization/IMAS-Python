@@ -1,6 +1,6 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
-"""Exception classes used in imas-python.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
+"""Exception classes used in IMAS-Python.
 """
 
 import difflib

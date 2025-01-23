@@ -1,5 +1,5 @@
 #!/bin/bash
-# Bamboo CI script to install imas and run all tests
+# Bamboo CI script to install imas Python module and run all tests
 # Note: this script should be run from the root of the git repository
 
 # Debuggging:

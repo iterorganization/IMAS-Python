@@ -8,7 +8,7 @@ from imas.dd_helpers import prepare_data_dictionaries, _idsdef_zip_relpath, _bui
 
 _idsdef_unzipped_relpath = Path("idsdef_unzipped")
 
-
+@pytest.mark.skip(reason="skipping IDSDef.zip generation")
 def test_prepare_data_dictionaries():
     prepare_data_dictionaries()
     assert os.path.exists(

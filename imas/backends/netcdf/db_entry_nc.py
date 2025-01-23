@@ -31,7 +31,7 @@ class NCDBEntryImpl(DBEntryImpl):
         if netCDF4 is None:
             raise RuntimeError(
                 "The `netCDF4` python module is not available. Please install this "
-                "module to read/write IMAS netCDF files with imas-python."
+                "module to read/write IMAS netCDF files with IMAS-Python."
             )
         # To support netcdf v1.4 (which has no mode "x") we map it to "w" with
         # `clobber=True`.

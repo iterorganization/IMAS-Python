@@ -3,25 +3,25 @@
 CI configuration
 ================
 
-imas-python uses `ITER Bamboo <https://ci.iter.org/>`_ for CI. This page provides an overview
+IMAS-Python uses `ITER Bamboo <https://ci.iter.org/>`_ for CI. This page provides an overview
 of the CI Plan and deployment projects.
 
 CI Plan
 -------
 
-The `imas-python CI plan <https://ci.iter.org/browse/IC-IG>`_ consists of 4 types of jobs:
+The `IMAS-Python CI plan <https://ci.iter.org/browse/IC-IG>`_ consists of 4 types of jobs:
 
 Linting and DD ZIP
     This job is responsible for three things:
 
     1.  Verify that the ``IDSDef2MDSplusPreTree.xsl`` file matches the one in the Access
         Layer repository. This file is required for building MDSplus models and the
-        models built by imas-python should match those built by the Access Layer.
-    2.  Linting: run ``black`` and ``flake8`` on the imas-python code base. See :ref:`code
+        models built by IMAS-Python should match those built by the Access Layer.
+    2.  Linting: run ``black`` and ``flake8`` on the IMAS-Python code base. See :ref:`code
         style and linting`.
     3.  Build the Data Dictionary zip file. This Task builds the Data Dictionary for all
         tagged releases since DD version ``3.22.0``. These are combined into the
-        ``IDSDef.zip`` file, which is distributed with imas-python.
+        ``IDSDef.zip`` file, which is distributed with IMAS-Python.
 
         The ZIP file is built in a separate job, such that the subsequent test jobs can
         reuse this.
@@ -62,7 +62,7 @@ Benchmark
     The CI script executed in this job is: ``ci/run_benchmark.sh``.
 
 Build docs and dists
-    This job builds the Sphinx documentation and python packages for imas-python (``sdist``
+    This job builds the Sphinx documentation and python packages for IMAS-Python (``sdist``
     and ``wheel``).
 
     The CI script executed in this job is: ``ci/build_docs_and_dist.sh``.
@@ -71,14 +71,14 @@ Build docs and dists
 Deployment projects
 -------------------
 
-There is github workflow for imas-python:
+There is github workflow for IMAS-Python:
 
-`imas-python-PyPi <https://github.com/iterorganization/imas-python/blob/main/.github/workflows/publish.yml>`_
+`IMAS-Python-PyPi <https://github.com/iterorganization/IMAS-Python/blob/main/.github/workflows/publish.yml>`_
     Deploy the python packages job to the  https://pypi.org/ server and https://test.pypi.org/ server.
-    You can find link here : `imas-python <https://pypi.org/project/imas-python/>`_
+    You can find link here : `IMAS-Python <https://pypi.org/project/IMAS-Python/>`_
 
 
-`Deploy imas-python-doc <https://app.readthedocs.org/projects/imas-python/>`_
+`Deploy IMAS-Python-doc <https://app.readthedocs.org/projects/IMAS-Python/>`_
     Deploy the documentation using `readthedocs
-    <https://imas-python.readthedocs.io/en/latest/>`_.
+    <https://IMAS-Python.readthedocs.io/en/latest/>`_.
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Bamboo CI script to install imas and run all tests
+# Bamboo CI script to install imas Python module and run all tests
 # Note: this script should be run from the root of the git repository
 
 # Debuggging:
@@ -27,7 +27,7 @@ pip install --upgrade pip setuptools wheel build
 rm -rf dist
 python -m build .
 
-# Install imas and documentation dependencies from the just-built wheel
+# Install imas Python module and documentation dependencies from the just-built wheel
 pip install "`readlink -f dist/*.whl`[docs,netcdf]"
 
 # Debugging:

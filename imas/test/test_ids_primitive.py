@@ -1,5 +1,5 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 import pprint
 
 import numpy as np
@@ -38,7 +38,7 @@ str('A filled comment')"""
 
 
 def test_value_attribute(fake_filled_toplevel):
-    """Test if the value attribute acts as imas-python expects"""
+    """Test if the value attribute acts as IMAS-Python expects"""
     eig = fake_filled_toplevel.wavevector[0].eigenmode[0]
     assert isinstance(eig.frequency_norm, IDSPrimitive)
     assert hasattr(eig.frequency_norm, "value")

@@ -1,24 +1,24 @@
-.. _`Installing imas-python`:
+.. _`Installing IMAS-Python`:
 
-Installing imas-python
+Installing IMAS-Python
 ======================
 
-imas-python is a pure Python package. For full functionality of the package you need
+IMAS-Python is a pure Python package. For full functionality of the package you need
 an installation of `the IMAS Core library <https://imas.iter.org/>`_. See
-:ref:`imas-python 5 minute introduction` for an overview of functionality which does
+:ref:`IMAS-Python 5 minute introduction` for an overview of functionality which does
 (not) require the IMAS Core library available.
 
-To get started, you can install it from `pypi.org <https://pypi.org/project/imas-python>`_:
+To get started, you can install it from `pypi.org <https://pypi.org/project/IMAS-Python>`_:
 
 .. code-block:: bash
 
-    pip install imas-python
+    pip install IMAS-Python
 
 
 Local installation from sources
 -------------------------------
 
-We recommend using a :external:py:mod:`venv`. Then, clone the imas-python repository
+We recommend using a :external:py:mod:`venv`. Then, clone the IMAS-Python repository
 and run `pip install`:
 
 .. code-block:: bash
@@ -26,7 +26,7 @@ and run `pip install`:
     python3 -m venv ./venv
     . venv/bin/activate
     
-    git clone ssh://git@github.com:iterorganization/imas-python.git
+    git clone ssh://git@github.com:iterorganization/IMAS-Python.git
     cd imas
     pip install --upgrade pip
     pip install --upgrade wheel setuptools
@@ -50,17 +50,17 @@ Test your installation by trying
     cd ~
     python -c "import imas; print(imas.__version__)"
 
-This is how to run the imas-python test suite:
+This is how to run the IMAS-Python test suite:
 
 .. code-block:: bash
 
-    # inside the imas-python git repository
+    # inside the IMAS-Python git repository
     pytest imas --mini
 
     # run with a specific backend
     pytest imas --ascii --mini
 
-And to build the imas-python documentation, execute:
+And to build the IMAS-Python documentation, execute:
 
 .. code-block:: bash
 

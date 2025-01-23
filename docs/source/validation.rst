@@ -3,7 +3,7 @@
 IDS validation
 ==============
 
-The IDSs you fill should be consistent. To help you in validating that, imas-python has a
+The IDSs you fill should be consistent. To help you in validating that, IMAS-Python has a
 :py:meth:`~imas.ids_toplevel.IDSToplevel.validate` method that executes the following
 checks.
 
@@ -11,7 +11,7 @@ checks.
     :local:
     :depth: 1
 
-If you call this method and your IDS fails validation, imas-python raises an error explaining
+If you call this method and your IDS fails validation, IMAS-Python raises an error explaining
 the problem. See the following example:
 
 >>> import imas
@@ -19,7 +19,7 @@ the problem. See the following example:
 >>> core_profiles.validate()
 imas.exception.ValidationError: Invalid value for ids_properties.homogeneous_time: -999999999
 
-imas-python also automatically validates an IDS every time you do a
+IMAS-Python also automatically validates an IDS every time you do a
 :py:meth:`~imas.db_entry.DBEntry.put` or
 :py:meth:`~imas.db_entry.DBEntry.put_slice`. To disable this feature, you must set the
 environment variable ``IMAS_AL_DISABLE_VALIDATE`` to ``1``.

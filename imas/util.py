@@ -1,6 +1,6 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
-"""Collection of useful helper methods when working with imas-python.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
+"""Collection of useful helper methods when working with IMAS-Python.
 """
 
 
@@ -32,7 +32,7 @@ def visit_children(
 ) -> None:
     """Apply a function to node and its children
 
-    imas-python objects generally live in a tree structure. Similar to Pythons
+    IMAS-Python objects generally live in a tree structure. Similar to Pythons
     :py:func:`map`, this method can be used to apply a function to objects
     within this tree structure.
 
@@ -56,7 +56,7 @@ def visit_children(
     Example:
         .. code-block:: python
 
-            # Print all filled leaf nodes in a given imas-python IDSToplevel
+            # Print all filled leaf nodes in a given IMAS-Python IDSToplevel
             visit_children(print, toplevel)
 
     See Also:
@@ -80,9 +80,9 @@ def tree_iter(
     accept_lazy: bool = False,
     include_node: bool = False,
 ) -> Iterator[IDSBase]:
-    """Tree iterator for imas-python structures.
+    """Tree iterator for IMAS-Python structures.
 
-    Iterate (depth-first) through the whole subtree of an imas-python structure.
+    Iterate (depth-first) through the whole subtree of an IMAS-Python structure.
 
     Args:
         node: Node to start iterating from.
@@ -104,7 +104,7 @@ def tree_iter(
     Example:
         .. code-block:: python
 
-            # Iterate over all filled leaf nodes in a given imas-python IDSToplevel
+            # Iterate over all filled leaf nodes in a given IMAS-Python IDSToplevel
             for node in tree_iter(toplevel):
                 print(node)
 
@@ -514,7 +514,7 @@ def get_data_dictionary_version(obj: Union[IDSBase, DBEntry, IDSFactory]) -> str
     """Find out the version of the data dictionary definitions that this object uses.
 
     Args:
-        obj: Any imas-python object that is data-dictionary dependent.
+        obj: Any IMAS-Python object that is data-dictionary dependent.
 
     Returns:
         The data dictionary version, e.g. ``"3.38.1"``.

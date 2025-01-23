@@ -1,16 +1,16 @@
 .. _`benchmarking IMAS`:
 
-Benchmarking imas-python
+Benchmarking IMAS-Python
 ========================
 
-imas-python integrates with the `airspeed velocity
+IMAS-Python integrates with the `airspeed velocity
 <https://asv.readthedocs.io/en/stable/index.html>`_ ``asv`` package for benchmarking.
 
 
-imas-python benchmarks
+IMAS-Python benchmarks
 ----------------------
 
-imas-python benchmarks are stored in the ``benchmarks`` folder in the git repository. We can
+IMAS-Python benchmarks are stored in the ``benchmarks`` folder in the git repository. We can
 currently distinguish three types of benchmarks:
 
 Technical benchmarks
@@ -20,14 +20,14 @@ Technical benchmarks
 
 Basic functional benchmarks
     These are for benchmarking functionality with an equivalent feature in the IMAS
-    Access Layer HLI. In addition to tracking the performance of the imas-python features
+    Access Layer HLI. In addition to tracking the performance of the IMAS-Python features
     over time, we can also benchmark the performance against the traditional HLI.
 
     For example: putting and getting IDSs.
 
-imas-python-specific functional benchmarks
+IMAS-Python-specific functional benchmarks
     These are for benchmarking functionality without an equivalent feature in the IMAS
-    Access Layer HLI. We use these for tracking the imas-python performance over time.
+    Access Layer HLI. We use these for tracking the IMAS-Python performance over time.
 
     For example: data conversion between DD versions.
 
@@ -35,7 +35,7 @@ imas-python-specific functional benchmarks
 Running benchmarks (quick)
 --------------------------
 
-When you have an existing imas-python installation, you can run the benchmarks like this:
+When you have an existing IMAS-Python installation, you can run the benchmarks like this:
 
 .. code-block:: console
 
@@ -103,8 +103,8 @@ Running benchmarks (advanced)
 -----------------------------
 
 Running benchmarks quickly, as explained in the previous section, is great during
-development and for comparing the performance of imas-python against the imas HLI. However,
-``asv`` can also track the performance of benchmarks over various commits of imas-python.
+development and for comparing the performance of IMAS-Python against the imas HLI. However,
+``asv`` can also track the performance of benchmarks over various commits of IMAS-Python.
 Unfortunately this is a bit more tricky to set up.
 
 
@@ -112,7 +112,7 @@ Setup advanced benchmarking
 '''''''''''''''''''''''''''
 
 First, some background on how ``asv`` tracks performance: it creates an isolated virtual
-environment (using the ``virtualenv`` package) and installs imas-python for each commit that
+environment (using the ``virtualenv`` package) and installs IMAS-Python for each commit that
 will be benchmarked. However, because the virtual environment is isolated, the ``imas``
 package won't be available. We need to work around it by setting the environment
 variable ``ASV_PYTHONPATH``:
@@ -171,7 +171,7 @@ Instead, you can submit a benchmark job to the compute nodes.
     #!/bin/bash
 
     # Set SLURM options:
-    #SBATCH --job-name=imas-python-benchmark
+    #SBATCH --job-name=IMAS-Python-benchmark
     #SBATCH --time=1:00:00
     #SBATCH --partition=gen10_ib
     # Note: for proper benchmarking we need to exclusively reserve a node, even though

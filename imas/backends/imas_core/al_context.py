@@ -1,5 +1,5 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 """Object-oriented interface to the IMAS lowlevel.
 """
 
@@ -298,7 +298,7 @@ class LazyALContext:
             if not cache or cache[-1] is not ctx:
                 logger.warning(
                     "Found an empty AL context cache: This should not happen, please "
-                    "report this bug to the imas-python developers."
+                    "report this bug to the IMAS-Python developers."
                 )
             else:
                 return ctx

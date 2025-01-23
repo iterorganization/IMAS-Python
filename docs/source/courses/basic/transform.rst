@@ -1,4 +1,4 @@
-Transform with imas-python
+Transform with IMAS-Python
 ==========================
 
 In this part of the course we'll perform a coordinate transformation. Our input data is
@@ -27,7 +27,7 @@ Exercise 1: Check which time slices exist
         .. hint::
             You can use :ref:`lazy loading` to avoid loading all data in memory.
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/transform_grid.py
             :start-at: # Open input data entry
@@ -44,7 +44,7 @@ Exercise 2: Load a time slice
         Loop over each available time in the IDS and load the time slice inside the
         loop.
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/transform_grid.py
             :start-at: # Loop over each time slice
@@ -74,7 +74,7 @@ We will apply the transformation of the data as follows:
 
 .. md-tab-set::
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/transform_grid.py
             :start-at: # Loop over each time slice
@@ -90,7 +90,7 @@ Exercise 4: Store a time slice
 
         Store the time slice after the transformation.
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/transform_grid.py
             :start-at: # Create output data entry
@@ -114,7 +114,7 @@ Exercise 5: Plotting data before and after the transformation
         :math:`\rho,\theta` plane (transformed data) to verify that the transformation
         is correct.
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/transform_grid.py
             :start-at: # Create a plot
@@ -125,7 +125,7 @@ Bringing it all together
 
 .. md-tab-set::
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/transform_grid.py
             :caption: Source code for the complete exercise

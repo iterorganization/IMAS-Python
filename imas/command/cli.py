@@ -1,5 +1,5 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 """ Main CLI entry point """
 
 import logging
@@ -44,7 +44,7 @@ def _excepthook(type_, value, tb):
 
 @click.group("imas", invoke_without_command=True, no_args_is_help=True)
 def cli():
-    """imas-python command line interface.
+    """IMAS-Python command line interface.
 
     Please use one of the available commands listed below. You can get help for each
     command by executing:
@@ -62,15 +62,15 @@ cli.add_command(process_db_analysis)
 
 @cli.command("version")
 def print_version():
-    """Print version information of imas-python."""
+    """Print version information of IMAS-Python."""
     cons = console.Console()
     grid = Table(
-        title="imas-python version info", show_header=False, title_style="bold"
+        title="IMAS-Python version info", show_header=False, title_style="bold"
     )
     grid.box = box.HORIZONTALS
     if cons.size.width > 120:
         grid.width = 120
-    grid.add_row("imas-python version:", imas.__version__)
+    grid.add_row("IMAS-Python version:", imas.__version__)
     grid.add_section()
     grid.add_row("Default data dictionary version:", imas.IDSFactory().dd_version)
     dd_versions = ", ".join(imas.dd_zip.dd_xml_versions())

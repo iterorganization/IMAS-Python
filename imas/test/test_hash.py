@@ -162,7 +162,7 @@ def test_hash_ids():
     cp = imas.IDSFactory().core_profiles()
     cp.ids_properties.homogeneous_time = 1
     cp.ids_properties.comment = "Testing hash function"
-    cp.code.name = "imas-python"
+    cp.code.name = "IMAS-Python"
     cp.time = [1.0, 2.0, 3.0, 4.0]
     cp.profiles_1d.resize(4)
     for p1d in cp.profiles_1d:

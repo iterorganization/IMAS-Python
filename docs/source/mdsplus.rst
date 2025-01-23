@@ -1,11 +1,11 @@
-.. _`MDSplus in imas-python`:
+.. _`MDSplus in IMAS-Python`:
 
-MDSplus in imas-python
+MDSplus in IMAS-Python
 ======================
 
 `MDSplus <https://www.mdsplus.org>`_ is a set of software tools for data
 acquisition and storage and a methodology for management of complex
-scientific data. imas-python uses the IMAS LowLevel interface to interact
+scientific data. IMAS-Python uses the IMAS LowLevel interface to interact
 with MDSplus data. The model files required to read IMAS IDS-structured
 data are generated on demand, whenever a specific DD version is used
 by the user. As this generation might take a while, MDSplus models are

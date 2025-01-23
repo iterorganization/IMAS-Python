@@ -1,11 +1,11 @@
 # pylint: disable=wrong-import-position
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 """
 Packaging settings. Inspired by a minimal setup.py file, the Pandas cython build
 and the access-layer setup template.
 
-The installable imas-python package tries to follow in the following order:
+The installable IMAS-Python package tries to follow in the following order:
 - The style guide for Python code [PEP8](https://www.python.org/dev/peps/pep-0008/)
 - The [PyPA guide on packaging projects](
   https://packaging.python.org/guides/distributing-packages-using-setuptools/#distributing-packages)

@@ -3,11 +3,11 @@
    define TOC here, but it'll be put in the sidebar by the theme
 
 ==================
-imas-python manual
+IMAS-Python manual
 ==================
 
-imas-python is a pure-python library to handle arbitrarily nested
-data structures. imas-python is designed for, but not necessarily bound to,
+IMAS-Python is a pure-python library to handle arbitrarily nested
+data structures. IMAS-Python is designed for, but not necessarily bound to,
 interacting with Interface Data Structures (IDSs) as defined by the
 Integrated Modelling & Analysis Suite (IMAS) Data Model.
 
@@ -22,7 +22,7 @@ It provides:
 
 The README is best read on :src:`#imas`.
 
-Read what's new in the current version of imas-python in our :ref:`changelog`!
+Read what's new in the current version of IMAS-Python in our :ref:`changelog`!
 
 
 Manual
@@ -48,7 +48,7 @@ Manual
    changelog
 
 .. toctree::
-   :caption: imas-python training courses
+   :caption: IMAS-Python training courses
    :maxdepth: 1
 
    courses/basic_user_training
@@ -64,7 +64,7 @@ Manual
 
 
 .. toctree::
-   :caption: imas-python development
+   :caption: IMAS-Python development
    :maxdepth: 1
 
    imas_architecture

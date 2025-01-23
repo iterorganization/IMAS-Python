@@ -118,7 +118,7 @@ def mdsplus_model_dir(factory: IDSFactory) -> str:
     # on-disk formats should be versioned and documented properly, so this should never
     # happen again.
 
-    # There are multiple possible cases for the imas-python cache
+    # There are multiple possible cases for the IMAS-Python cache
     # 1. The cache exist and can be used
     # 2. The cache folder exists, and another process is creating it
     # 3. The cache folder exists, but the process creating it has stopped
@@ -158,7 +158,7 @@ def mdsplus_model_dir(factory: IDSFactory) -> str:
                     os.listdir(cache_dir_path),
                 )
                 raise MDSPlusModelError(
-                    "The imas-python cache directory is corrupted. Please clean the"
+                    "The IMAS-Python cache directory is corrupted. Please clean the"
                     f" cache directory ({cache_dir_path}) and try again."
                 )
     elif not cache_dir_path.is_dir() and not model_exists(cache_dir_path):

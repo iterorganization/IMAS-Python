@@ -1,10 +1,10 @@
 Advanced data exploration
 =========================
 
-In the :ref:`basic/explore` training we have seen how to explore imas-python data structures
+In the :ref:`basic/explore` training we have seen how to explore IMAS-Python data structures
 in an interactive way.
 
-In this lesson, we will go a step further and look at methods to explore imas-python data
+In this lesson, we will go a step further and look at methods to explore IMAS-Python data
 structures programmatically. This can be useful for, for example, writing plotting
 tools, analysis scripts, etc.
 
@@ -13,7 +13,7 @@ Exploring IDS (sub)structures
 -----------------------------
 
 An IDS structure is a collection of IDS nodes (which could be structures, or arrays of
-structures themselves). In imas-python this is represented by the
+structures themselves). In IMAS-Python this is represented by the
 :py:class:`~imas.ids_structure.IDSStructure` class. You will find these classes in a
 lot of places:
 
@@ -106,7 +106,7 @@ Some methods and properties are defined for all data nodes and arrays of structu
     details.
 
 .. seealso::
-    You can find more details on IDS data node related classes and methods in the imas-python Architecture documentation:
+    You can find more details on IDS data node related classes and methods in the IMAS-Python Architecture documentation:
     :ref:`imas_architecture/IDS_nodes`
 
 Apply a function to all nodes in an IDS
@@ -142,7 +142,7 @@ Exercise 2: Explore data nodes
         .. hint::
             :collapsible:
             
-            Review imas-python Architecture documentation for data node methods:
+            Review IMAS-Python Architecture documentation for data node methods:
             :ref:`imas_architecture/IDS_nodes`
 
     .. md-tab-item:: Solution

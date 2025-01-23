@@ -9,7 +9,7 @@ When reading data from a data entry (using :meth:`DBEntry.get
 lowlevel Access Layer backend. This may take a long time to complete if the data entry
 has a lot of data stored for the requested IDS.
 
-Instead of reading data immediately, imas-python can also `lazy load` the data when you need
+Instead of reading data immediately, IMAS-Python can also `lazy load` the data when you need
 it. This will speed up your program in cases where you are interested in a subset of all
 the data stored in an IDS.
 
@@ -71,7 +71,7 @@ Lazy loading of data may speed up your programs, but also comes with some limita
     -   Copying lazy-loaded IDSs (through :external:py:func:`copy.deepcopy`) is not
         implemented.
 
-2.  imas-python **assumes** that the underlying data entry is not modified.
+2.  IMAS-Python **assumes** that the underlying data entry is not modified.
 
     When you (or another user) overwrite or add data to the same data entry, you may end
     up with a mix of old and new data in the lazy loaded IDS.
@@ -89,5 +89,5 @@ Lazy loading of data may speed up your programs, but also comes with some limita
 4.  Lazy loading has more overhead for reading data from the lowlevel: it is therefore
     more efficient to do a full :code:`get()` or :code:`get_slice()` when you intend to
     use most of the data stored in an IDS.
-5.  When using imas-python with remote data access (i.e. the UDA backend), a full
+5.  When using IMAS-Python with remote data access (i.e. the UDA backend), a full
     :code:`get()` or :code:`get_slice()` is more efficient than lazy loading.

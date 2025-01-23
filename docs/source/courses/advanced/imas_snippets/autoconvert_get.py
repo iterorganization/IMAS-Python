@@ -11,7 +11,7 @@ pulse_schedule = factory.new("pulse_schedule")
 
 # Fill the IDS with some test data
 pulse_schedule.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
-pulse_schedule.ids_properties.comment = "Testing renamed IDS nodes with imas-python"
+pulse_schedule.ids_properties.comment = "Testing renamed IDS nodes with IMAS-Python"
 pulse_schedule.time = [1.0, 1.1, 1.2]
 
 pulse_schedule.ec.antenna.resize(1)

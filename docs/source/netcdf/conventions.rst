@@ -263,7 +263,7 @@ IMAS netCDF writers are recommended to overwrite the following metadata:
 - ``ids_properties.version_put.access_layer``: fill with ``"N/A"``, since this
   IDS is not written by the IMAS Access Layer.
 - ``ids_properties.version_put.access_layer_language``: fill with the name and
-  version of the netCDF writer, for example ``imas-python 1.1.0``.
+  version of the netCDF writer, for example ``IMAS-Python 1.1.0``.
 
 All other IDS metadata and provenance should be filled by the user or software
 that provides the IDS data.

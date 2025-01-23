@@ -1,5 +1,5 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 """ Extract DD versions from a zip file.
 
 The zip file contains files as
@@ -11,7 +11,7 @@ First the environment variable IMAS_DDZIP is checked.
 If that exists and points to a file we will attempt to open it.
 Then, IDSDef.zip is searched in site-packages, the current folder,
 in .config/imas/ (`$$XDG_CONFIG_HOME`) and in
-the assets/ folder within the imas-python package.
+the assets/ folder within the IMAS-Python package.
 
 1. `$$IMAS_DDZIP`
 2. The virtual environment
@@ -22,7 +22,7 @@ the assets/ folder within the imas-python package.
 7. `__file__/../../imas/assets/IDSDef.zip`
 
 All files are checked, i.e. if your .config/imas/IDSDef.zip is outdated
-the imas-python-packaged version will be used.
+the IMAS-Python-packaged version will be used.
 
 The `assets/IDSDef.zip` provided with the package can be updated
 with the `python setup.py build_DD` command, which is also performed on install

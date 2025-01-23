@@ -20,10 +20,10 @@ representations:
 3. A description (long string)
 
 
-Identifiers in imas-python
+Identifiers in IMAS-Python
 --------------------------
 
-imas-python implements identifiers as an :py:class:`enum.Enum`. Identifiers are
+IMAS-Python implements identifiers as an :py:class:`enum.Enum`. Identifiers are
 constructed on-demand from the loaded Data Dictionary definitions.
 
 All identifier enums can be accessed through ``imas.identifiers``. A list of
@@ -59,10 +59,10 @@ the available identifiers is stored as ``imas.identifiers.identifiers``.
     print(core_sources.source[0].identifier.metadata.identifier_enum)
 
 
-Assigning identifiers in imas-python
+Assigning identifiers in IMAS-Python
 ------------------------------------
 
-imas-python implements smart assignment of identifiers. You may assign an identifier
+IMAS-Python implements smart assignment of identifiers. You may assign an identifier
 enum value (for example ``imas.identifiers.core_source_identifier.total``), a
 string (for example ``"total"``) or an integer (for example ``"1"``) to an
 identifier structure (for example ``core_profiles.source[0].identifier``) to set

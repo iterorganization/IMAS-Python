@@ -1,4 +1,4 @@
-"""Compare the access patterns of the lowlevel AL API between imas-python and the HLI.
+"""Compare the access patterns of the lowlevel AL API between IMAS-Python and the HLI.
 """
 
 from functools import wraps
@@ -113,10 +113,10 @@ def compare_ids_get(imas_ids):
     help="Use heterogeneous time mode instead of homogeneous time.",
 )
 def main(ids_name, method, heterogeneous):
-    """Compare lowlevel calls done by imas-python vs. the Python HLI
+    """Compare lowlevel calls done by IMAS-Python vs. the Python HLI
 
     This program fills the provided IDS with random data, then does I/O with it using
-    both the Python HLI and the imas-python APIs. The resulting calls to the lowlevel Access
+    both the Python HLI and the IMAS-Python APIs. The resulting calls to the lowlevel Access
     Layer are logged to respectively /tmp/hli.log and /tmp/imas.log.
 
     You may use your favorite diff tool to compare the two files.

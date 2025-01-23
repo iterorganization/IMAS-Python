@@ -1,4 +1,4 @@
-Analyze with imas-python
+Analyze with IMAS-Python
 ========================
 
 For this part of the training we will learn to open an IMAS database entry, and
@@ -23,13 +23,13 @@ We load data in memory with the :meth:`~imas.db_entry.DBEntry.get()` and
 can use the data.
 
 .. hint::
-    Use the ASCII data supplied with imas-python for all exercises. It contains two
+    Use the ASCII data supplied with IMAS-Python for all exercises. It contains two
     IDSs (``equilibrium`` and ``core_profiles``) filled  with data from three
     time slices of ITER reference data. Two convenience methods are available in the
     :mod:`imas.training` module to open the DBEntry for this training data.
 
     1. :meth:`imas.training.get_training_db_entry()` returns an opened
-       ``imas.DBEntry`` object. Use this method if you want to use the imas-python
+       ``imas.DBEntry`` object. Use this method if you want to use the IMAS-Python
        interface.
     2. :meth:`imas.training.get_training_imas_db_entry()` returns an opened
        ``imas.DBEntry`` object. Use this method if you want to use the Python Access
@@ -69,7 +69,7 @@ Exercise 1
            ``core_profiles.profiles_1d[i].electrons.temperature``) from the
            ``core_profiles`` IDS at time slice :math:`t\approx 433\,\mathrm{s}`
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/read_whole_equilibrium.py
 
@@ -80,7 +80,7 @@ Exercise 1
    The recommendations for larger data files are:
 
    - Only load the time slice(s) that you are interested in.
-   - Alternatively, imas-python allows to load data on-demand, see
+   - Alternatively, IMAS-Python allows to load data on-demand, see
      :ref:`Lazy loading` for more details.
 
 
@@ -105,21 +105,21 @@ Exercise 2
             :external:func:`numpy.argmin`.
 
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/read_equilibrium_time_array.py
 
 .. attention::
 
-    imas-python objects mostly behave the same way as numpy arrays. However, in some cases
-    functions explicitly expect a pure numpy array and supplying an imas-python object raises
+    IMAS-Python objects mostly behave the same way as numpy arrays. However, in some cases
+    functions explicitly expect a pure numpy array and supplying an IMAS-Python object raises
     an exception. When this is the case, the ``.value`` attribute can be used to obtain
     the underlying data.
 
 .. note::
-    imas-python has two main ways of accessing IDSs. In the exercises above, we used
+    IMAS-Python has two main ways of accessing IDSs. In the exercises above, we used
     the "attribute-like" access. This is the main way of navigating the IDS tree.
-    However, imas-python also provides a "dict-like" interface to access data, which
+    However, IMAS-Python also provides a "dict-like" interface to access data, which
     might be more convenient in some cases. For example:
 
     .. literalinclude:: imas_snippets/iterate_core_profiles.py
@@ -162,7 +162,7 @@ Exercise 3
             of its arguments, here you can use ``imas.ids_defs.CLOSEST_INTERP``.
 
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/read_core_profiles_ne_timeslice.py
 
@@ -185,7 +185,7 @@ Exercise 4
         Using ``matplotlib``, create a plot of :math:`n_e` on the y-axis and
         :math:`\rho_{tor, norm}` on the x-axis at :math:`t=433\mathrm{s}`
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/plot_core_profiles_ne_timeslice.py
 
@@ -205,7 +205,7 @@ When you are interested in the time evolution of a quantity, using ``get_slice``
 impractical. It gets around the limitation of the data not fitting in memory, but will
 still need to read all of the data from disk (just not at once).
 
-imas-python has a `lazy loading` mode, where it will only read the requested data from disk
+IMAS-Python has a `lazy loading` mode, where it will only read the requested data from disk
 when you try to access it. You can enable it by supplying ``lazy=True`` to a call to 
 :meth:`~imas.db_entry.DBEntry.get()` or :meth:`~imas.db_entry.DBEntry.get_slice()`.
 
@@ -233,7 +233,7 @@ Exercise 5
                 data_entry = imas.DBEntry(MDSPLUS_BACKEND, database, pulse, run, user)
                 data_entry.open()
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/plot_core_profiles_te.py
 

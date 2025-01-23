@@ -1,5 +1,5 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 """Functionality for converting IDSToplevels between DD versions.
 """
 
@@ -183,7 +183,7 @@ class DDVersionMap:
         else:
             logger.debug(
                 "Data type of %s changed from %s to %s. This change is not "
-                "supported by imas-python: no conversion will be done.",
+                "supported by IMAS-Python: no conversion will be done.",
                 new_item.get("path"),
                 old_item.get("data_type"),
                 new_item.get("data_type"),
@@ -527,7 +527,7 @@ def _add_provenance_entry(
     source_txt = (
         f"{provenance_origin_uri}; "
         f"This IDS has been converted from DD {source_version} to "
-        f"DD {target_ids._dd_version} by imas-python {imas.__version__}."
+        f"DD {target_ids._dd_version} by IMAS-Python {imas.__version__}."
     )
     if hasattr(node, "reference"):
         # DD version after IMAS-5304

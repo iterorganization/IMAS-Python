@@ -3,7 +3,7 @@
 Changelog
 =========
 
-What's new in imas-python 1.1.1
+What's new in IMAS-Python 1.1.1
 -------------------------------
 
 This is a small release that mainly fixes issues related to the recent Data
@@ -19,7 +19,7 @@ Bug fixes
     Dictionary 4.0.0 and 3.42.0. In other cases, the Data Dictionary version is
     now explicitly indicated.
 
-- :issue:`IMAS-5560`: Fix a bug where imas-python would not correctly recognize that
+- :issue:`IMAS-5560`: Fix a bug where IMAS-Python would not correctly recognize that
   the UDA backend is used.
 - :issue:`IMAS-5541`: Fix a bug when converting a closed contour to Data
   Dictionary version 4.0.0.
@@ -29,7 +29,7 @@ Bug fixes
   recent Data Dictionary version than the on-disk data was stored with.
 
 
-What's new in imas-python 1.1
+What's new in IMAS-Python 1.1
 -----------------------------
 
 New features
@@ -37,7 +37,7 @@ New features
 
 - :ref:`1.1/improved performance`.
 - :ref:`1.1/improved conversion`.
-- imas-python 1.1 adds support for Identifiers defined by the Data Dictionary. This
+- IMAS-Python 1.1 adds support for Identifiers defined by the Data Dictionary. This
   functionality is described in detail in :ref:`Identifiers`.
 - Support for the new
   :py:const:`~imaspy.ids_defs.FLEXBUFFERS_SERIALIZER_PROTOCOL` that is
@@ -52,7 +52,7 @@ New features
   netCDF file, which can be used for sharing and/or archiving data.
   
   This feature is in `preview` status, meaning that it may change in upcoming
-  minor releases of imas-python.
+  minor releases of IMAS-Python.
 
 - Additional utility functions in :py:mod:`imaspy.util`:
 
@@ -71,7 +71,7 @@ New features
   - :py:func:`imaspy.util.get_data_dictionary_version` returns the Data
     Dictionary version for which an IDS was created.
 
-- Add support for IMAS Access Layer Core 5.2 and later. imas-python can now be used
+- Add support for IMAS Access Layer Core 5.2 and later. IMAS-Python can now be used
   with just the Access Layer Core package available, the full AL-Python HLI is
   no longer required.
 
@@ -91,16 +91,16 @@ New features
   backend.
 
   During a :py:meth:`~imaspy.db_entry.DBEntry.get` or
-  :py:meth:`~imaspy.db_entry.DBEntry.get_slice`, imas-python first reads the version
+  :py:meth:`~imaspy.db_entry.DBEntry.get_slice`, IMAS-Python first reads the version
   of the Data Dictionary that was used to store the IDS. When this version is
-  not known to imas-python, an error is raised. This error can now be ignored by
+  not known to IMAS-Python, an error is raised. This error can now be ignored by
   setting the parameter
   :py:param:`~imaspy.db_entry.DBEntry.get.ignore_unknown_dd_version` to
-  ``True``, and imas-python will do its best to load the data anyway.
+  ``True``, and IMAS-Python will do its best to load the data anyway.
 
 - A new command line tool exists for analyzing which Data Dictionary fields are
   used in provided Data Entries. This tool is explained in detail in
-  :ref:`imas-python Data Entry analysis`.
+  :ref:`IMAS-Python Data Entry analysis`.
 
 - Various improvements to the documentation were made.
 
@@ -110,7 +110,7 @@ Breaking changes
 
 .. note::
 
-  We attempt to keep the public API of imas-python stable with minor releases. The
+  We attempt to keep the public API of IMAS-Python stable with minor releases. The
   following breaking change is the result of an upgrade of the IMAS Access Layer.
 
 - Starting with Access Layer 5.2 or newer, the Access Layer will raise
@@ -121,8 +121,8 @@ Breaking changes
   You may need to update the :py:class:`Exception` classes in ``try/except``
   blocks to the new Exception classes raised by ``imas_core``.
 
-  When using an older version of the Access Layer, the behaviour of imas-python is no
-  different than in imas-python 1.0.
+  When using an older version of the Access Layer, the behaviour of IMAS-Python is no
+  different than in IMAS-Python 1.0.
 
 
 Bug fixes
@@ -136,10 +136,10 @@ Bug fixes
 - Fixed a bug with :py:func:`~imaspy.ids_toplevel.IDSToplevel.serialize` when
   the IDS is in a non-default Data Dictionary version.
 - Fixed a bug when assigning ``nan`` to a FLT_0D, which would lead to a
-  confusing and incorrect log message in imas-python 1.0.
-- Fixed incorrect oldest supported DD version. Previously imas-python indicated that
+  confusing and incorrect log message in IMAS-Python 1.0.
+- Fixed incorrect oldest supported DD version. Previously IMAS-Python indicated that
   DD ``3.21.1`` was supported, however ``3.22.0`` is the oldest Data Dictionary
-  tested (and provided) with imas-python. :py:attr:`imaspy.OLDEST_SUPPORTED_VERSION`
+  tested (and provided) with IMAS-Python. :py:attr:`imaspy.OLDEST_SUPPORTED_VERSION`
   has been updated to reflect this.
 - Fixed a bug when using numpy functions, such as
   :external:py:func:`numpy.isclose` on scalar numbers. Previously an error was
@@ -158,11 +158,11 @@ Improved performance
 ''''''''''''''''''''
 
 - Improved performance of :py:meth:`~imaspy.ids_toplevel.IDSToplevel.validate`.
-- Improved creation of imas-python IDS objects. This made filling IDSs and loading
+- Improved creation of IMAS-Python IDS objects. This made filling IDSs and loading
   them with :py:meth:`~imaspy.db_entry.DBEntry.get` /
   :py:meth:`~imaspy.db_entry.DBEntry.get_slice` 10-20% faster.
 - Improved the performance of lazy loading. This is most noticeable with the
-  ``HDF5`` backend, which is now up to 40x faster than with imas-python 1.0.
+  ``HDF5`` backend, which is now up to 40x faster than with IMAS-Python 1.0.
 - Improved the performance of :py:meth:`~imaspy.db_entry.DBEntry.get` /
   :py:meth:`~imaspy.db_entry.DBEntry.get_slice` /
   :py:meth:`~imaspy.db_entry.DBEntry.put` /
@@ -180,7 +180,7 @@ Converting IDSs between Data Dictionary versions has several improvements for
 recent DD versions. Further details on IDS conversion can be found in
 :ref:`Conversion of IDSs between DD versions`.
 
-- The imas-python Command Line Interface for converting Data Entries between different
+- The IMAS-Python Command Line Interface for converting Data Entries between different
   versions of the Data Dictionary has been improved. See :ref:`Command line tool
   reference` or execute ``imas convert --help`` in a shell for further
   details.
@@ -190,7 +190,7 @@ recent DD versions. Further details on IDS conversion can be found in
   For example, in the ``pulse_schedule`` IDS, the node
   ``ec/beam/power_launched/reference`` in Data Dictionary ``3.40.0`` was renamed
   from ``ec/launcher/power/reference/data`` in Data Dictionary ``3.39.0``. This
-  use case is now supported by imas-python.
+  use case is now supported by IMAS-Python.
 
 - Automatically convert data between 0D and 1D when possible (`IMAS-5170
   <https://jira.iter.org/browse/IMAS-5170>`__).

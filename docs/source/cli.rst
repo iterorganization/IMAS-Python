@@ -1,31 +1,31 @@
-.. _`imas-python Command Line tool`:
+.. _`IMAS-Python Command Line tool`:
 
-imas-python Command Line tool
+IMAS-Python Command Line tool
 =============================
 
-imas-python comes with a command line tool: ``imas``. This allows you to execute
+IMAS-Python comes with a command line tool: ``imas``. This allows you to execute
 some tasks without writing Python code:
 
 - ``imas convert`` can convert Data Entries (or, optionally, single IDSs from
   a Data Entry) to a different DD version. This command can also be used to
   convert IDSs between different backends.
 - ``imas print`` can print the contents of an IDS to the terminal.
-- ``imas version`` shows version information of imas-python.
+- ``imas version`` shows version information of IMAS-Python.
 - ``imas analyze-db`` and ``imas process-db-analysis`` analyze the contents
   of one or more Data Entries (stored in the HDF5 backend format). This tool is
-  explained in more detail :ref:`below <imas-python Data Entry analysis>`.
+  explained in more detail :ref:`below <IMAS-Python Data Entry analysis>`.
 
 You can get further details, including the expected command line arguments and
 options, by running any tool with the ``--help`` flag. This help is also
 available in the :ref:`Command line tool reference` below.
 
 
-.. _`imas-python Data Entry analysis`:
+.. _`IMAS-Python Data Entry analysis`:
 
-imas-python Data Entry analysis
+IMAS-Python Data Entry analysis
 -------------------------------
 
-The imas-python Data Entry analysis tool is a set of two command line programs:
+The IMAS-Python Data Entry analysis tool is a set of two command line programs:
 ``imas analyze-db`` and ``imas process-db-analysis``. The tool analyzes the
 files from the HDF5 backend to figure out which IDSs are stored in the Data
 Entry, and which fields from the Data Dictionary have any data stored. This

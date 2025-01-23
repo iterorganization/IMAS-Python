@@ -1,5 +1,5 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 
 # isort: skip_file
 
@@ -17,7 +17,7 @@ from .ids_factory import IDSFactory
 from .ids_convert import convert_ids
 from .ids_identifiers import identifiers
 
-# Load the imas-python IMAS AL/DD core
+# Load the IMAS-Python IMAS AL/DD core
 from . import (
     db_entry,
     dd_helpers,
@@ -25,7 +25,7 @@ from . import (
     util,
 )
 
-PUBLISHED_DOCUMENTATION_ROOT = "https://imas-python.readthedocs.io/en/latest/"
+PUBLISHED_DOCUMENTATION_ROOT = "https://IMAS-Python.readthedocs.io/en/latest/"
 """URL to the published documentation."""
 OLDEST_SUPPORTED_VERSION = _V("3.22.0")
-"""Oldest Data Dictionary version that is supported by imas-python."""
+"""Oldest Data Dictionary version that is supported by IMAS-Python."""

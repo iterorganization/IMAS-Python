@@ -188,8 +188,8 @@ def test_provenance_entry(factory):
     # Check that origin and destination DD versions are included
     assert "3.31.0" in provenance_txt
     assert "3.38.0" in provenance_txt
-    # Check that imas-python is mentioned
-    assert "imas-python" in provenance_txt
+    # Check that IMAS-Python is mentioned
+    assert "IMAS-Python" in provenance_txt
 
     # Test logic branch for node.reference implemented with IMAS-5304
     cp4 = convert_ids(cp2, "3.42.0", provenance_origin_uri="<testdata>")

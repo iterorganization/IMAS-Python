@@ -1,5 +1,5 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 """Logic for interpreting coordinates in an IDS.
 """
 
@@ -386,7 +386,7 @@ class IDSCoordinates:
                     )
                 else:
                     version_error = (
-                        "Please report this issue to the imas-python developers."
+                        "Please report this issue to the IMAS-Python developers."
                     )
                 logger.warning(
                     "An error occurred while finding coordinate `%s` of dimension %s, "

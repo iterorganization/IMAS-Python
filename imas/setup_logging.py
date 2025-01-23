@@ -1,6 +1,6 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
-"""Create a default log handler when imas-python is imported.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
+"""Create a default log handler when IMAS-Python is imported.
 """
 
 import logging

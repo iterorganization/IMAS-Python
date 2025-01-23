@@ -207,7 +207,7 @@ class ALDBEntryImpl(DBEntryImpl):
             os.environ["IDSDEF_PATH"] = idsdef_path
             logger.warning(
                 "The UDA backend is not tested with "
-                "imas-python and may not work properly. "
+                "IMAS-Python and may not work properly. "
                 "Please raise any issues you find."
             )
 
@@ -215,7 +215,7 @@ class ALDBEntryImpl(DBEntryImpl):
             pass  # nothing to set up
 
         else:
-            logger.warning("Backend %s is unknown to imas-python", backend)
+            logger.warning("Backend %s is unknown to IMAS-Python", backend)
 
     def close(self, *, erase: bool = False) -> None:
         if self._db_ctx is None:

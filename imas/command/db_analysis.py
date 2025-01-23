@@ -1,4 +1,4 @@
-"""imas-python-based command line tool for analysing fields in a database."""
+"""IMAS-Python-based command line tool for analysing fields in a database."""
 
 import gzip
 import json

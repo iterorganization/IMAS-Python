@@ -4,7 +4,7 @@ Create ``xarray.DataArray`` from an IDS
 .. info::
 
     In this lesson you will create a ``DataArray`` manually. In a future version of
-    imas-python we plan to include functionality that will automatically do this for you.
+    IMAS-Python we plan to include functionality that will automatically do this for you.
     That should further simplify working with data inside IDSs.
 
 Let's start with an introduction of Xarray. According to `their website

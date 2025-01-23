@@ -17,18 +17,18 @@ def fill_ggd(edge_profiles, times):
     """Fill nested arrays of structures in grids_ggd and ggd substructures.
 
     Args:
-        edge_profiles: edge_profiles IDS object (either from imas-python or AL HLI)
+        edge_profiles: edge_profiles IDS object (either from IMAS-Python or AL Python)
         times: time values to fill
     """
     edge_profiles.ids_properties.homogeneous_time = (
         imas.ids_defs.IDS_TIME_MODE_HETEROGENEOUS
     )
-    edge_profiles.ids_properties.comment = "Generated for imas-python benchmark suite"
+    edge_profiles.ids_properties.comment = "Generated for IMAS-Python benchmark suite"
     edge_profiles.ids_properties.creation_date = datetime.date.today().isoformat()
-    edge_profiles.code.name = "imas-python ASV benchmark"
+    edge_profiles.code.name = "IMAS-Python ASV benchmark"
     edge_profiles.code.version = imas.__version__
     edge_profiles.code.repository = (
-        "https://github.com/iterorganization/imas-python"
+        "https://github.com/iterorganization/IMAS-Python"
     )
 
     # This GGD grid is not a valid description, but it's a good stress test for the

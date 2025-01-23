@@ -1,4 +1,4 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
-"""NetCDF IO support for imas-python. Requires [netcdf] extra dependencies.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
+"""NetCDF IO support for IMAS-Python. Requires [netcdf] extra dependencies.
 """

@@ -1,6 +1,6 @@
-# This file is part of imas-python.
-# You should have received the imas-python LICENSE file with this project.
-""" Load imas-python libs to provide constants
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
+""" Load IMAS-Python libs to provide constants
 
 .. _`Backend identifiers`:
 

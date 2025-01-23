@@ -76,7 +76,7 @@ def create_dbentry(hli, backend):
                 )
             except (AttributeError, AssertionError):
                 raise NotImplementedError(
-                    "This version of imas-python doesn't implement netCDF."
+                    "This version of IMAS-Python doesn't implement netCDF."
                 ) from None
 
     path = Path.cwd() / f"DB-{hli}-{backend}"

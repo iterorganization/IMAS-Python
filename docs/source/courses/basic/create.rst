@@ -1,4 +1,4 @@
-Create with imas-python
+Create with IMAS-Python
 =======================
 
 In this section of the training, we will have a look at creating (and filling) IDSs from
@@ -7,7 +7,7 @@ scratch.
 Create an empty IDS
 -------------------
 
-Empty IDSs in imas-python are created by the :py:meth:`~imas.ids_factory.IDSFactory.new`
+Empty IDSs in IMAS-Python are created by the :py:meth:`~imas.ids_factory.IDSFactory.new`
 method of an :py:class:`~imas.ids_factory.IDSFactory`.
 
 .. note::
@@ -24,7 +24,7 @@ Exercise 1
 
         Create an empty ``core_profiles`` IDS.
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/create_core_profiles.py
             :end-before: # Set properties
@@ -59,7 +59,7 @@ Exercise 2
         Fill the ``core_profiles`` IDS with the fields as described above.
 
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/create_core_profiles.py
             :start-at: # Set properties
@@ -67,7 +67,7 @@ Exercise 2
 
         .. note::
 
-            Observe that we can assign a Python list to ``cp.time``. imas-python will
+            Observe that we can assign a Python list to ``cp.time``. IMAS-Python will
             automatically convert it to a numpy array.
 
 
@@ -89,7 +89,7 @@ Exercise 3
 
         Validate the just-filled IDS.
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/create_core_profiles.py
             :start-at: # Validate the IDS for consistency
@@ -115,7 +115,7 @@ Exercise 4
 
         Fix the coordinate consistency error.
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/create_core_profiles.py
             :start-at: # Fill in the missing rho_tor_norm coordinate
@@ -162,7 +162,7 @@ Exercise 5
 
             The signature of :meth:`~imas.db_entry.DBEntry()` is: ``DBEntry(backend, database, pulse, run)``
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/create_core_profiles.py
             :start-at: # Create a new data entry for storing the IDS
@@ -183,6 +183,6 @@ Congratulations for completing this section of the course. You have:
 
         Click on the tabs to see the complete source, combining all exercises.
 
-    .. md-tab-item:: imas-python
+    .. md-tab-item:: IMAS-Python
 
         .. literalinclude:: imas_snippets/create_core_profiles.py

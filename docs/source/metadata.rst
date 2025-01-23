@@ -5,14 +5,14 @@ IDS metadata
 
 Besides the data structure, the IMAS Data Dictionary also defines metadata
 associated with elements in the IDS, such as coordinate information, units, etc.
-imas-python provides the :py:class:`~imas.ids_metadata.IDSMetadata` API for
+IMAS-Python provides the :py:class:`~imas.ids_metadata.IDSMetadata` API for
 interacting with this metadata.
 
 On this page you find several examples for querying and using the metadata of
 IDS elements.
 
 .. seealso::
-    imas-python advanced training: :ref:`Using metadata`
+    IMAS-Python advanced training: :ref:`Using metadata`
 
 
 Overview of available metadata
@@ -68,7 +68,7 @@ looked up. See below example.
     >>> profile.electrons.temperature.coordinates[0]
     IDSNumericArray("/core_profiles/profiles_1d/1/grid/rho_tor_norm", array([0.  , 0.15, 0.3 , 0.45, 0.6 ]))
 
-When a coordinate is just an index, imas-python generates a
+When a coordinate is just an index, IMAS-Python generates a
 :external:py:func:`numpy.arange` with the same length as the data. See below
 example.
 
@@ -84,7 +84,7 @@ example.
 .. rubric:: Time coordinates
 
 Time coordinates are a special case: the coordinates depend on whether the IDS
-is in homogeneous time mode or not. imas-python handles this transparently.
+is in homogeneous time mode or not. IMAS-Python handles this transparently.
 
 .. code-block:: python
     :caption: Example getting time coordinate values
@@ -116,15 +116,15 @@ used as a coordinate. For example, the
 ``distribution(i1)/profiles_2d(itime)/grid/r OR
 distribution(i1)/profiles_2d(itime)/grid/rho_tor_norm``. This means that either
 ``r`` or ``rho_tor_norm`` can be used as coordinate. When requesting such a
-coordinate from imas-python, four things may happen:
+coordinate from IMAS-Python, four things may happen:
 
 1.  When ``r`` is empty and ``rho_tor_norm`` not, ``coordinates[0]`` will return
     ``rho_tor_norm``.
 2.  When ``rho_tor_norm`` is empty and ``r`` not, ``coordinates[0]`` will return
     ``r``.
-3.  When both ``r`` and ``rho_tor_norm`` are not empty, imas-python raises an error
+3.  When both ``r`` and ``rho_tor_norm`` are not empty, IMAS-Python raises an error
     because it cannot determine which of the two coordinates should be used.
-4.  Similarly, an error is raised by imas-python when neither ``r`` nor
+4.  Similarly, an error is raised by IMAS-Python when neither ``r`` nor
     ``rho_tor_norm`` are set.
 
 
@@ -135,7 +135,7 @@ coordinate from imas-python, four things may happen:
 Query coordinate information
 ''''''''''''''''''''''''''''
 
-In imas-python you can query coordinate information in two ways:
+In IMAS-Python you can query coordinate information in two ways:
 
 1.  Directly query the coordinate attribute on the metadata:
     :code:`<quantity>.metadata.coordinate2` gives you the coordinate information

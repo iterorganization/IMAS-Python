@@ -22,16 +22,16 @@ def fill_slices(core_profiles, times):
     """Fill a time slice of a core_profiles IDS with generated data.
 
     Args:
-        core_profiles: core_profiles IDS (either from imas-python or AL HLI)
+        core_profiles: core_profiles IDS (either from IMAS-Python or AL Python)
         times: time values to fill a slice for
     """
     core_profiles.ids_properties.homogeneous_time = 1  # HOMOGENEOUS
-    core_profiles.ids_properties.comment = "Generated for the imas-python benchmark suite"
+    core_profiles.ids_properties.comment = "Generated for the IMAS-Python benchmark suite"
     core_profiles.ids_properties.creation_date = datetime.date.today().isoformat()
-    core_profiles.code.name = "imas-python ASV benchmark"
+    core_profiles.code.name = "IMAS-Python ASV benchmark"
     core_profiles.code.version = imas.__version__
     core_profiles.code.repository = (
-        "https://github.com/iterorganization/imas-python"
+        "https://github.com/iterorganization/IMAS-Python"
     )
 
     core_profiles.time = np.array(times)

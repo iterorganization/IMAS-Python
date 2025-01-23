@@ -1,6 +1,6 @@
-.. _`imas-python 5 minute introduction`:
+.. _`IMAS-Python 5 minute introduction`:
 
-imas-python 5 minute introduction
+IMAS-Python 5 minute introduction
 ---------------------------------
 
 .. contents:: Contents
@@ -12,7 +12,7 @@ Verify your IMAS installation
 '''''''''''''''''''''''''''''
 
 Before continuing, verify that your imas install is working. Check the
-:ref:`Installing imas-python` page for installation instructions if below fails for
+:ref:`Installing IMAS-Python` page for installation instructions if below fails for
 you. Start python and import imas. Note that the version in below output may
 be outdated.
 
@@ -24,8 +24,8 @@ be outdated.
 
 .. note::
 
-    If you have an imas-python install without the IMAS Access Layer, importing
-    imas-python will display an error message. You can still use imas-python, but not all
+    If you have an IMAS-Python install without the IMAS Access Layer, importing
+    IMAS-Python will display an error message. You can still use IMAS-Python, but not all
     functionalities are available.
 
 
@@ -34,7 +34,7 @@ Create and use an IDS
 
 To create an IDS, you must first make an :py:class:`~imas.ids_factory.IDSFactory`
 object. The IDS factory is necessary for specifying which version of the IMAS Data
-Dictionary you want to use. If you don't specify anything, imas-python uses the same Data
+Dictionary you want to use. If you don't specify anything, IMAS-Python uses the same Data
 Dictionary version as the loaded IMAS environment, or the latest available version. See
 :ref:`Using multiple DD versions in the same environment` for more information
 on different Data Dictionary versions.
@@ -52,7 +52,7 @@ We can now use this ``core_profiles`` IDS and assign some data to it:
 
 .. code-block:: python
 
-    >>> core_profiles.ids_properties.comment = "Testing imas-python"
+    >>> core_profiles.ids_properties.comment = "Testing IMAS-Python"
     >>> core_profiles.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
     >>> # array quantities are automatically converted to the appropriate numpy arrays
     >>> core_profiles.time = [1, 2, 3]
@@ -68,7 +68,7 @@ We can now use this ``core_profiles`` IDS and assign some data to it:
     >>> core_profiles.profiles_1d[0].grid.rho_tor_norm = [0, 0.5, 1.0]
     >>> core_profiles.profiles_1d[0].j_tor = [0, 0, 0]
 
-As you can see in the example above, imas-python automatically checks the data you try to
+As you can see in the example above, IMAS-Python automatically checks the data you try to
 assign to an IDS with the data type specified in the Data Dictionary. When
 possible, your data is automatically converted to the expected type. You will
 get an error message if this is not possible:
@@ -90,7 +90,7 @@ Store an IDS to disk
 .. note::
 
     - This functionality requires the IMAS Access Layer.
-    - This API will change when imas-python is moving to Access Layer 5 (expected Q2
+    - This API will change when IMAS-Python is moving to Access Layer 5 (expected Q2
       2023).
 
 To store an IDS to disk, we need to indicate the following information to the
@@ -102,7 +102,7 @@ IMAS Access Layer. Please check the `IMAS Access Layer documentation
 - ``pulse``
 - ``run``
 
-In imas-python you do this as follows:
+In IMAS-Python you do this as follows:
 
 .. code-block:: python
 
@@ -122,7 +122,7 @@ Load an IDS from disk
 .. note::
 
     - This functionality requires the IMAS Access Layer.
-    - This API will change when imas-python is moving to Access Layer 5 (expected Q2
+    - This API will change when IMAS-Python is moving to Access Layer 5 (expected Q2
       2023).
 
 To load an IDS from disk, you need to specify the same information as
@@ -136,4 +136,4 @@ can use ``<IDS>.get()`` to load IDS data from disk:
     >>> dbentry2.open()
     >>> core_profiles2 = dbentry2.get("core_profiles")
     >>> print(core_profiles2.ids_properties.comment.value)
-    Testing imas-python
+    Testing IMAS-Python
