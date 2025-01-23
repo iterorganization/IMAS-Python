@@ -70,13 +70,13 @@ contains tabular results. Some examples:
 
 
 Here we see the benchmark ``core_profiles.Generate.time_create_core_profiles`` for 
-imas-python ``imas-python``.
+``IMAS-Python``.
 
 Some benchmarks are parametrized in multiple dimensions, as in below example. This
 results in a 2D table of results.
 
 .. code-block:: text
-    :caption: Example output for a test parametrized in ``imas-python`` and ``backend``
+    :caption: Example output for a test parametrized in ``IMAS-Python`` and ``backend``
 
     [65.62%] ··· core_profiles.Get.time_get     ok
     [65.62%] ··· ====== ========= ========== ============ ========= ============

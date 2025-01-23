@@ -3,7 +3,7 @@
    <version name="version">0.0.1</version>
    <IDS name="minimal_struct_array"
         maxoccur="1"
-        documentation="A minimal test imas-python Data Structure (IDS)"
+        documentation="A minimal test IMAS-Python Data Structure (IDS)"
         lifecycle_status="alpha"
         lifecycle_version="0.0.1"
         lifecycle_last_change="0.0.1">

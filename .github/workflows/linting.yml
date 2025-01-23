@@ -1,4 +1,4 @@
-name: imas-python
+name: IMAS-Python
 
 on: push
 
@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout imas-python sources
+      - name: Checkout IMAS-Python sources
         uses: actions/checkout@v4
 
       - name: Set up Python

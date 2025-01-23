@@ -26,7 +26,7 @@ jobs:
         path: dist/
         
   publish-to-pypi:
-    name: Publish imas-python distribution to PyPI
+    name: Publish IMAS-Python distribution to PyPI
     needs:
     - build
     runs-on: ubuntu-latest
@@ -45,7 +45,7 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       
   publish-to-testpypi:
-    name: Publish imas-python distribution to TestPyPI
+    name: Publish IMAS-Python distribution to TestPyPI
     needs:
     - build
     runs-on: ubuntu-latest
