@@ -1,10 +1,10 @@
 Advanced data exploration
 =========================
 
-In the :ref:`basic/explore` training we have seen how to explore IMASPy data structures
+In the :ref:`basic/explore` training we have seen how to explore IMAS-Python data structures
 in an interactive way.
 
-In this lesson, we will go a step further and look at methods to explore IMASPy data
+In this lesson, we will go a step further and look at methods to explore IMAS-Python data
 structures programmatically. This can be useful for, for example, writing plotting
 tools, analysis scripts, etc.
 
@@ -13,26 +13,26 @@ Exploring IDS (sub)structures
 -----------------------------
 
 An IDS structure is a collection of IDS nodes (which could be structures, or arrays of
-structures themselves). In IMASPy this is represented by the
-:py:class:`~imaspy.ids_structure.IDSStructure` class. You will find these classes in a
+structures themselves). In IMAS-Python this is represented by the
+:py:class:`~imas.ids_structure.IDSStructure` class. You will find these classes in a
 lot of places:
 
 - Data Dictionary IDSs is a special case of an IDS structure (implemented by class
-  :py:class:`~imaspy.ids_toplevel.IDSToplevel`, which is a subclass of
+  :py:class:`~imas.ids_toplevel.IDSToplevel`, which is a subclass of
   ``IDSStructure``).
 - Data Dictionary structures, for example, the ``ids_properties`` structure that is
   present in every IDS.
 - Data Dictionary arrays of structures (implemented by
-  :py:class:`~imaspy.ids_struct_array.IDSStructArray`) contain ``IDSStructure``\ s.
+  :py:class:`~imas.ids_struct_array.IDSStructArray`) contain ``IDSStructure``\ s.
 
 When you have an ``IDSStructure`` object, you can iterate over it to get all child nodes
 that are contained in this structure. See the following example:
 
 .. code-block:: python
 
-    import imaspy
+    import imas
 
-    core_profiles = imaspy.IDSFactory().core_profiles()
+    core_profiles = imas.IDSFactory().core_profiles()
     # core_profiles is an IDS toplevel, which is also a structure:
     
     print("Core profiles contains the following elements:")
@@ -61,15 +61,15 @@ Exercise 1: Explore structures
         
     .. md-tab-item:: Solution
 
-        .. literalinclude:: imaspy_snippets/explore_structures.py
+        .. literalinclude:: imas_snippets/explore_structures.py
 
 
 Explore IDS data nodes and arrays of structures
 -----------------------------------------------
 
 Besides structures, IDSs contain arrays of structures, and data nodes. Arrays of
-structures (modeled by :py:class:`~imaspy.ids_struct_array.IDSStructArray`) are (as the
-name applies) arrays containing :py:class:`~imaspy.ids_structure.IDSStructure`\ s. Data
+structures (modeled by :py:class:`~imas.ids_struct_array.IDSStructArray`) are (as the
+name applies) arrays containing :py:class:`~imas.ids_structure.IDSStructure`\ s. Data
 nodes can contain scalar or array data of various types.
 
 Some methods and properties are defined for all data nodes and arrays of structures:
@@ -106,14 +106,14 @@ Some methods and properties are defined for all data nodes and arrays of structu
     details.
 
 .. seealso::
-    You can find more details on IDS data node related classes and methods in the IMASPy Architecture documentation:
-    :ref:`imaspy_architecture/IDS_nodes`
+    You can find more details on IDS data node related classes and methods in the IMAS-Python Architecture documentation:
+    :ref:`imas_architecture/IDS_nodes`
 
 Apply a function to all nodes in an IDS
 '''''''''''''''''''''''''''''''''''''''
 
 Before diving into the exercise and use this new knowledge, it is useful to know the
-:py:meth:`imaspy.util.visit_children` method. This method allows you to apply a method
+:py:meth:`imas.util.visit_children` method. This method allows you to apply a method
 to all nodes of an IDS. Additional keyword arguments can control whether you want to
 include leaf nodes (data nodes) only, or also include structures and arrays of
 structure. You can also choose between applying the function to filled nodes only (the
@@ -122,7 +122,7 @@ default) or all nodes, including empty ones.
 
 .. seealso::
     You can find more details in the API documentation:
-    :py:meth:`imaspy.util.visit_children`
+    :py:meth:`imas.util.visit_children`
 
 
 Exercise 2: Explore data nodes
@@ -134,7 +134,7 @@ Exercise 2: Explore data nodes
 
         1.  Load the training data for the ``equilibrium`` IDS.
         2.  Create a function that prints the path, shape and size of an IDS node.
-        3.  Use :py:meth:`~imaspy.util.visit_children` to apply the function to all
+        3.  Use :py:meth:`~imas.util.visit_children` to apply the function to all
             non-empty nodes in the equilbrium IDS.
         4.  Update your function such that it skips scalar (0D) IDS nodes. Apply the
             updated function to the equilibrium IDS.
@@ -142,9 +142,9 @@ Exercise 2: Explore data nodes
         .. hint::
             :collapsible:
             
-            Review IMASPy Architecture documentation for data node methods:
-            :ref:`imaspy_architecture/IDS_nodes`
+            Review IMAS-Python Architecture documentation for data node methods:
+            :ref:`imas_architecture/IDS_nodes`
 
     .. md-tab-item:: Solution
 
-        .. literalinclude:: imaspy_snippets/explore_data.py
+        .. literalinclude:: imas_snippets/explore_data.py

@@ -1,9 +1,11 @@
 #!/bin/bash
-# Bamboo CI script to install imaspy and run all tests
+# Bamboo CI script to install imas Python module and run all tests
 # Note: this script should be run from the root of the git repository
 
 # Debuggging:
-set -e -o pipefail
+if [[ "$(uname -n)" == *"bamboo"* ]]; then
+    set -e -o pipefail
+fi
 echo "Loading modules:" $@
 
 # Set up environment such that module files can be loaded
@@ -14,8 +16,6 @@ module load $@
 
 # Debuggging:
 echo "Done loading modules"
-set -x
-
 
 # Set up the testing venv
 rm -rf venv  # Environment should be clean, but remove directory to be sure
@@ -27,7 +27,7 @@ pip install --upgrade pip setuptools wheel build
 rm -rf dist
 python -m build .
 
-# Install imaspy and documentation dependencies from the just-built wheel
+# Install imas Python module and documentation dependencies from the just-built wheel
 pip install "`readlink -f dist/*.whl`[docs,netcdf]"
 
 # Debugging:
@@ -41,3 +41,5 @@ export SPHINXOPTS='-W -n --keep-going'
 
 # Run sphinx to create the documentation
 make -C docs clean html
+
+deactivate

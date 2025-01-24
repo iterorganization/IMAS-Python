@@ -91,21 +91,16 @@ ENV/
 *.swo
 
 # SCM setuptools
-imaspy/version.py
-
-# Saxon symlink or downloaded file
-saxon*.jar
+imas/_version.py
 
 # IMAS DD
 data-dictionary
-access-layer
-containers/arch/imaspy/
+containers/arch/imas/
 containers/arch/data-dictionary/
-containers/arch/access-layer/
-imaspy/assets/IDSDef.zip
+imas/assets/IDSDef.zip
 
 # IDS files
-*.ids
+# *.ids
 
 # ASV folder
 /.asv

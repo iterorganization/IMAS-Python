@@ -1,11 +1,11 @@
 # pylint: disable=wrong-import-position
-# This file is part of IMASPy.
-# You should have received the IMASPy LICENSE file with this project.
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
 """
 Packaging settings. Inspired by a minimal setup.py file, the Pandas cython build
 and the access-layer setup template.
 
-The installable IMASPy package tries to follow in the following order:
+The installable IMAS-Python package tries to follow in the following order:
 - The style guide for Python code [PEP8](https://www.python.org/dev/peps/pep-0008/)
 - The [PyPA guide on packaging projects](
   https://packaging.python.org/guides/distributing-packages-using-setuptools/#distributing-packages)
@@ -25,11 +25,9 @@ import importlib
 import importlib.util
 import site
 import traceback
-
 # Allow importing local files, see https://snarky.ca/what-the-heck-is-pyproject-toml/
 import sys
 import warnings
-
 # Import other stdlib packages
 from pathlib import Path
 
@@ -49,7 +47,6 @@ except ImportError:
 
 # Ensure the current folder is on the import path:
 sys.path.append(str(Path(__file__).parent.resolve()))
-import versioneer  # noqa
 
 cannonical_python_command = "module load Python/3.8.6-GCCcore-10.2.0"
 
@@ -80,13 +77,13 @@ this_file = Path(__file__)
 this_dir = this_file.parent.resolve()
 
 # Start: Load dd_helpers
-dd_helpers_file = this_dir / "imaspy/dd_helpers.py"
+dd_helpers_file = this_dir / "imas/dd_helpers.py"
 assert dd_helpers_file.is_file()
 spec = importlib.util.spec_from_file_location("dd_helpers", dd_helpers_file)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
-sys.modules["imaspy.dd_helpers"] = module
-from imaspy.dd_helpers import prepare_data_dictionaries  # noqa
+sys.modules["imas.dd_helpers"] = module
+from imas.dd_helpers import prepare_data_dictionaries  # noqa
 
 # End: Load dd_helpers
 
@@ -114,9 +111,8 @@ class BuildDDCommand(setuptools.Command):
 # - `pip install -e .`` (from git clone)
 # - `python -m build``
 # - Source tarball from git-archive. Note: version only picked up when doing git-archive
-#   from a tagged release, otherwise version will be "0+unknown" (expected versioneer
-#   behaviour).
-#   `git archive HEAD -v -o imaspy.tar.gz && pip install imaspy.tar.gz`
+#   from a tagged release, 
+#   `git archive HEAD -v -o imas.tar.gz && pip install imas.tar.gz`
 cmd_class = {}
 build_overrides = {"build_ext": build_ext, "build_py": build_py, "sdist": sdist}
 if bdist_wheel:
@@ -139,7 +135,6 @@ for name, cls in build_overrides.items():
 
 if __name__ == "__main__":
     setup(
-        version=versioneer.get_version(),
         zip_safe=False,  # https://mypy.readthedocs.io/en/latest/installed_packages.html
-        cmdclass=versioneer.get_cmdclass({"build_DD": BuildDDCommand, **cmd_class}),
+        cmdclass={"build_DD": BuildDDCommand, **cmd_class}
     )

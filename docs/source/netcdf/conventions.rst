@@ -21,7 +21,7 @@ Goals
 The netCDF library is a cross-platform library that enables to read and write
 *self-describing* datasets consisting of multi-dimensional arrays. The purpose
 of these IMAS conventions is to define how to store IMAS data, conforming to the
-`IMAS Data Dictionary <https://confluence.iter.org/display/IMP/Data+Model>`__,
+`IMAS Data Dictionary <https://imas-data-dictionary.readthedocs.io>`__,
 in a netCDF file.
 
 
@@ -263,7 +263,7 @@ IMAS netCDF writers are recommended to overwrite the following metadata:
 - ``ids_properties.version_put.access_layer``: fill with ``"N/A"``, since this
   IDS is not written by the IMAS Access Layer.
 - ``ids_properties.version_put.access_layer_language``: fill with the name and
-  version of the netCDF writer, for example ``IMASPy 1.1.0``.
+  version of the netCDF writer, for example ``IMAS-Python 1.1.0``.
 
 All other IDS metadata and provenance should be filled by the user or software
 that provides the IDS data.

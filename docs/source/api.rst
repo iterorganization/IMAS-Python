@@ -1,16 +1,16 @@
-.. currentmodule:: imaspy
+.. currentmodule:: imas
 
 API reference
 =============
 
-This page provides an auto-generated summary of IMASPy's API. For more details
+This page provides an auto-generated summary of IMAS-Python's API. For more details
 and examples, refer to the relevant chapters in the main part of the
 documentation.
 
-IMASPy IDS manipulation
--------------------------
+IMAS-Python IDS manipulation
+----------------------------
 
-.. currentmodule:: imaspy
+.. currentmodule:: imas
 
 .. autosummary::
 

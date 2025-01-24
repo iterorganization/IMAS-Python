@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-import imaspy
+import imas
 
 from .utils import (
     available_backends,
@@ -22,16 +22,16 @@ def fill_slices(core_profiles, times):
     """Fill a time slice of a core_profiles IDS with generated data.
 
     Args:
-        core_profiles: core_profiles IDS (either from IMASPy or AL HLI)
+        core_profiles: core_profiles IDS (either from IMAS-Python or AL Python)
         times: time values to fill a slice for
     """
     core_profiles.ids_properties.homogeneous_time = 1  # HOMOGENEOUS
-    core_profiles.ids_properties.comment = "Generated for the IMASPy benchmark suite"
+    core_profiles.ids_properties.comment = "Generated for the IMAS-Python benchmark suite"
     core_profiles.ids_properties.creation_date = datetime.date.today().isoformat()
-    core_profiles.code.name = "IMASPy ASV benchmark"
-    core_profiles.code.version = imaspy.__version__
+    core_profiles.code.name = "IMAS-Python ASV benchmark"
+    core_profiles.code.version = imas.__version__
     core_profiles.code.repository = (
-        "https://git.iter.org/projects/IMAS/repos/imaspy/browse"
+        "https://github.com/iterorganization/IMAS-Python"
     )
 
     core_profiles.time = np.array(times)
@@ -50,7 +50,14 @@ def fill_slices(core_profiles, times):
         profiles_1d.ion.resize(len(ions))
         profiles_1d.neutral.resize(len(ions))
         for i, ion in enumerate(ions):
-            profiles_1d.ion[i].label = profiles_1d.neutral[i].label = ion
+            if hasattr(profiles_1d.ion[i], 'label'):
+                profiles_1d.ion[i].label = ion
+                profiles_1d.neutral[i].label = ion
+            if hasattr(profiles_1d.ion[i], 'name'):
+                profiles_1d.ion[i].name = ion
+                profiles_1d.neutral[i].name = ion
+            
+            # profiles_1d.ion[i].label = profiles_1d.neutral[i].label = ion
             profiles_1d.ion[i].z_ion = 1.0
             profiles_1d.ion[i].neutral_index = profiles_1d.neutral[i].ion_index = i + 1
 
@@ -74,7 +81,7 @@ class GetSlice:
 
     def time_get_slice(self, hli, backend):
         for t in TIME:
-            self.dbentry.get_slice("core_profiles", t, imaspy.ids_defs.CLOSEST_INTERP)
+            self.dbentry.get_slice("core_profiles", t, imas.ids_defs.CLOSEST_INTERP)
 
     def teardown(self, hli, backend):
         if hasattr(self, "dbentry"):  # imas + netCDF has no dbentry
@@ -96,8 +103,8 @@ class LazyGet:
     param_names = ["lazy", "backend"]
 
     def setup(self, lazy, backend):
-        self.dbentry = create_dbentry("imaspy", backend)
-        core_profiles = factory["imaspy"].core_profiles()
+        self.dbentry = create_dbentry("imas", backend)
+        core_profiles = factory["imas"].core_profiles()
         fill_slices(core_profiles, TIME)
         self.dbentry.put(core_profiles)
 

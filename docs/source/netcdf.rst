@@ -9,60 +9,60 @@ IMAS netCDF files
     netcdf/conventions
 
 
-IMASPy supports reading IDSs from and writing IDSs to IMAS netCDF files. This
+IMAS-Python supports reading IDSs from and writing IDSs to IMAS netCDF files. This
 feature is currently in alpha status, and its functionality may change in
-upcoming minor releases of IMASPy.
+upcoming minor releases of IMAS-Python.
 
 A detailed description of the IMAS netCDF format and conventions can be found on
 the :ref:`IMAS conventions for the netCDF data format` page.
 
-Reading from and writing to netCDF files uses the same :py:class:`imaspy.DBEntry
-<imaspy.db_entry.DBEntry>` API as reading and writing to Access Layer backends.
+Reading from and writing to netCDF files uses the same :py:class:`imas.DBEntry
+<imas.db_entry.DBEntry>` API as reading and writing to Access Layer backends.
 If you provide a path to a netCDF file (ending with ``.nc``) the netCDF backend
-will be used for :py:meth:`~imaspy.db_entry.DBEntry.get` and
-:py:meth:`~imaspy.db_entry.DBEntry.put` calls. See the below example:
+will be used for :py:meth:`~imas.db_entry.DBEntry.get` and
+:py:meth:`~imas.db_entry.DBEntry.put` calls. See the below example:
 
 .. code-block:: python
     :caption: Use DBEntry to write and read IMAS netCDF files
 
-    import imaspy
+    import imas
 
-    cp = imaspy.IDSFactory().core_profiles()
-    cp.ids_properties.homogeneous_time = imaspy.ids_defs.IDS_TIME_MODE_INDEPENDENT
+    cp = imas.IDSFactory().core_profiles()
+    cp.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_INDEPENDENT
     cp.ids_properties.comment = "Test IDS"
 
     # This will create the `test.nc` file and stores the core_profiles IDS in it
-    with imaspy.DBEntry("test.nc", "w") as netcdf_entry:
+    with imas.DBEntry("test.nc", "w") as netcdf_entry:
         netcdf_entry.put(cp)
 
     # Reading back:
-    with imaspy.DBEntry("test.nc", "r") as netcdf_entry:
+    with imas.DBEntry("test.nc", "r") as netcdf_entry:
         cp2 = netcdf_entry.get("core_profiles")
 
-    imaspy.util.print_tree(cp2)
+    imas.util.print_tree(cp2)
 
 
 Using IMAS netCDF files with 3rd-party tools
 --------------------------------------------
 
-The netCDF files produces by IMASPy can be read with external tools. In this
+The netCDF files produces by IMAS-Python can be read with external tools. In this
 section we will show how to load data with the `xarray
 <https://docs.xarray.dev/en/stable/index.html>`__ package.
 
 Let's first create a small netCDF file in the current working directory based on
-the IMASPy training data:
+the IMAS-Python training data:
 
 .. code-block:: python
     :caption: Store ``core_profiles`` training data in a netCDF file
 
-    import imaspy.training
+    import imas.training
 
     # Open the training entry
-    with imaspy.training.get_training_db_entry() as training_entry:
+    with imas.training.get_training_db_entry() as training_entry:
         # Load the core_profiles IDS
         core_profiles = training_entry.get("core_profiles")
         # Open a netCDF entry to store this IDS in:
-        with imaspy.DBEntry("core_profiles.nc", "w") as nc:
+        with imas.DBEntry("core_profiles.nc", "w") as nc:
             nc.put(core_profiles)
 
 If you execute this code snippet, you will find a file ``core_profiles.nc`` in
@@ -107,6 +107,6 @@ your directory. Let's open this file with ``xarray.load_dataset``:
 Validating an IMAS netCDF file
 ------------------------------
 
-IMAS netCDF files can be validated with IMASPy through the command line ``imaspy
-validate_nc <filename>``. See also :ref:`IMASPy Command Line tool` or type
-``imaspy validate_nc --help`` in a command line.
+IMAS netCDF files can be validated with IMAS-Python through the command line ``imas
+validate_nc <filename>``. See also :ref:`IMAS-Python Command Line tool` or type
+``imas validate_nc --help`` in a command line.

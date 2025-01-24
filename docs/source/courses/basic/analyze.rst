@@ -1,5 +1,5 @@
-Analyze with IMASPy
-===================
+Analyze with IMAS-Python
+========================
 
 For this part of the training we will learn to open an IMAS database entry, and
 plot some basic data in it using `matplotlib <https://matplotlib.org/>`_.
@@ -12,26 +12,26 @@ Open an IMAS database entry
 
 IMAS explicitly separates the data on disk from the data in memory. To get
 started we load an existing IMAS data file from disk. The on-disk file
-is represented by an :class:`imaspy.DBEntry <imaspy.db_entry.DBEntry>`, which we have to
-:meth:`~imaspy.db_entry.DBEntry.open()` to get a reference to the data file we
+is represented by an :class:`imas.DBEntry <imas.db_entry.DBEntry>`, which we have to
+:meth:`~imas.db_entry.DBEntry.open()` to get a reference to the data file we
 will manipulate. The connection to the data file is kept intact until we
-:meth:`~imaspy.db_entry.DBEntry.close()` the file. Note that the on-disk file
-will not be changed until an explicit :meth:`~imaspy.db_entry.DBEntry.put()` or
-:meth:`~imaspy.db_entry.DBEntry.put_slice()` is called.
-We load data in memory with the :meth:`~imaspy.db_entry.DBEntry.get()` and
-:meth:`~imaspy.db_entry.DBEntry.get_slice()` methods, after which we
+:meth:`~imas.db_entry.DBEntry.close()` the file. Note that the on-disk file
+will not be changed until an explicit :meth:`~imas.db_entry.DBEntry.put()` or
+:meth:`~imas.db_entry.DBEntry.put_slice()` is called.
+We load data in memory with the :meth:`~imas.db_entry.DBEntry.get()` and
+:meth:`~imas.db_entry.DBEntry.get_slice()` methods, after which we
 can use the data.
 
 .. hint::
-    Use the ASCII data supplied with IMASPy for all exercises. It contains two
+    Use the ASCII data supplied with IMAS-Python for all exercises. It contains two
     IDSs (``equilibrium`` and ``core_profiles``) filled  with data from three
     time slices of ITER reference data. Two convenience methods are available in the
-    :mod:`imaspy.training` module to open the DBEntry for this training data.
+    :mod:`imas.training` module to open the DBEntry for this training data.
 
-    1. :meth:`imaspy.training.get_training_db_entry()` returns an opened
-       ``imaspy.DBEntry`` object. Use this method if you want to use the IMASPy
+    1. :meth:`imas.training.get_training_db_entry()` returns an opened
+       ``imas.DBEntry`` object. Use this method if you want to use the IMAS-Python
        interface.
-    2. :meth:`imaspy.training.get_training_imas_db_entry()` returns an opened
+    2. :meth:`imas.training.get_training_imas_db_entry()` returns an opened
        ``imas.DBEntry`` object. Use this method if you want to use the Python Access
        Layer interface.
 
@@ -42,10 +42,10 @@ Exercise 1
 
     .. md-tab-item:: Exercise
 
-        Open the training database entry: ``entry = imaspy.training.get_training_db_entry()``
+        Open the training database entry: ``entry = imas.training.get_training_db_entry()``
 
         1. Load the ``equilibrium`` IDS into memory using the
-           :meth:`entry.get <imaspy.db_entry.DBEntry.get()>` method
+           :meth:`entry.get <imas.db_entry.DBEntry.get()>` method
         2. Read and print the ``time`` array of the ``equilibrium`` IDS
         3. Load the ``core_profiles`` IDS into memory
         4. Explore the ``core_profiles.profiles_1d`` property and try to match
@@ -62,20 +62,16 @@ Exercise 1
                     depending on the time mode of the IDS
                     (``core_profiles.ids_properties.homogeneous_time``). In this case
                     the IDS uses homogeneous time, so all time coordinates use
-                    ``core_profiles.time``. See also the `AL documentation (iter.org)
-                    <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/ACCESS-LAYER-doc/python/5.0/use_ids.html#time-coordinates-and-time-handling>`_.
+                    ``core_profiles.time``. See also the `Data Dictionary documentation 
+                    <https://imas-data-dictionary.readthedocs.io/en/latest/coordinates.html>`_.
 
         5. Read and print the 1D electron temperature profile (:math:`T_e`,
            ``core_profiles.profiles_1d[i].electrons.temperature``) from the
            ``core_profiles`` IDS at time slice :math:`t\approx 433\,\mathrm{s}`
 
-    .. md-tab-item:: AL4
+    .. md-tab-item:: IMAS-Python
 
-        .. literalinclude:: al4_snippets/read_whole_equilibrium.py
-
-    .. md-tab-item:: IMASPy
-
-        .. literalinclude:: imaspy_snippets/read_whole_equilibrium.py
+        .. literalinclude:: imas_snippets/read_whole_equilibrium.py
 
 .. caution::
    When dealing with unknown data, you shouldn't blindly ``get()`` all data:
@@ -84,7 +80,7 @@ Exercise 1
    The recommendations for larger data files are:
 
    - Only load the time slice(s) that you are interested in.
-   - Alternatively, IMASPy allows to load data on-demand, see
+   - Alternatively, IMAS-Python allows to load data on-demand, see
      :ref:`Lazy loading` for more details.
 
 
@@ -108,28 +104,25 @@ Exercise 2
             Now the index of the closest time slice can be found with
             :external:func:`numpy.argmin`.
 
-    .. md-tab-item:: AL4
 
-        .. literalinclude:: al4_snippets/read_equilibrium_time_array.py
+    .. md-tab-item:: IMAS-Python
 
-    .. md-tab-item:: IMASPy
-
-        .. literalinclude:: imaspy_snippets/read_equilibrium_time_array.py
+        .. literalinclude:: imas_snippets/read_equilibrium_time_array.py
 
 .. attention::
 
-    IMASPy objects mostly behave the same way as numpy arrays. However, in some cases
-    functions explicitly expect a pure numpy array and supplying an IMASPy object raises
+    IMAS-Python objects mostly behave the same way as numpy arrays. However, in some cases
+    functions explicitly expect a pure numpy array and supplying an IMAS-Python object raises
     an exception. When this is the case, the ``.value`` attribute can be used to obtain
     the underlying data.
 
 .. note::
-    IMASPy has two main ways of accessing IDSs. In the exercises above, we used
+    IMAS-Python has two main ways of accessing IDSs. In the exercises above, we used
     the "attribute-like" access. This is the main way of navigating the IDS tree.
-    However, IMASPy also provides a "dict-like" interface to access data, which
+    However, IMAS-Python also provides a "dict-like" interface to access data, which
     might be more convenient in some cases. For example:
 
-    .. literalinclude:: imaspy_snippets/iterate_core_profiles.py
+    .. literalinclude:: imas_snippets/iterate_core_profiles.py
 
 
 Retreiving part of an IDS
@@ -148,7 +141,7 @@ Retrieve a single time slice
 
 When we are interested in quantities at a single time slice (or a low number of time
 slices), we can decide to only load the data at specified times. This can be
-accomplished with the aforementioned :meth:`~imaspy.db_entry.DBEntry.get_slice()`
+accomplished with the aforementioned :meth:`~imas.db_entry.DBEntry.get_slice()`
 method.
 
 
@@ -159,23 +152,19 @@ Exercise 3
 
     .. md-tab-item:: Exercise
 
-        Use the :meth:`~imaspy.db_entry.DBEntry.get_slice()` method to obtain the electron density
+        Use the :meth:`~imas.db_entry.DBEntry.get_slice()` method to obtain the electron density
         :math:`n_e` at :math:`t\approx 433\,\mathrm{s}`.
         
         .. hint::
             :collapsible:
 
-            :meth:`~imaspy.db_entry.DBEntry.get_slice()` requires an ``interpolation_method`` as one
-            of its arguments, here you can use ``imas.imasdef.CLOSEST_INTERP``. Alternatively,
-            if you use IMASPy, you can use ``imaspy.ids_defs.CLOSEST_INTERP``.
+            :meth:`~imas.db_entry.DBEntry.get_slice()` requires an ``interpolation_method`` as one
+            of its arguments, here you can use ``imas.ids_defs.CLOSEST_INTERP``.
 
-    .. md-tab-item:: AL4
 
-        .. literalinclude:: al4_snippets/read_core_profiles_ne_timeslice.py
+    .. md-tab-item:: IMAS-Python
 
-    .. md-tab-item:: IMASPy
-
-        .. literalinclude:: imaspy_snippets/read_core_profiles_ne_timeslice.py
+        .. literalinclude:: imas_snippets/read_core_profiles_ne_timeslice.py
 
 
 .. attention::
@@ -196,13 +185,9 @@ Exercise 4
         Using ``matplotlib``, create a plot of :math:`n_e` on the y-axis and
         :math:`\rho_{tor, norm}` on the x-axis at :math:`t=433\mathrm{s}`
 
-    .. md-tab-item:: AL4
+    .. md-tab-item:: IMAS-Python
 
-        .. literalinclude:: al4_snippets/plot_core_profiles_ne_timeslice.py
-
-    .. md-tab-item:: IMASPy
-
-        .. literalinclude:: imaspy_snippets/plot_core_profiles_ne_timeslice.py
+        .. literalinclude:: imas_snippets/plot_core_profiles_ne_timeslice.py
 
     .. md-tab-item:: Plot
         
@@ -220,9 +205,9 @@ When you are interested in the time evolution of a quantity, using ``get_slice``
 impractical. It gets around the limitation of the data not fitting in memory, but will
 still need to read all of the data from disk (just not at once).
 
-IMASPy has a `lazy loading` mode, where it will only read the requested data from disk
+IMAS-Python has a `lazy loading` mode, where it will only read the requested data from disk
 when you try to access it. You can enable it by supplying ``lazy=True`` to a call to 
-:meth:`~imaspy.db_entry.DBEntry.get()` or :meth:`~imaspy.db_entry.DBEntry.get_slice()`.
+:meth:`~imas.db_entry.DBEntry.get()` or :meth:`~imas.db_entry.DBEntry.get_slice()`.
 
 
 Exercise 5
@@ -241,16 +226,16 @@ Exercise 5
             the ITER cluster, you can load the following data entry with much more data,
             to better notice the difference that lazy loading can make::
 
-                import imaspy
-                from imaspy.ids_defs import MDSPLUS_BACKEND
+                import imas
+                from imas.ids_defs import MDSPLUS_BACKEND
                 
                 database, pulse, run, user = "ITER", 134173, 106, "public"
-                data_entry = imaspy.DBEntry(MDSPLUS_BACKEND, database, pulse, run, user)
+                data_entry = imas.DBEntry(MDSPLUS_BACKEND, database, pulse, run, user)
                 data_entry.open()
 
-    .. md-tab-item:: IMASPy
+    .. md-tab-item:: IMAS-Python
 
-        .. literalinclude:: imaspy_snippets/plot_core_profiles_te.py
+        .. literalinclude:: imas_snippets/plot_core_profiles_te.py
 
     .. md-tab-item:: Plot
 

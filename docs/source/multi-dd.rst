@@ -4,26 +4,26 @@ Using multiple DD versions in the same environment
 ==================================================
 
 Whereas the default IMAS High Level Interface is built for a single Data Dictionary
-version, IMASPy can transparently handle multiple DD versions.
+version, IMAS-Python can transparently handle multiple DD versions.
 
-By default, IMASPy uses the same Data Dictionary version as the loaded IMAS environment
+By default, IMAS-Python uses the same Data Dictionary version as the loaded IMAS environment
 is using, as specified by the environment variable ``IMAS_VERSION``. If no IMAS
 environment is loaded, the last available DD version is used.
 
 You can also explicitly specify which IMAS version you want to use when constructing a
-:py:class:`~imaspy.db_entry.DBEntry` or :py:class:`~imaspy.ids_factory.IDSFactory`. For
+:py:class:`~imas.db_entry.DBEntry` or :py:class:`~imas.ids_factory.IDSFactory`. For
 example:
 
 .. code-block:: python
     :caption: Using non-default IMAS versions.
 
-    import imaspy
+    import imas
 
-    factory_default = imaspy.IDSFactory()  # Use default DD version
-    factory_3_32_0 = imaspy.IDSFactory("3.32.0")  # Use DD version 3.32.0
+    factory_default = imas.IDSFactory()  # Use default DD version
+    factory_3_32_0 = imas.IDSFactory("3.32.0")  # Use DD version 3.32.0
 
     # Will write IDSs to the backend in DD version 3.32.0
-    dbentry = imaspy.DBEntry(imaspy.ids_defs.HDF5_BACKEND, "TEST", 10, 2, version="3.32.0")
+    dbentry = imas.DBEntry(imas.ids_defs.HDF5_BACKEND, "TEST", 10, 2, version="3.32.0")
     dbentry.create()
 
 .. seealso:: :ref:`multi-dd training`
@@ -34,13 +34,13 @@ example:
 Conversion of IDSs between DD versions
 --------------------------------------
 
-IMASPy can convert IDSs between different versions of the data dictionary. This uses the
+IMAS-Python can convert IDSs between different versions of the data dictionary. This uses the
 "non-backwards compatible changes" metadata from the DD definitions. There are
 two conversion modes:
 
 1.  Automatic conversion: this is handled when reading or writing data
-    (:py:meth:`~imaspy.db_entry.DBEntry.get`/:py:meth:`~imaspy.db_entry.DBEntry.get_slice`,
-    :py:meth:`~imaspy.db_entry.DBEntry.put`/:py:meth:`~imaspy.db_entry.DBEntry.put_slice`).
+    (:py:meth:`~imas.db_entry.DBEntry.get`/:py:meth:`~imas.db_entry.DBEntry.get_slice`,
+    :py:meth:`~imas.db_entry.DBEntry.put`/:py:meth:`~imas.db_entry.DBEntry.put_slice`).
 
     The DBEntry class automatically converts IDSs to the requested version:
 
@@ -57,7 +57,7 @@ two conversion modes:
       are silently ignored.
 
 2.  Explicit conversion: this is achieved with a call to
-    :py:func:`imaspy.convert_ids <imaspy.ids_convert.convert_ids>`.
+    :py:func:`imas.convert_ids <imas.ids_convert.convert_ids>`.
 
 Automatic conversion is faster when reading data (up to a factor 2, depending on
 the backend and the stored data), but it doesn't support all conversion logic
@@ -75,8 +75,8 @@ the backend and the stored data), but it doesn't support all conversion logic
     be more efficient to convert the data to your DD version, store it and then
     use it. This avoids conversion every time you read the data.
 
-    Converting an entire Data Entry can also be done with the IMASPy command
-    line interface. See :ref:`IMASPy Command Line tool`.
+    Converting an entire Data Entry can also be done with the IMAS-Python command
+    line interface. See :ref:`IMAS-Python Command Line tool`.
 
 
 Explicit conversion
@@ -85,28 +85,28 @@ Explicit conversion
 .. code-block:: python
     :caption: Explicitly convert data when reading from disk
 
-    import imaspy
+    import imas
 
-    entry = imaspy.DBEntry("<URI to data>", "r")
+    entry = imas.DBEntry("<URI to data>", "r")
 
     # Disable automatic conversion when reading the IDS with autoconvert=False
     ids = entry.get("<ids name>", autoconvert=False)
     # Explicitly convert the IDS to the target version
-    ids = imaspy.convert_ids(ids, "<target DD version>")
+    ids = imas.convert_ids(ids, "<target DD version>")
 
 
 .. code-block:: python
     :caption: Convert an IDS to a different DD version
 
-    import imaspy
+    import imas
 
     # Create a pulse_schedule IDS in version 3.23.0
-    ps = imaspy.IDSFactory("3.25.0").new("pulse_schedule")
+    ps = imas.IDSFactory("3.25.0").new("pulse_schedule")
     ps.ec.antenna.resize(1)
     ps.ec.antenna[0].name = "IDS conversion test"
 
     # Convert the IDS to version 3.30.0
-    ps330 = imaspy.convert_ids(ps, "3.30.0")
+    ps330 = imas.convert_ids(ps, "3.30.0")
     # ec.antenna was renamed to ec.launcher between 3.23.0 and 3.30.0
     print(len(ps330.ec.launcher))  # 1
     print(ps330.ec.launcher[0].name.value)  # IDS conversion test
@@ -114,7 +114,7 @@ Explicit conversion
 .. note::
 
     Not all data may be converted. For example, when an IDS node is removed between DD
-    versions, the corresponding data is not copied. IMASPy provides logging to indicate
+    versions, the corresponding data is not copied. IMAS-Python provides logging to indicate
     when this happens.
 
 
@@ -181,16 +181,16 @@ explicit conversion mechanisms.
 Background information
 ----------------------
 
-Since IMASPy needs to have access to multiple DD versions it was chosen to
+Since IMAS-Python needs to have access to multiple DD versions it was chosen to
 bundle these with the code at build-time, in setup.py. If a git clone of the
 Data Dictionary succeeds, the setup tools automatically download saxon and
 generate ``IDSDef.xml`` for each of the tagged versions in the DD git
 repository. These are then gathered into ``IDSDef.zip``, which is
-distributed inside the IMASPy package.
+distributed inside the IMAS-Python package.
 
 To update the set of data dictionaries new versions can be added to the zipfile.
 A reinstall of the package will ensure that all available versions are included
-in IMASPy. Additionally an explicit path to an XML file can be specified, which
+in IMAS-Python. Additionally an explicit path to an XML file can be specified, which
 is useful for development.
 
 Automated tests have been provided that check the loading of all of the DD
@@ -203,14 +203,14 @@ Extending the DD set
 Use the command ``python setup.py build_DD`` to build a new ``IDSDef.zip``. This
 fetches all tags from the data dictionary git repository and builds the ``IDSDef.zip``.
 
-IMASPy searches for an ``IDSDef.zip`` in the following locations:
+IMAS-Python searches for an ``IDSDef.zip`` in the following locations:
 
-1.  The environment variable ``$IMASPY_DDZIP`` (path to a zip file)
+1.  The environment variable ``$IMAS_DDZIP`` (path to a zip file)
 2.  The file ``./IDSDef.zip`` in the current working directory
-3.  In the local configuration folder: ``~/.config/imaspy/IDSDef.zip``, or
-    ``$XDG_CONFIG_DIR/imaspy/IDSDef.zip`` (if the environment variable
+3.  In the local configuration folder: ``~/.config/imas/IDSDef.zip``, or
+    ``$XDG_CONFIG_DIR/imas/IDSDef.zip`` (if the environment variable
     ``$XDG_CONFIG_DIR`` is set)
-4.  The zipfile bundled with the IMASPy installation: ``assets/IDSDef.zip``
+4.  The zipfile bundled with the IMAS-Python installation: ``assets/IDSDef.zip``
 
 All paths are searched in order when loading the definitions of a specific data
 dictionary version: the first zip file that contains the definitions of the requested

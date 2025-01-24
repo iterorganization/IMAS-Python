@@ -3,18 +3,23 @@
 # Note: this script should be run from the root of the git repository
 
 # Debuggging:
-set -e -o pipefail
+if [[ "$(uname -n)" == *"bamboo"* ]]; then
+    set -e -o pipefail
+fi
 echo "Loading modules..."
 
 # Set up environment such that module files can be loaded
 source /etc/profile.d/modules.sh
 module purge
 # Modules are supplied as arguments in the CI job:
-module load $@
+if [ -z "$@" ]; then
+    module load Python
+else
+    module load $@
+fi
 
 # Debuggging:
 echo "Done loading modules"
-set -x
 
 # Create a venv
 rm -rf venv
@@ -24,5 +29,7 @@ python -m venv venv
 # Install and run linters
 pip install --upgrade 'black >=24,<25' flake8
 
-black --check imaspy
-flake8 imaspy
+black --check imas
+flake8 imas
+
+deactivate

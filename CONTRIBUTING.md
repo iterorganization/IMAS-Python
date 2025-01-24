@@ -1,23 +1,23 @@
 # Contributing guidelines
 
-We welcome any kind of contribution to `imas-python`, 
+We welcome any kind of contribution to `IMAS-Python`, 
 from a simple comment, a question or even a full fledged pull 
 request. 
 Please first make sure you read and follow the 
 [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## You think you found a bug in the code, or have a question in its use
-1. use the [issue search](https://github.com/iterorganization/imas-python/issues)
+1. use the [issue search](https://github.com/iterorganization/IMAS-Python/issues)
 to check if someone already created a similar issue;
 3. if not, make a **new issue** to describe your problem or question. 
 In the case of a bug suspiscion, please try to give all the relevant 
 information to allow reproducing the error or identifying 
-its root cause (version of the imas-python, OS and relevant 
+its root cause (version of the IMAS-Python, OS and relevant 
 dependencies, snippet of code);
 4. apply relevant labels to the issue.
 
 ## You want to make or ask some change to the code
-1. use the [issue search](https://github.com/iterorganization/imas-python/issues)
+1. use the [issue search](https://github.com/iterorganization/IMAS-Python/issues)
 to check if someone already proposed a similar idea/change;
 3. if not, create a **new issue** to describe what change you would like to see 
 implemented and specify it if you intend to work on it yourself or if some help 
