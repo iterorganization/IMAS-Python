@@ -6,10 +6,10 @@ This page provides an overview of available variables.
 
 .. note::
 
-    In addition to the listed environment variables, the Access Layer lowlevel also has
-    environment variables available to control its behaviour. See the `Access Layer
+    In addition to the listed environment variables, the IMAS Core library also has
+    environment variables available to control its behaviour. See the `IMAS Core 
     documentation
-    <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/ACCESS-LAYER-doc/python/5.1/conf.html#environment-variables-controlling-access-layer-plugins>`_
+    <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/ACCESS-LAYER-doc/python/dev/conf.html>`_
 
 
 ``IMAS_LOGLEVEL``

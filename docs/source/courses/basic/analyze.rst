@@ -62,8 +62,8 @@ Exercise 1
                     depending on the time mode of the IDS
                     (``core_profiles.ids_properties.homogeneous_time``). In this case
                     the IDS uses homogeneous time, so all time coordinates use
-                    ``core_profiles.time``. See also the `AL documentation (iter.org)
-                    <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/ACCESS-LAYER-doc/python/5.0/use_ids.html#time-coordinates-and-time-handling>`_.
+                    ``core_profiles.time``. See also the `Data Dictionary documentation 
+                    <https://imas-data-dictionary.readthedocs.io/en/latest/coordinates.html>`_.
 
         5. Read and print the 1D electron temperature profile (:math:`T_e`,
            ``core_profiles.profiles_1d[i].electrons.temperature``) from the

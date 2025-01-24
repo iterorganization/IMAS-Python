@@ -14,9 +14,8 @@ Most codes will touch multiple IDSs inside a single IMAS data entry. For example
 a heating code using a magnetic equilibrium from the ``equilibrium`` IDS with a
 heating profile from the ``core_sources`` IDS. To find out how to write your
 code, there are two main strategies: read the
-`Data Model <https://confluence.iter.org/display/IMP/Data+Model>`_ documents of
-the `Data Dictionary
-<https://portal.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI>`_
+`IMAS Data Dictionary documentation
+<https://imas-data-dictionary.readthedocs.io>`_ 
 or explore the data interactively. We will focus on the latter method here.
 
 

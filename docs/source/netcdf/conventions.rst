@@ -21,7 +21,7 @@ Goals
 The netCDF library is a cross-platform library that enables to read and write
 *self-describing* datasets consisting of multi-dimensional arrays. The purpose
 of these IMAS conventions is to define how to store IMAS data, conforming to the
-`IMAS Data Dictionary <https://confluence.iter.org/display/IMP/Data+Model>`__,
+`IMAS Data Dictionary <https://imas-data-dictionary.readthedocs.io>`__,
 in a netCDF file.
 
 

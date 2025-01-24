@@ -9,62 +9,21 @@ IMAS-Python development follows the a fork-based model described in
 Creating an IMAS-Python release
 -------------------------------
 
-1.  Create a Pull Request using fork based workflow from ``develop`` to ``main``.
+1.  Create a Pull Request from ``develop`` to ``main``.
 2.  Add a change log to the Pull Request, briefly describing new features, bug fixes,
     and update accordingly the :ref:`changelog`.
 3.  The PR is reviewed and merged by the maintainers who also create the release tags.
 4.  After the release PR is merged, update the Easybuild configurations for SDCC modules
     in the `easybuild-easyconfigs repository
-    <https://git.iter.org/projects/IMEX/repos/easybuild-easyconfigs/browse/easybuild/easyconfigs/i/IMAS-Python>`_.
+    <https://github.com/easybuilders/easybuild-easyconfigs>`_.
     See the next section for more details on how to do this.
 
 
 Updating and testing the IMAS-Python Easybuild configuration
 ------------------------------------------------------------
 
-The following steps can be taken on an SDCC login node.
-
-Configure easybuild
-'''''''''''''''''''
-
-First we need to configure easybuild. This only needs to be done once.
-
--   Create an HTTP access token in Bitbucket with ``PROJECT READ`` and ``REPOSITORY
-    READ`` permissions. See this `Bitbucket support page
-    <https://confluence.atlassian.com/bitbucketserver0721/http-access-tokens-1115665626.html>`_
-    for more details.
--   Create a new text file in your home folder
-    ``$HOME/.config/easybuild/secret.txt``. Fill it as follows (replace ``<token>``
-    with the token generated in the previous bullet).
-
-    .. code-block:: text
-        :caption: ``$HOME/.config/easybuild/secret.txt``
-
-        ^https://git.iter.org::Authorization: Bearer <token>
-
-    Ensure that only you have access to the file, e.g. ``chmod 600
-    ~/.config/easybuild/secret.txt``.
--   Create a new configuration file ``$HOME/.config/easybuild/config.cfg`` and fill
-    it as follows (replace ``<username>`` with your username):
-
-    .. code-block:: cfg
-        :caption: ``$HOME/.config/easybuild/config.cfg``
-
-        [override]
-        # Set extra HTTP header Fields when downloading files from URL patterns:
-        http-header-fields-urlpat=/home/ITER/<username>/.config/easybuild/secret.txt
-
-        # Set modules flags
-        module-syntax=Tcl
-        modules-tool=EnvironmentModules
-        allow-modules-tool-mismatch=true
-
-
-Update and test Easybuild configurations
-''''''''''''''''''''''''''''''''''''''''
-
-The following steps must be performed for each of the tool chains (currently
-``intel-2020b``, ``foss-2020b`` and ``gfbf-2022b``):
+The following steps must be performed for each of the supported tool chains
+(currently ``intel-2023b``, ``foss-2023b``):
 
 1.  Create the ``.eb`` file for the new release.
 
@@ -75,13 +34,6 @@ The following steps must be performed for each of the tool chains (currently
 
         -   ``builddependencies`` contains build-time dependencies which are available
             as a module on SDCC.
-
-            .. note::
-
-                The IMAS module is a build-time dependency only and not a runtime
-                dependency. This allows IMAS-Python users to load the IMAS-Python module and
-                **any** supported IMAS module.
-
         -   ``dependencies`` contains run-time dependencies which are available as a
             module on SDCC.
         -   ``exts_list`` contains python package dependencies (and potentially
@@ -94,7 +46,7 @@ The following steps must be performed for each of the tool chains (currently
 
         .. code-block:: text
 
-            https://github.com/iterorganization/IMAS-Python/archive/refs/heads/<version>.tar.gz
+            https://github.com/iterorganization/IMAS-Python/archive/refs/tags/<version>.tar.gz
 
         Then, calculate the hash of the downloaded archive with ``sha256sum`` and update
         it in the ``.eb`` file.
@@ -121,6 +73,6 @@ The following steps must be performed for each of the tool chains (currently
             module purge
             module use ~/.local/easybuild/modules/all/
             module load IMAS-Python/<version>-<toolchain>
-            module laod IMAS
+            module laod IMAS-AL-Core
     
     c.  Sanity check the module, for example by running the ``pytest`` unit tests.

@@ -3,16 +3,15 @@
 Installing IMAS-Python
 ======================
 
-IMAS-Python is a pure Python package. For full functionality of the package you need
-an installation of `the IMAS Core library <https://imas.iter.org/>`_. See
-:ref:`IMAS-Python 5 minute introduction` for an overview of functionality which does
-(not) require the IMAS Core library available.
+IMAS-Python is a pure Python package. While it can be used without it, for full functionality
+of the package you need an installation of `the IMAS Core library <https://imas.iter.org/>`_.
+See :ref:`IMAS-Python 5 minute introduction` for a quick overview of its most basic functionalities.
 
-To get started, you can install it from `pypi.org <https://pypi.org/project/IMAS-Python>`_:
+To get started, you can install it from `pypi.org <https://pypi.org/project/imas-python>`_:
 
 .. code-block:: bash
 
-    pip install IMAS-Python
+    pip install imas-python
 
 
 Local installation from sources
@@ -26,8 +25,8 @@ and run `pip install`:
     python3 -m venv ./venv
     . venv/bin/activate
     
-    git clone ssh://git@github.com:iterorganization/IMAS-Python.git
-    cd imas
+    git clone git@github.com:iterorganization/IMAS-Python.git
+    cd IMAS-Python
     pip install --upgrade pip
     pip install --upgrade wheel setuptools
     pip install .

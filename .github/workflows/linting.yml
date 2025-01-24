@@ -1,4 +1,4 @@
-name: IMAS-Python
+name: linting-and-code-formatting
 
 on: push
 

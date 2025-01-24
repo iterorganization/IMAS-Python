@@ -34,7 +34,7 @@ IMAS-Python-specific functional benchmarks
 Running benchmarks (quick)
 --------------------------
 
-When you have an existing IMAS-Python installation, you can run the benchmarks like this:
+When you have an existing IMAS-Python development installation, you can run the benchmarks like this:
 
 .. code-block:: console
 
@@ -59,7 +59,7 @@ parametrized (they are repeated with varying parameters), in which case the outp
 contains tabular results. Some examples:
 
 .. code-block:: text
-    :caption: Example output for a test parametrized in ``hli``
+    :caption: Example output for a test 
 
     [56.25%] ··· core_profiles.Generate.time_create_core_profiles                                                                                  ok
     [56.25%] ··· ====== =============
@@ -69,14 +69,13 @@ contains tabular results. Some examples:
                 ====== =============
 
 
-Here we see the benchmark ``core_profiles.Generate.time_create_core_profiles`` for 
-``IMAS-Python``.
+Here we see the benchmark ``core_profiles.Generate.time_create_core_profiles``.
 
 Some benchmarks are parametrized in multiple dimensions, as in below example. This
 results in a 2D table of results.
 
 .. code-block:: text
-    :caption: Example output for a test parametrized in ``IMAS-Python`` and ``backend``
+    :caption: Example output for a test parametrized in ``backend``
 
     [65.62%] ··· core_profiles.Get.time_get     ok
     [65.62%] ··· ====== ========= ========== ============ ========= ============
@@ -138,14 +137,11 @@ benchmarked. See the `asv documentation for some examples
 .. seealso:: https://asv.readthedocs.io/en/stable/commands.html#asv-run
 
 
-Running benchmarks on SDCC
-''''''''''''''''''''''''''
+Running benchmarks on a cluster
+'''''''''''''''''''''''''''''''
 
-Running benchmarks on the SDCC login nodes is useful for debugging, but not for
-comparing performance: many people are using the login nodes at the same time, and the
-machine load is variable.
-
-Instead, you can submit a benchmark job to the compute nodes. 
+For running the benchmarks on a cluster by submitting a job with SLURM, you can
+adapt the following scripts to your own needs.
 
 .. code-block:: bash
     :caption: SLURM control script (``slurm.sh``)
@@ -155,7 +151,7 @@ Instead, you can submit a benchmark job to the compute nodes.
     # Set SLURM options:
     #SBATCH --job-name=IMAS-Python-benchmark
     #SBATCH --time=1:00:00
-    #SBATCH --partition=gen10_ib
+    #SBATCH --partition=<...>
     # Note: for proper benchmarking we need to exclusively reserve a node, even though
     # we're only using 1 CPU (most of the time)
     #SBATCH --exclusive
@@ -166,9 +162,9 @@ Instead, you can submit a benchmark job to the compute nodes.
 .. code-block:: bash
     :caption: Benchmark run script (``run_benchmarks.sh``)
 
-    # Load IMAS-AL-Core module
+    # If using environment modules (must be adapted to names of the modules in the targeted cluster)
     module purge
-    module load IMAS-AL-Core
+    module load IMAS-AL-Core 
     module load Python
 
     # Verify we can run python
