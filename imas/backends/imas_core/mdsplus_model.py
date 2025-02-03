@@ -1,7 +1,6 @@
 # Helper functions to create MDSPlus reference models
 # and store them in a cache directory (.cache/imas/MDSPlus/name-HASH/)
-"""Module for generating and working with MDSplus models.
-"""
+"""Module for generating and working with MDSplus models."""
 
 import errno
 import getpass
@@ -256,7 +255,7 @@ def create_model_ids_xml(cache_dir_path, fname, version):
                     and os.path.exists(fname)
                 ):
                     result = xslt_processor.transform_to_file(
-                        source_file=fname,
+                        source_file=str(fname),
                         stylesheet_file=str(xslfile),
                         output_file=str(output_file),
                     )
