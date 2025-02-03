@@ -243,40 +243,40 @@ def create_model_ids_xml(cache_dir_path, fname, version):
 
             with PySaxonProcessor(license=False) as proc:
                 xslt_processor = proc.new_xslt30_processor()
-
-                xslt_processor.compile_stylesheet(stylesheet_file=str(xslfile))
-
-                input_xml = get_dd_xml(version) if version else None
-                if fname:
-                    source_file = str(fname)
-                elif input_xml:
-                    source_file = input_xml  # Use standard input for the XML string
-                else:
-                    raise ValueError(
-                        "Either 'fname' or 'version' must be provided to generate XML."
-                    )
-
-                # xdm_ddgit = proc.make_string_value(str(version or fname))
-                # xsltproc.set_parameter("DD_GIT_DESCRIBE", xdm_ddgit)
-                # xdm_algit = proc.make_string_value(os.environ.get
-                # ("AL_VERSION", "0.0.0"))
-                # xsltproc.set_parameter("AL_GIT_DESCRIBE", xdm_algit)
-                # Transform XML
-                result = xslt_processor.transform_to_file(
-                    source_file=source_file,
-                    output_file=str(output_file),
-                    initial_template_params={
-                        "DD_GIT_DESCRIBE": str(version or fname),
-                        "AL_GIT_DESCRIBE": os.environ.get("AL_VERSION", "0.0.0"),
-                    },
+                xdm_ddgit = proc.make_string_value(str(version) or fname)
+                xslt_processor.set_parameter("DD_GIT_DESCRIBE", xdm_ddgit)
+                xdm_algit = proc.make_string_value(
+                    os.environ.get("AL_VERSION", "0.0.0")
                 )
-
-                if result is False:
-                    logger.error(
-                        "Transformation failed: Check Saxon/C logs for details."
+                xslt_processor.set_parameter("AL_GIT_DESCRIBE", xdm_algit)
+                if (
+                    fname != None
+                    and fname != "-"
+                    and fname != ""
+                    and os.path.exists(fname)
+                ):
+                    result = xslt_processor.transform_to_file(
+                        source_file=fname,
+                        stylesheet_file=str(xslfile),
+                        output_file=str(output_file),
                     )
-                    raise RuntimeError("Saxon/C XSLT transformation failed.")
+                elif version != None and version != "":
+                    xml_string = get_dd_xml(version)
+                    import tempfile
 
+                    with tempfile.NamedTemporaryFile(
+                        delete=False, mode="w+b"
+                    ) as temp_file:
+                        temp_file.write(xml_string)
+                        temp_file.seek(0)
+
+                        result = xslt_processor.transform_to_file(
+                            source_file=temp_file.name,
+                            stylesheet_file=str(xslfile),
+                            output_file=str(output_file),
+                        )
+                else:
+                    raise MDSPlusModelError("Either fname or version must be provided")
     except Exception as e:
         if fname:
             logger.error("Error making MDSplus model IDS.xml for %s", fname)

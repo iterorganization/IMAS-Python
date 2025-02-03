@@ -13,7 +13,7 @@ source /etc/profile.d/modules.sh
 module purge
 # Modules are supplied as arguments in the CI job:
 if [ -z "$@" ]; then
-    module load IMAS-AL-Core
+    module load IMAS-AL-Core Java MDSplus 
 else
     module load $@
 fi
