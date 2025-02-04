@@ -234,6 +234,14 @@ def model_exists(path: Path) -> bool:
     )
 
 
+def transform_with_xslt(xslt_processor, source, xslfile, output_file):
+    return xslt_processor.transform_to_file(
+        source_file=str(source),
+        stylesheet_file=str(xslfile),
+        output_file=str(output_file),
+    )
+
+
 def create_model_ids_xml(cache_dir_path, fname, version):
     """Use Saxon/C to compile an ids.xml suitable for creating an MDSplus model."""
     try:
@@ -254,25 +262,17 @@ def create_model_ids_xml(cache_dir_path, fname, version):
                     and fname != ""
                     and os.path.exists(fname)
                 ):
-                    result = xslt_processor.transform_to_file(
-                        source_file=str(fname),
-                        stylesheet_file=str(xslfile),
-                        output_file=str(output_file),
-                    )
+                    transform_with_xslt(xslt_processor, fname, xslfile, output_file)
                 elif version is not None and version != "":
                     xml_string = get_dd_xml(version)
-                    import tempfile
 
                     with tempfile.NamedTemporaryFile(
-                        delete=False, mode="w+b"
+                        delete=True, mode="w+b"
                     ) as temp_file:
                         temp_file.write(xml_string)
                         temp_file.seek(0)
-
-                        result = xslt_processor.transform_to_file(
-                            source_file=temp_file.name,
-                            stylesheet_file=str(xslfile),
-                            output_file=str(output_file),
+                        transform_with_xslt(
+                            xslt_processor, temp_file.name, xslfile, output_file
                         )
                 else:
                     raise MDSPlusModelError("Either fname or version must be provided")
