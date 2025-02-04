@@ -249,7 +249,7 @@ def create_model_ids_xml(cache_dir_path, fname, version):
                 )
                 xslt_processor.set_parameter("AL_GIT_DESCRIBE", xdm_algit)
                 if (
-                    fname != None
+                    fname is not None
                     and fname != "-"
                     and fname != ""
                     and os.path.exists(fname)
