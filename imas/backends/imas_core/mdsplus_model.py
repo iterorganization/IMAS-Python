@@ -259,7 +259,7 @@ def create_model_ids_xml(cache_dir_path, fname, version):
                         stylesheet_file=str(xslfile),
                         output_file=str(output_file),
                     )
-                elif version != None and version != "":
+                elif version is not None and version != "":
                     xml_string = get_dd_xml(version)
                     import tempfile
 
