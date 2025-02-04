@@ -184,20 +184,25 @@ class NC2IDS:
                     for index, node in tree_iter(self.ids, target_metadata):
                         shape = shapes[index]
                         if shape.all():
-                            node.value = data[index + tuple(map(slice, shapes[index]))]
+                            # NOTE: bypassing IDSPrimitive.value.setter logic
+                            node._IDSPrimitive__value = data[
+                                index + tuple(map(slice, shape))
+                            ]
                 else:
                     for index, node in tree_iter(self.ids, target_metadata):
                         value = data[index]
                         if value != getattr(var, "_FillValue", None):
-                            node.value = data[index]
+                            # NOTE: bypassing IDSPrimitive.value.setter logic
+                            node._IDSPrimitive__value = value
 
             elif metadata.path_string not in self.ncmeta.aos:
                 # Shortcut for assigning untensorized data
-                self.ids[target_metadata.path] = data
+                self.ids[target_metadata.path]._IDSPrimitive__value = data
 
             else:
                 for index, node in tree_iter(self.ids, target_metadata):
-                    node.value = data[index]
+                    # NOTE: bypassing IDSPrimitive.value.setter logic
+                    node._IDSPrimitive__value = data[index]
 
     def validate_variables(self) -> None:
         """Validate that all variables in the netCDF Group exist and match the DD."""
