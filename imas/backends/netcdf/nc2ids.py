@@ -3,6 +3,7 @@ import os
 from typing import Iterator, List, Optional, Tuple
 
 import netCDF4
+import numpy as np
 
 from imas.backends.netcdf import ids2nc
 from imas.backends.netcdf.nc_metadata import NCMetadata
@@ -100,6 +101,8 @@ class NC2IDS:
         """NetCDF related metadata."""
         self.variables = list(group.variables)
         """List of variable names stored in the netCDF group."""
+
+        self._lazy_map = {}
         # Don't use masked arrays: they're slow and we'll handle most of the unset
         # values through the `:shape` arrays
         self.group.set_auto_mask(False)
@@ -113,7 +116,7 @@ class NC2IDS:
                 "Mandatory variable `ids_properties.homogeneous_time` does not exist."
             )
         var = group["ids_properties.homogeneous_time"]
-        self._validate_variable(var, ids.ids_properties.homogeneous_time.metadata)
+        self._validate_variable(var, ids.metadata["ids_properties/homogeneous_time"])
         if var[()] not in [0, 1, 2]:
             raise InvalidNetCDFEntry(
                 f"Invalid value for ids_properties.homogeneous_time: {var[()]}. "
@@ -121,10 +124,12 @@ class NC2IDS:
             )
         self.homogeneous_time = var[()] == IDS_TIME_MODE_HOMOGENEOUS
 
-    def run(self) -> None:
+    def run(self, lazy: bool) -> None:
         """Load the data from the netCDF group into the IDS."""
         self.variables.sort()
         self.validate_variables()
+        if lazy:
+            self.ids._set_lazy_context(LazyContext(self))
         for var_name in self.variables:
             if var_name.endswith(":shape"):
                 continue
@@ -157,6 +162,10 @@ class NC2IDS:
                 target_metadata = metadata  # no conversion required
 
             var = self.group[var_name]
+            if lazy:
+                self._lazy_map[target_metadata.path_string] = var
+                continue
+
             if metadata.data_type is IDSDataType.STRUCT_ARRAY:
                 if "sparse" in var.ncattrs():
                     shapes = self.group[var_name + ":shape"][()]
@@ -342,3 +351,74 @@ class NC2IDS:
             raise variable_error(
                 shape_var, "dtype", shape_var.dtype, "any integer type"
             )
+
+
+class LazyContext:
+    def __init__(self, nc2ids, index=()):
+        self.nc2ids = nc2ids
+        self.index = index
+
+    def get_child(self, child):
+        metadata = child.metadata
+        path = metadata.path_string
+        data_type = metadata.data_type
+
+        var = self.nc2ids._lazy_map.get(path)
+        if data_type is IDSDataType.STRUCT_ARRAY:
+            # Determine size of the aos
+            if var is None:
+                size = 0
+            elif "sparse" in var.ncattrs():
+                size = self.group[var.name + ":shape"][self.index][0]
+            else:
+                # FIXME: extract dimension name from nc file?
+                dim = self.ncmeta.get_dimensions(
+                    metadata.path_string, self.homogeneous_time
+                )[-1]
+                size = self.group.dimensions[dim].size
+
+            child._set_lazy_context(
+                LazyArrayStructContext(self.nc2ids, self.index, size)
+            )
+
+        elif data_type is IDSDataType.STRUCTURE:
+            child._set_lazy_context(self)
+
+        else:  # Data elements
+            var = self.nc2ids._lazy_map.get(path)
+            if var is None:
+                return  # nothing to load
+
+            value = None
+            if "sparse" in var.ncattrs():
+                if metadata.ndim:
+                    shape_var = self.nc2ids.group[var.name + ":shape"]
+                    shape = shape_var[self.index]
+                    if shape.all():
+                        value = var[self.index + tuple(map(slice, shape))]
+                else:
+                    value = var[self.index]
+                    if value == getattr(var, "_FillValue", None):
+                        value = None  # Skip setting
+            else:
+                value = var[self.index]
+
+            if value is not None:
+                if isinstance(value, np.ndarray):
+                    # Convert the numpy array to a read-only view
+                    value = value.view()
+                    value.flags.writeable = False
+                # NOTE: bypassing IDSPrimitive.value.setter logic
+                child._IDSPrimitive__value = value
+
+
+class LazyArrayStructContext(LazyContext):
+    def __init__(self, nc2ids, index, size):
+        super().__init__(nc2ids, index)
+        self.size = size
+
+    def get_context(self):
+        return self  # IDSStructArray expects to get something with a size attribute
+
+    def iterate_to_index(self, index: int) -> LazyContext:
+        return LazyContext(self.nc2ids, self.index + (index,))

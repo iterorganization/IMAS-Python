@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterator, List, Optional, Tuple
 
 import numpy
 
+import imas
 from imas.backends.imas_core.imas_interface import ll_interface
 from imas.exception import LowlevelError
 from imas.ids_defs import (
@@ -279,6 +280,9 @@ class LazyALContext:
         """Time mode used by the IDS being lazy loaded."""
         self.context = None
         """Potential weak reference to opened context."""
+
+    def get_child(self, child):
+        imas.backends.imas_core.db_entry_helpers._get_child(child, self)
 
     def get_context(self) -> ALContext:
         """Create and yield the actual ALContext."""

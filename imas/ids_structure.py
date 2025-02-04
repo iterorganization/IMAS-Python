@@ -6,17 +6,19 @@
 import logging
 from copy import deepcopy
 from types import MappingProxyType
-from typing import Generator, List, Optional, Union
+from typing import TYPE_CHECKING, Generator, List, Optional, Union
 
 from xxhash import xxh3_64
 
-from imas.backends.imas_core.al_context import LazyALContext
 from imas.ids_base import IDSBase, IDSDoc
 from imas.ids_identifiers import IDSIdentifier
 from imas.ids_metadata import IDSDataType, IDSMetadata
 from imas.ids_path import IDSPath
 from imas.ids_primitive import IDSPrimitive
 from imas.ids_struct_array import IDSStructArray
+
+if TYPE_CHECKING:
+    from imas.backends.imas_core.al_context import LazyALContext
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +34,7 @@ class IDSStructure(IDSBase):
 
     __doc__ = IDSDoc(__doc__)
     _children: "MappingProxyType[str, IDSMetadata]"
-    _lazy_context: Optional[LazyALContext]
+    _lazy_context: Optional["LazyALContext"]
 
     def __init__(self, parent: IDSBase, metadata: IDSMetadata):
         """Initialize IDSStructure from metadata specification
@@ -62,10 +64,8 @@ class IDSStructure(IDSBase):
         child_meta = self._children[name]
         child = child_meta._node_type(self, child_meta)
         self.__dict__[name] = child  # bypass setattr logic below: avoid recursion
-        if self._lazy:  # lazy load the child
-            from imas.backends.imas_core.db_entry_helpers import _get_child
-
-            _get_child(child, self._lazy_context)
+        if self._lazy and self._lazy_context is not None:  # lazy load the child
+            self._lazy_context.get_child(child)
         return child
 
     def _assign_identifier(self, value: Union[IDSIdentifier, str, int]) -> None:
@@ -168,7 +168,7 @@ class IDSStructure(IDSBase):
             return False  # Not equal if there is any difference
         return True  # Equal when there are no differences
 
-    def _set_lazy_context(self, ctx: LazyALContext) -> None:
+    def _set_lazy_context(self, ctx: "LazyALContext") -> None:
         """Called by DBEntry during a lazy get/get_slice.
 
         Set the context that we can use for retrieving our children.

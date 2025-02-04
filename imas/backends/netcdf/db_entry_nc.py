@@ -108,10 +108,6 @@ class NCDBEntryImpl(DBEntryImpl):
             else:
                 func = "get_sample"
             raise NotImplementedError(f"`{func}` is not available for netCDF files.")
-        if lazy:
-            raise NotImplementedError(
-                "Lazy loading is not implemented for netCDF files."
-            )
 
         # Check if the IDS/occurrence exists, and obtain the group it is stored in
         try:
@@ -123,7 +119,7 @@ class NCDBEntryImpl(DBEntryImpl):
 
         # Load data into the destination IDS
         if self._ds_factory.dd_version == destination._dd_version:
-            NC2IDS(group, destination, destination.metadata, None).run()
+            NC2IDS(group, destination, destination.metadata, None).run(lazy)
         else:
             # Construct relevant NBCPathMap, the one we get from DBEntry has the reverse
             # mapping from what we need. The imas_core logic does the mapping from
@@ -135,7 +131,7 @@ class NCDBEntryImpl(DBEntryImpl):
             nbc_map = ddmap.old_to_new if source_is_older else ddmap.new_to_old
             NC2IDS(
                 group, destination, self._ds_factory.new(ids_name).metadata, nbc_map
-            ).run()
+            ).run(lazy)
 
         return destination
 
