@@ -8,6 +8,7 @@ from imas.backends.netcdf import ids2nc
 from imas.backends.netcdf.nc_metadata import NCMetadata
 from imas.exception import InvalidNetCDFEntry
 from imas.ids_base import IDSBase
+from imas.ids_convert import NBCPathMap
 from imas.ids_data_type import IDSDataType
 from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
 from imas.ids_metadata import IDSMetadata
@@ -70,19 +71,32 @@ def _tree_iter(
 class NC2IDS:
     """Class responsible for reading an IDS from a NetCDF group."""
 
-    def __init__(self, group: netCDF4.Group, ids: IDSToplevel) -> None:
+    def __init__(
+        self,
+        group: netCDF4.Group,
+        ids: IDSToplevel,
+        ids_metadata: IDSMetadata,
+        nbc_map: Optional[NBCPathMap],
+    ) -> None:
         """Initialize NC2IDS converter.
 
         Args:
             group: NetCDF group that stores the IDS data.
             ids: Corresponding IDS toplevel to store the data in.
+            ids_metadata: Metadata corresponding to the DD version that the data is
+                stored in.
+            nbc_map: Path map for implicit DD conversions.
         """
         self.group = group
         """NetCDF Group that the IDS is stored in."""
         self.ids = ids
         """IDS to store the data in."""
+        self.ids_metadata = ids_metadata
+        """Metadata of the IDS in the DD version that the data is stored in"""
+        self.nbc_map = nbc_map
+        """Path map for implicit DD conversions."""
 
-        self.ncmeta = NCMetadata(ids.metadata)
+        self.ncmeta = NCMetadata(ids_metadata)
         """NetCDF related metadata."""
         self.variables = list(group.variables)
         """List of variable names stored in the netCDF group."""
@@ -114,16 +128,39 @@ class NC2IDS:
         for var_name in self.variables:
             if var_name.endswith(":shape"):
                 continue
-            metadata = self.ids.metadata[var_name]
+            metadata = self.ids_metadata[var_name]
 
             if metadata.data_type is IDSDataType.STRUCTURE:
                 continue  # This only contains DD metadata we already know
+
+            # Handle implicit DD version conversion
+            if self.nbc_map is None:
+                target_metadata = metadata  # no conversion
+            elif metadata.path_string in self.nbc_map:
+                new_path = self.nbc_map.path[metadata.path_string]
+                if new_path is None:
+                    logging.info(
+                        "Not loading data for %s: no equivalent data structure exists "
+                        "in the target Data Dictionary version.",
+                        metadata.path_string,
+                    )
+                    continue
+                target_metadata = self.ids.metadata[new_path]
+            elif metadata.path_string in self.nbc_map.type_change:
+                logging.info(
+                    "Not loading data for %s: cannot hanlde type changes when "
+                    "implicitly converting data to the target Data Dictionary version.",
+                    metadata.path_string,
+                )
+                continue
+            else:
+                target_metadata = metadata  # no conversion required
 
             var = self.group[var_name]
             if metadata.data_type is IDSDataType.STRUCT_ARRAY:
                 if "sparse" in var.ncattrs():
                     shapes = self.group[var_name + ":shape"][()]
-                    for index, node in tree_iter(self.ids, metadata):
+                    for index, node in tree_iter(self.ids, target_metadata):
                         node.resize(shapes[index][0])
 
                 else:
@@ -132,7 +169,7 @@ class NC2IDS:
                         metadata.path_string, self.homogeneous_time
                     )[-1]
                     size = self.group.dimensions[dim].size
-                    for _, node in tree_iter(self.ids, metadata):
+                    for _, node in tree_iter(self.ids, target_metadata):
                         node.resize(size)
 
                 continue
@@ -144,22 +181,22 @@ class NC2IDS:
             if "sparse" in var.ncattrs():
                 if metadata.ndim:
                     shapes = self.group[var_name + ":shape"][()]
-                    for index, node in tree_iter(self.ids, metadata):
+                    for index, node in tree_iter(self.ids, target_metadata):
                         shape = shapes[index]
                         if shape.all():
                             node.value = data[index + tuple(map(slice, shapes[index]))]
                 else:
-                    for index, node in tree_iter(self.ids, metadata):
+                    for index, node in tree_iter(self.ids, target_metadata):
                         value = data[index]
                         if value != getattr(var, "_FillValue", None):
                             node.value = data[index]
 
             elif metadata.path_string not in self.ncmeta.aos:
                 # Shortcut for assigning untensorized data
-                self.ids[metadata.path] = data
+                self.ids[target_metadata.path] = data
 
             else:
-                for index, node in tree_iter(self.ids, metadata):
+                for index, node in tree_iter(self.ids, target_metadata):
                     node.value = data[index]
 
     def validate_variables(self) -> None:
@@ -194,7 +231,7 @@ class NC2IDS:
             # Check that the DD defines this variable, and validate its metadata
             var = self.group[var_name]
             try:
-                metadata = self.ids.metadata[var_name]
+                metadata = self.ids_metadata[var_name]
             except KeyError:
                 raise InvalidNetCDFEntry(
                     f"Invalid variable {var_name}: no such variable exists in the "

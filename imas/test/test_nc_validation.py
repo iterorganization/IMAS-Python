@@ -1,7 +1,6 @@
 import netCDF4
 import numpy as np
 import pytest
-
 from imas.backends.netcdf.ids2nc import IDS2NC
 from imas.backends.netcdf.nc2ids import NC2IDS
 from imas.backends.netcdf.nc_validate import validate_netcdf_file
@@ -32,7 +31,8 @@ def memfile_with_ids(memfile, factory):
     ids.profiles_1d[0].zeff = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
     IDS2NC(ids, memfile).run()
     # This one is valid:
-    NC2IDS(memfile, factory.core_profiles()).run()
+    ids = factory.core_profiles()
+    NC2IDS(memfile, ids, ids.metadata, None).run()
     return memfile
 
 
@@ -51,66 +51,75 @@ def test_invalid_homogeneous_time(memfile, factory):
 
     ids = factory.core_profiles()
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(empty_group, ids)  # ids_properties.homogeneous_time does not exist
+        # ids_properties.homogeneous_time does not exist
+        NC2IDS(empty_group, ids, ids.metadata, None)
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(invalid_dtype, ids)
+        NC2IDS(invalid_dtype, ids, ids.metadata, None)
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(invalid_shape, ids)
+        NC2IDS(invalid_shape, ids, ids.metadata, None)
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(invalid_value, ids)
+        NC2IDS(invalid_value, ids, ids.metadata, None)
 
 
 def test_invalid_units(memfile_with_ids, factory):
     memfile_with_ids["time"].units = "hours"
+    ids = factory.core_profiles()
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(memfile_with_ids, factory.core_profiles()).run()
+        NC2IDS(memfile_with_ids, ids, ids.metadata, None).run()
 
 
 def test_invalid_documentation(memfile_with_ids, factory, caplog):
+    ids = factory.core_profiles()
     with caplog.at_level("WARNING"):
-        NC2IDS(memfile_with_ids, factory.core_profiles()).run()
+        NC2IDS(memfile_with_ids, ids, ids.metadata, None).run()
     assert not caplog.records
     # Invalid docstring logs a warning
     memfile_with_ids["time"].documentation = "https://en.wikipedia.org/wiki/Time"
     with caplog.at_level("WARNING"):
-        NC2IDS(memfile_with_ids, factory.core_profiles()).run()
+        NC2IDS(memfile_with_ids, ids, ids.metadata, None).run()
     assert len(caplog.records) == 1
 
 
 def test_invalid_dimension_name(memfile_with_ids, factory):
     memfile_with_ids.renameDimension("time", "T")
+    ids = factory.core_profiles()
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(memfile_with_ids, factory.core_profiles()).run()
+        NC2IDS(memfile_with_ids, ids, ids.metadata, None).run()
 
 
 def test_invalid_coordinates(memfile_with_ids, factory):
     memfile_with_ids["profiles_1d.grid.rho_tor_norm"].coordinates = "xyz"
+    ids = factory.core_profiles()
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(memfile_with_ids, factory.core_profiles()).run()
+        NC2IDS(memfile_with_ids, ids, ids.metadata, None).run()
 
 
 def test_invalid_ancillary_variables(memfile_with_ids, factory):
     memfile_with_ids["time"].ancillary_variables = "xyz"
+    ids = factory.core_profiles()
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(memfile_with_ids, factory.core_profiles()).run()
+        NC2IDS(memfile_with_ids, ids, ids.metadata, None).run()
 
 
 def test_extra_attributes(memfile_with_ids, factory):
     memfile_with_ids["time"].new_attribute = [1, 2, 3]
+    ids = factory.core_profiles()
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(memfile_with_ids, factory.core_profiles()).run()
+        NC2IDS(memfile_with_ids, ids, ids.metadata, None).run()
 
 
 def test_shape_array_without_data(memfile_with_ids, factory):
     memfile_with_ids.createVariable("profiles_1d.t_i_average:shape", int, ())
+    ids = factory.core_profiles()
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(memfile_with_ids, factory.core_profiles()).run()
+        NC2IDS(memfile_with_ids, ids, ids.metadata, None).run()
 
 
 def test_shape_array_without_sparse_data(memfile_with_ids, factory):
     memfile_with_ids.createVariable("profiles_1d.grid.rho_tor_norm:shape", int, ())
+    ids = factory.core_profiles()
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(memfile_with_ids, factory.core_profiles()).run()
+        NC2IDS(memfile_with_ids, ids, ids.metadata, None).run()
 
 
 def test_shape_array_with_invalid_dimensions(memfile_with_ids, factory):
@@ -128,7 +137,7 @@ def test_shape_array_with_invalid_dimensions(memfile_with_ids, factory):
         ("time", "profiles_1d.grid.rho_tor_norm:i"),
     )
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(memfile_with_ids, cp).run()
+        NC2IDS(memfile_with_ids, cp, cp.metadata, None).run()
 
 
 def test_shape_array_with_invalid_dtype(memfile_with_ids, factory):
@@ -144,7 +153,7 @@ def test_shape_array_with_invalid_dtype(memfile_with_ids, factory):
         "profiles_1d.t_i_average:shape", float, ("time", "1D")
     )
     with pytest.raises(InvalidNetCDFEntry):
-        NC2IDS(memfile_with_ids, cp).run()
+        NC2IDS(memfile_with_ids, cp, cp.metadata, None).run()
 
 
 def test_validate_nc(tmpdir):

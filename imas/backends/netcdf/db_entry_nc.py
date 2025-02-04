@@ -11,7 +11,7 @@ from imas.backends.db_entry_impl import (
 from imas.backends.netcdf.ids2nc import IDS2NC
 from imas.backends.netcdf.nc2ids import NC2IDS
 from imas.exception import DataEntryException, InvalidNetCDFEntry
-from imas.ids_convert import NBCPathMap, convert_ids
+from imas.ids_convert import NBCPathMap, dd_version_map_from_factories
 from imas.ids_factory import IDSFactory
 from imas.ids_toplevel import IDSToplevel
 
@@ -123,14 +123,19 @@ class NCDBEntryImpl(DBEntryImpl):
 
         # Load data into the destination IDS
         if self._ds_factory.dd_version == destination._dd_version:
-            NC2IDS(group, destination).run()
+            NC2IDS(group, destination, destination.metadata, None).run()
         else:
-            # FIXME: implement automatic conversion using nbc_map
-            #   As a work-around: do an explicit conversion, but automatic conversion
-            #   will also be needed to implement lazy loading.
-            ids = self._ds_factory.new(ids_name)
-            NC2IDS(group, ids).run()
-            convert_ids(ids, None, target=destination)
+            # Construct relevant NBCPathMap, the one we get from DBEntry has the reverse
+            # mapping from what we need. The imas_core logic does the mapping from
+            # in-memory to on-disk, while we take what is on-disk and map it to
+            # in-memory.
+            ddmap, source_is_older = dd_version_map_from_factories(
+                ids_name, self._ds_factory, self._factory
+            )
+            nbc_map = ddmap.old_to_new if source_is_older else ddmap.new_to_old
+            NC2IDS(
+                group, destination, self._ds_factory.new(ids_name).metadata, nbc_map
+            ).run()
 
         return destination
 
