@@ -206,7 +206,9 @@ class NC2IDS:
 
             elif metadata.path_string not in self.ncmeta.aos:
                 # Shortcut for assigning untensorized data
-                self.ids[target_metadata.path]._IDSPrimitive__value = data
+                # Note: var[()] can return 0D numpy arrays. Instead of handling this
+                # here, we'll let IDSPrimitive.value.setter take care of it:
+                self.ids[target_metadata.path].value = data
 
             else:
                 for index, node in tree_iter(self.ids, target_metadata):
