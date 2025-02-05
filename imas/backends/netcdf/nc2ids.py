@@ -362,37 +362,32 @@ class LazyContext:
         metadata = child.metadata
         path = metadata.path_string
         data_type = metadata.data_type
+        nc2ids = self.nc2ids
+        var = nc2ids._lazy_map.get(path)
 
-        var = self.nc2ids._lazy_map.get(path)
         if data_type is IDSDataType.STRUCT_ARRAY:
             # Determine size of the aos
             if var is None:
                 size = 0
             elif "sparse" in var.ncattrs():
-                size = self.group[var.name + ":shape"][self.index][0]
+                size = nc2ids.group[var.name + ":shape"][self.index][0]
             else:
                 # FIXME: extract dimension name from nc file?
-                dim = self.ncmeta.get_dimensions(
-                    metadata.path_string, self.homogeneous_time
+                dim = nc2ids.ncmeta.get_dimensions(
+                    metadata.path_string, nc2ids.homogeneous_time
                 )[-1]
-                size = self.group.dimensions[dim].size
+                size = nc2ids.group.dimensions[dim].size
 
-            child._set_lazy_context(
-                LazyArrayStructContext(self.nc2ids, self.index, size)
-            )
+            child._set_lazy_context(LazyArrayStructContext(nc2ids, self.index, size))
 
         elif data_type is IDSDataType.STRUCTURE:
             child._set_lazy_context(self)
 
-        else:  # Data elements
-            var = self.nc2ids._lazy_map.get(path)
-            if var is None:
-                return  # nothing to load
-
+        elif var is not None:  # Data elements
             value = None
             if "sparse" in var.ncattrs():
                 if metadata.ndim:
-                    shape_var = self.nc2ids.group[var.name + ":shape"]
+                    shape_var = nc2ids.group[var.name + ":shape"]
                     shape = shape_var[self.index]
                     if shape.all():
                         value = var[self.index + tuple(map(slice, shape))]
