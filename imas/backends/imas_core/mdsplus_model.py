@@ -1,7 +1,6 @@
 # Helper functions to create MDSPlus reference models
 # and store them in a cache directory (.cache/imas/MDSPlus/name-HASH/)
-"""Module for generating and working with MDSplus models.
-"""
+"""Module for generating and working with MDSplus models."""
 
 import errno
 import getpass
@@ -235,6 +234,14 @@ def model_exists(path: Path) -> bool:
     )
 
 
+def transform_with_xslt(xslt_processor, source, xslfile, output_file):
+    return xslt_processor.transform_to_file(
+        source_file=str(source),
+        stylesheet_file=str(xslfile),
+        output_file=str(output_file),
+    )
+
+
 def create_model_ids_xml(cache_dir_path, fname, version):
     """Use Saxon/C to compile an ids.xml suitable for creating an MDSplus model."""
     try:
@@ -243,40 +250,32 @@ def create_model_ids_xml(cache_dir_path, fname, version):
 
             with PySaxonProcessor(license=False) as proc:
                 xslt_processor = proc.new_xslt30_processor()
-
-                xslt_processor.compile_stylesheet(stylesheet_file=str(xslfile))
-
-                input_xml = get_dd_xml(version) if version else None
-                if fname:
-                    source_file = str(fname)
-                elif input_xml:
-                    source_file = input_xml  # Use standard input for the XML string
-                else:
-                    raise ValueError(
-                        "Either 'fname' or 'version' must be provided to generate XML."
-                    )
-
-                # xdm_ddgit = proc.make_string_value(str(version or fname))
-                # xsltproc.set_parameter("DD_GIT_DESCRIBE", xdm_ddgit)
-                # xdm_algit = proc.make_string_value(os.environ.get
-                # ("AL_VERSION", "0.0.0"))
-                # xsltproc.set_parameter("AL_GIT_DESCRIBE", xdm_algit)
-                # Transform XML
-                result = xslt_processor.transform_to_file(
-                    source_file=source_file,
-                    output_file=str(output_file),
-                    initial_template_params={
-                        "DD_GIT_DESCRIBE": str(version or fname),
-                        "AL_GIT_DESCRIBE": os.environ.get("AL_VERSION", "0.0.0"),
-                    },
+                xdm_ddgit = proc.make_string_value(str(version) or fname)
+                xslt_processor.set_parameter("DD_GIT_DESCRIBE", xdm_ddgit)
+                xdm_algit = proc.make_string_value(
+                    os.environ.get("AL_VERSION", "0.0.0")
                 )
+                xslt_processor.set_parameter("AL_GIT_DESCRIBE", xdm_algit)
+                if (
+                    fname is not None
+                    and fname != "-"
+                    and fname != ""
+                    and os.path.exists(fname)
+                ):
+                    transform_with_xslt(xslt_processor, fname, xslfile, output_file)
+                elif version is not None and version != "":
+                    xml_string = get_dd_xml(version)
 
-                if result is False:
-                    logger.error(
-                        "Transformation failed: Check Saxon/C logs for details."
-                    )
-                    raise RuntimeError("Saxon/C XSLT transformation failed.")
-
+                    with tempfile.NamedTemporaryFile(
+                        delete=True, mode="w+b"
+                    ) as temp_file:
+                        temp_file.write(xml_string)
+                        temp_file.seek(0)
+                        transform_with_xslt(
+                            xslt_processor, temp_file.name, xslfile, output_file
+                        )
+                else:
+                    raise MDSPlusModelError("Either fname or version must be provided")
     except Exception as e:
         if fname:
             logger.error("Error making MDSplus model IDS.xml for %s", fname)
