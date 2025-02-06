@@ -32,7 +32,7 @@ except ImportError as exc:
     imasdef = None
     lowlevel = None
     logger.critical(
-        "Could not import 'al_core': %s. Some functionality is not available.",
+        "Could not import 'imas_core': %s. Some functionality is not available.",
         exc,
     )
 
