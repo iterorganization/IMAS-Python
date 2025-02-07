@@ -71,7 +71,8 @@ dependencies = [
 [project.optional-dependencies]
 # these self-dependencies are available since pip 21.2
 all = [
-    "imas[test,docs,imas-core,netcdf,h5py]"
+    "imas-python[test,docs,netcdf,h5py]" 
+    # "imas-python[test,docs,imas-core,netcdf,h5py]" TODO enable when imas-core is available on pypi
 ]
 docs = [
     "sphinx>=6.0.0,<7.0.0",
