@@ -3,7 +3,6 @@ from unittest.mock import DEFAULT, patch
 
 import numpy
 import pytest
-
 from imas.backends.imas_core.imas_interface import ll_interface
 from imas.db_entry import DBEntry
 from imas.ids_defs import (
@@ -22,6 +21,15 @@ def test_lazy_load_aos(backend, worker_id, tmp_path, log_lowlevel_calls):
     if backend == ASCII_BACKEND:
         pytest.skip("Lazy loading is not supported by the ASCII backend.")
     dbentry = open_dbentry(backend, "w", worker_id, tmp_path, dd_version="3.39.0")
+    run_lazy_load_aos(dbentry)
+
+
+def test_lazy_load_aos_netcdf(tmp_path):
+    dbentry = DBEntry(str(tmp_path / "lazy_load_aos.nc"), "x", dd_version="3.39.0")
+    run_lazy_load_aos(dbentry)
+
+
+def run_lazy_load_aos(dbentry):
     ids = dbentry.factory.new("core_profiles")
     ids.ids_properties.homogeneous_time = IDS_TIME_MODE_HETEROGENEOUS
     ids.profiles_1d.resize(10)
@@ -46,9 +54,12 @@ def test_lazy_load_aos(backend, worker_id, tmp_path, log_lowlevel_calls):
             assert values[method].call_count == 0
 
     # Test get_slice
-    lazy_ids_slice = dbentry.get_slice("core_profiles", 3.5, PREVIOUS_INTERP, lazy=True)
-    assert lazy_ids_slice.profiles_1d.shape == (1,)
-    assert lazy_ids_slice.profiles_1d[0].time == 3
+    try:
+        lazy_slice = dbentry.get_slice("core_profiles", 3.5, PREVIOUS_INTERP, lazy=True)
+        assert lazy_slice.profiles_1d.shape == (1,)
+        assert lazy_slice.profiles_1d[0].time == 3
+    except NotImplementedError:
+        pass  # netCDF backend doesn't implement get_slice
 
     dbentry.close()
 
@@ -57,6 +68,15 @@ def test_lazy_loading_distributions_random(backend, worker_id, tmp_path):
     if backend == ASCII_BACKEND:
         pytest.skip("Lazy loading is not supported by the ASCII backend.")
     dbentry = open_dbentry(backend, "w", worker_id, tmp_path)
+    run_lazy_loading_distributions_random(dbentry)
+
+
+def test_lazy_loading_distributions_random_netcdf(tmp_path):
+    dbentry = DBEntry(str(tmp_path / "lazy_load_distributions.nc"), "x")
+    run_lazy_loading_distributions_random(dbentry)
+
+
+def run_lazy_loading_distributions_random(dbentry):
     ids = IDSFactory().new("distributions")
     fill_consistent(ids)
     dbentry.put(ids)
@@ -92,7 +112,15 @@ def test_lazy_load_close_dbentry(requires_imas):
 def test_lazy_load_readonly(requires_imas):
     dbentry = DBEntry(MEMORY_BACKEND, "ITER", 1, 1)
     dbentry.create()
+    run_lazy_load_readonly(dbentry)
 
+
+def test_lazy_load_readonly_netcdf(tmp_path):
+    dbentry = DBEntry(str(tmp_path / "lazy_load_readonly.nc"), "x")
+    run_lazy_load_readonly(dbentry)
+
+
+def run_lazy_load_readonly(dbentry):
     ids = dbentry.factory.core_profiles()
     ids.ids_properties.homogeneous_time = IDS_TIME_MODE_HETEROGENEOUS
     ids.time = [1, 2]
@@ -163,6 +191,27 @@ def test_lazy_load_with_new_aos(requires_imas):
     assert len(lazy_et.model[0].ggd[0].electrons.particles.d_radial) == 0
 
     dbentry.close()
+
+
+def test_lazy_load_with_new_aos_netcdf(tmp_path):
+    fname = str(tmp_path / "new_aos.nc")
+    with DBEntry(fname, "x", dd_version="3.30.0") as dbentry:
+        et = dbentry.factory.edge_transport()
+
+        et.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+        et.time = [1.0]
+        et.model.resize(1)
+        et.model[0].ggd.resize(1)
+        et.model[0].ggd[0].electrons.particles.d.resize(1)
+        et.model[0].ggd[0].electrons.particles.d[0].grid_index = -1
+        dbentry.put(et)
+
+    with DBEntry(fname, "r", dd_version="3.39.0") as entry2:
+        lazy_et = entry2.get("edge_transport", lazy=True)
+        assert numpy.array_equal(lazy_et.time, [1.0])
+        assert lazy_et.model[0].ggd[0].electrons.particles.d[0].grid_index == -1
+        # d_radial did not exist in 3.30.0
+        assert len(lazy_et.model[0].ggd[0].electrons.particles.d_radial) == 0
 
 
 def test_lazy_load_with_new_structure(requires_imas):

@@ -3,11 +3,13 @@ import os
 from typing import Iterator, List, Optional, Tuple
 
 import netCDF4
+import numpy as np
 
 from imas.backends.netcdf import ids2nc
 from imas.backends.netcdf.nc_metadata import NCMetadata
 from imas.exception import InvalidNetCDFEntry
 from imas.ids_base import IDSBase
+from imas.ids_convert import NBCPathMap
 from imas.ids_data_type import IDSDataType
 from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
 from imas.ids_metadata import IDSMetadata
@@ -70,22 +72,37 @@ def _tree_iter(
 class NC2IDS:
     """Class responsible for reading an IDS from a NetCDF group."""
 
-    def __init__(self, group: netCDF4.Group, ids: IDSToplevel) -> None:
+    def __init__(
+        self,
+        group: netCDF4.Group,
+        ids: IDSToplevel,
+        ids_metadata: IDSMetadata,
+        nbc_map: Optional[NBCPathMap],
+    ) -> None:
         """Initialize NC2IDS converter.
 
         Args:
             group: NetCDF group that stores the IDS data.
             ids: Corresponding IDS toplevel to store the data in.
+            ids_metadata: Metadata corresponding to the DD version that the data is
+                stored in.
+            nbc_map: Path map for implicit DD conversions.
         """
         self.group = group
         """NetCDF Group that the IDS is stored in."""
         self.ids = ids
         """IDS to store the data in."""
+        self.ids_metadata = ids_metadata
+        """Metadata of the IDS in the DD version that the data is stored in"""
+        self.nbc_map = nbc_map
+        """Path map for implicit DD conversions."""
 
-        self.ncmeta = NCMetadata(ids.metadata)
+        self.ncmeta = NCMetadata(ids_metadata)
         """NetCDF related metadata."""
         self.variables = list(group.variables)
         """List of variable names stored in the netCDF group."""
+
+        self._lazy_map = {}
         # Don't use masked arrays: they're slow and we'll handle most of the unset
         # values through the `:shape` arrays
         self.group.set_auto_mask(False)
@@ -99,7 +116,7 @@ class NC2IDS:
                 "Mandatory variable `ids_properties.homogeneous_time` does not exist."
             )
         var = group["ids_properties.homogeneous_time"]
-        self._validate_variable(var, ids.ids_properties.homogeneous_time.metadata)
+        self._validate_variable(var, ids.metadata["ids_properties/homogeneous_time"])
         if var[()] not in [0, 1, 2]:
             raise InvalidNetCDFEntry(
                 f"Invalid value for ids_properties.homogeneous_time: {var[()]}. "
@@ -107,23 +124,52 @@ class NC2IDS:
             )
         self.homogeneous_time = var[()] == IDS_TIME_MODE_HOMOGENEOUS
 
-    def run(self) -> None:
+    def run(self, lazy: bool) -> None:
         """Load the data from the netCDF group into the IDS."""
         self.variables.sort()
         self.validate_variables()
+        if lazy:
+            self.ids._set_lazy_context(LazyContext(self))
         for var_name in self.variables:
             if var_name.endswith(":shape"):
                 continue
-            metadata = self.ids.metadata[var_name]
+            metadata = self.ids_metadata[var_name]
 
             if metadata.data_type is IDSDataType.STRUCTURE:
                 continue  # This only contains DD metadata we already know
 
+            # Handle implicit DD version conversion
+            if self.nbc_map is None:
+                target_metadata = metadata  # no conversion
+            elif metadata.path_string in self.nbc_map:
+                new_path = self.nbc_map.path[metadata.path_string]
+                if new_path is None:
+                    logging.info(
+                        "Not loading data for %s: no equivalent data structure exists "
+                        "in the target Data Dictionary version.",
+                        metadata.path_string,
+                    )
+                    continue
+                target_metadata = self.ids.metadata[new_path]
+            elif metadata.path_string in self.nbc_map.type_change:
+                logging.info(
+                    "Not loading data for %s: cannot hanlde type changes when "
+                    "implicitly converting data to the target Data Dictionary version.",
+                    metadata.path_string,
+                )
+                continue
+            else:
+                target_metadata = metadata  # no conversion required
+
             var = self.group[var_name]
+            if lazy:
+                self._lazy_map[target_metadata.path_string] = var
+                continue
+
             if metadata.data_type is IDSDataType.STRUCT_ARRAY:
                 if "sparse" in var.ncattrs():
                     shapes = self.group[var_name + ":shape"][()]
-                    for index, node in tree_iter(self.ids, metadata):
+                    for index, node in tree_iter(self.ids, target_metadata):
                         node.resize(shapes[index][0])
 
                 else:
@@ -132,7 +178,7 @@ class NC2IDS:
                         metadata.path_string, self.homogeneous_time
                     )[-1]
                     size = self.group.dimensions[dim].size
-                    for _, node in tree_iter(self.ids, metadata):
+                    for _, node in tree_iter(self.ids, target_metadata):
                         node.resize(size)
 
                 continue
@@ -144,23 +190,30 @@ class NC2IDS:
             if "sparse" in var.ncattrs():
                 if metadata.ndim:
                     shapes = self.group[var_name + ":shape"][()]
-                    for index, node in tree_iter(self.ids, metadata):
+                    for index, node in tree_iter(self.ids, target_metadata):
                         shape = shapes[index]
                         if shape.all():
-                            node.value = data[index + tuple(map(slice, shapes[index]))]
+                            # NOTE: bypassing IDSPrimitive.value.setter logic
+                            node._IDSPrimitive__value = data[
+                                index + tuple(map(slice, shape))
+                            ]
                 else:
-                    for index, node in tree_iter(self.ids, metadata):
+                    for index, node in tree_iter(self.ids, target_metadata):
                         value = data[index]
                         if value != getattr(var, "_FillValue", None):
-                            node.value = data[index]
+                            # NOTE: bypassing IDSPrimitive.value.setter logic
+                            node._IDSPrimitive__value = value
 
             elif metadata.path_string not in self.ncmeta.aos:
                 # Shortcut for assigning untensorized data
-                self.ids[metadata.path] = data
+                # Note: var[()] can return 0D numpy arrays. Instead of handling this
+                # here, we'll let IDSPrimitive.value.setter take care of it:
+                self.ids[target_metadata.path].value = data
 
             else:
-                for index, node in tree_iter(self.ids, metadata):
-                    node.value = data[index]
+                for index, node in tree_iter(self.ids, target_metadata):
+                    # NOTE: bypassing IDSPrimitive.value.setter logic
+                    node._IDSPrimitive__value = data[index]
 
     def validate_variables(self) -> None:
         """Validate that all variables in the netCDF Group exist and match the DD."""
@@ -194,7 +247,7 @@ class NC2IDS:
             # Check that the DD defines this variable, and validate its metadata
             var = self.group[var_name]
             try:
-                metadata = self.ids.metadata[var_name]
+                metadata = self.ids_metadata[var_name]
             except KeyError:
                 raise InvalidNetCDFEntry(
                     f"Invalid variable {var_name}: no such variable exists in the "
@@ -300,3 +353,69 @@ class NC2IDS:
             raise variable_error(
                 shape_var, "dtype", shape_var.dtype, "any integer type"
             )
+
+
+class LazyContext:
+    def __init__(self, nc2ids, index=()):
+        self.nc2ids = nc2ids
+        self.index = index
+
+    def get_child(self, child):
+        metadata = child.metadata
+        path = metadata.path_string
+        data_type = metadata.data_type
+        nc2ids = self.nc2ids
+        var = nc2ids._lazy_map.get(path)
+
+        if data_type is IDSDataType.STRUCT_ARRAY:
+            # Determine size of the aos
+            if var is None:
+                size = 0
+            elif "sparse" in var.ncattrs():
+                size = nc2ids.group[var.name + ":shape"][self.index][0]
+            else:
+                # FIXME: extract dimension name from nc file?
+                dim = nc2ids.ncmeta.get_dimensions(
+                    metadata.path_string, nc2ids.homogeneous_time
+                )[-1]
+                size = nc2ids.group.dimensions[dim].size
+
+            child._set_lazy_context(LazyArrayStructContext(nc2ids, self.index, size))
+
+        elif data_type is IDSDataType.STRUCTURE:
+            child._set_lazy_context(self)
+
+        elif var is not None:  # Data elements
+            value = None
+            if "sparse" in var.ncattrs():
+                if metadata.ndim:
+                    shape_var = nc2ids.group[var.name + ":shape"]
+                    shape = shape_var[self.index]
+                    if shape.all():
+                        value = var[self.index + tuple(map(slice, shape))]
+                else:
+                    value = var[self.index]
+                    if value == getattr(var, "_FillValue", None):
+                        value = None  # Skip setting
+            else:
+                value = var[self.index]
+
+            if value is not None:
+                if isinstance(value, np.ndarray):
+                    # Convert the numpy array to a read-only view
+                    value = value.view()
+                    value.flags.writeable = False
+                # NOTE: bypassing IDSPrimitive.value.setter logic
+                child._IDSPrimitive__value = value
+
+
+class LazyArrayStructContext(LazyContext):
+    def __init__(self, nc2ids, index, size):
+        super().__init__(nc2ids, index)
+        self.size = size
+
+    def get_context(self):
+        return self  # IDSStructArray expects to get something with a size attribute
+
+    def iterate_to_index(self, index: int) -> LazyContext:
+        return LazyContext(self.nc2ids, self.index + (index,))

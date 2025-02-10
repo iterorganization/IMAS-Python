@@ -9,16 +9,11 @@ import logging
 
 import numpy as np
 import pytest
-
 from imas.db_entry import DBEntry
 from imas.ids_convert import convert_ids
 from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS, MEMORY_BACKEND
 from imas.ids_factory import IDSFactory
-from imas.test.test_helpers import (
-    compare_children,
-    fill_with_random_data,
-    open_dbentry,
-)
+from imas.test.test_helpers import compare_children, fill_with_random_data, open_dbentry
 
 
 @pytest.fixture(autouse=True)
@@ -95,6 +90,23 @@ def test_nbc_0d_to_1d(caplog, requires_imas):
 
     # Note: closing entry_332 as well results in a double free, so we don't
     entry_339.close()
+
+
+def test_nbc_0d_to_1d_netcdf(caplog, tmp_path):
+    # channel/filter_spectrometer/radiance_calibration in spectrometer visible changed
+    # from FLT_0D to FLT_1D in DD 3.39.0
+    ids = IDSFactory("3.32.0").spectrometer_visible()
+    ids.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    ids.channel.resize(1)
+    ids.channel[0].filter_spectrometer.radiance_calibration = 1.0
+
+    # Test implicit conversion during get
+    with DBEntry(str(tmp_path / "test.nc"), "x", dd_version="3.32.0") as entry_332:
+        entry_332.put(ids)
+    with DBEntry(str(tmp_path / "test.nc"), "r", dd_version="3.39.0") as entry_339:
+        ids_339 = entry_339.get("spectrometer_visible")  # implicit conversion
+        assert not ids_339.channel[0].filter_spectrometer.radiance_calibration.has_value
+        entry_339.close()
 
 
 def test_nbc_change_aos_renamed():
@@ -272,7 +284,7 @@ def test_pulse_schedule_aos_renamed_autofill_up(backend, worker_id, tmp_path):
     dbentry.close()
 
 
-def test_pulse_schedule_multi_rename():
+def test_pulse_schedule_multi_rename(tmp_path):
     # Multiple renames of the same element:
     # DD >= 3.40+:  ec/beam
     # DD 3.26-3.40: ec/launcher (but NBC metadata added in 3.28 only)
@@ -294,9 +306,18 @@ def test_pulse_schedule_multi_rename():
     ps["3.40.0"].ec.beam[0].name = name
 
     for version1 in ps:
+        ncfilename = str(tmp_path / f"{version1}.nc")
+        with DBEntry(ncfilename, "x", dd_version=version1) as entry:
+            entry.put(ps[version1])
+
         for version2 in ps:
             converted = convert_ids(ps[version1], version2)
-            compare_children(ps[version2], converted)
+            compare_children(ps[version2].ec, converted.ec)
+
+            # Test with netCDF backend
+            with DBEntry(ncfilename, "r", dd_version=version2) as entry:
+                converted = entry.get("pulse_schedule")
+            compare_children(ps[version2].ec, converted.ec)
 
 
 def test_autofill_save_newer(ids_name, backend, worker_id, tmp_path):

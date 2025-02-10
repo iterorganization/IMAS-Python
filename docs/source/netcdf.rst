@@ -11,7 +11,7 @@ IMAS netCDF files
 
 IMAS-Python supports reading IDSs from and writing IDSs to IMAS netCDF files. This
 feature is currently in alpha status, and its functionality may change in
-upcoming minor releases of IMAS-Python.
+upcoming (minor) releases of IMAS-Python.
 
 A detailed description of the IMAS netCDF format and conventions can be found on
 the :ref:`IMAS conventions for the netCDF data format` page.
@@ -40,6 +40,34 @@ will be used for :py:meth:`~imas.db_entry.DBEntry.get` and
         cp2 = netcdf_entry.get("core_profiles")
 
     imas.util.print_tree(cp2)
+
+
+Implemented features of a netCDF ``DBEntry``
+--------------------------------------------
+
+A netCDF ``DBEntry`` doesn't implement all features that are supported by
+``imas_core``. The following table provides an overview of the implemented
+features that are supported by DBEntries using ``imas_core`` respectively
+``netCDF``:
+
+.. list-table::
+    :header-rows: 1
+    
+    * - Feature
+      - ``imas_core``
+      - ``netCDF``
+    * - :ref:`Lazy loading`
+      - Yes
+      - Yes
+    * - :ref:`Automatic conversion between DD versions <Conversion of IDSs between DD versions>`
+      - When reading and writing
+      - When reading
+    * - ``get_slice`` / ``put_slice``
+      - Yes
+      - Not implemented
+    * - ``get_sample``
+      - Yes (requires ``imas_core >= 5.4.0``)
+      - Not implemented
 
 
 Using IMAS netCDF files with 3rd-party tools

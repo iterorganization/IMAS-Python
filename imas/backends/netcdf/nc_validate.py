@@ -47,8 +47,9 @@ def validate_netcdf_file(filename: str) -> None:
         for ids_name in ids_names:
             for occurrence in entry.list_all_occurrences(ids_name):
                 group = dataset[f"{ids_name}/{occurrence}"]
+                ids = factory.new(ids_name)
                 try:
-                    NC2IDS(group, factory.new(ids_name)).validate_variables()
+                    NC2IDS(group, ids, ids.metadata, None).validate_variables()
                 except InvalidNetCDFEntry as exc:
                     occ = f":{occurrence}" if occurrence else ""
                     raise InvalidNetCDFEntry(f"Invalid IDS {ids_name}{occ}: {exc}")
