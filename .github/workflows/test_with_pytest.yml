@@ -1,0 +1,53 @@
+name: Test using pytest
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+
+        uses: actions/setup-python@v2
+        with:
+          # until saxonche is available in 3.13
+          # https://saxonica.plan.io/issues/6561
+          python-version: "<3.13"
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip setuptools wheel
+          pip install .[h5py,netcdf,test]
+
+      - name: Run tests
+        run: |
+          source venv/bin/activate
+          python -m pytest -n=auto --cov=imas --cov-report=term-missing --cov-report=xml:coverage.xml --cov-report=html:htmlcov --junit-xml=junit.xml
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: junit.xml
+
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-xml-coverage-path: ./coverage.xml
+          junitxml-path: ./junit.xml
+          xml-skip-covered: true
+          hide-report: true
