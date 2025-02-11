@@ -200,7 +200,8 @@ def test_provenance_entry(factory):
     timestamp = str(cp4.ids_properties.provenance.node[0].reference[0].timestamp)
     # Check that timestamp adheres to the format YYYY-MM-DDTHH:MM:SSZ
     assert re.match(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", timestamp)
-    dtime = datetime.now(UTC) - datetime.fromisoformat(timestamp)
+    timestamp_for_parsing = timestamp.replace("Z", "+00:00")
+    dtime = datetime.now(UTC) - datetime.fromisoformat(timestamp_for_parsing)
     assert timedelta(seconds=0) <= dtime < timedelta(seconds=2)
 
 
