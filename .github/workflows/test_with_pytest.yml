@@ -11,11 +11,11 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
 
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           # until saxonche is available in 3.13
           # https://saxonica.plan.io/issues/6561

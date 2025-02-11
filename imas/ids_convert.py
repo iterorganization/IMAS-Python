@@ -533,7 +533,8 @@ def _add_provenance_entry(
         # DD version after IMAS-5304
         node.reference.resize(len(node.reference) + 1, keep=True)
         node.reference[-1].name = source_txt
-        timestamp = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
+        utc = getattr(datetime, "UTC", datetime.timezone.utc)
+        timestamp = datetime.datetime.now(utc).isoformat(timespec="seconds")
         node.reference[-1].timestamp = timestamp.replace("+00:00", "Z")
     else:
         # DD before IMAS-5304 (between 3.34.0 and 3.41.0)
