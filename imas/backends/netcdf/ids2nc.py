@@ -1,21 +1,16 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""NetCDF IO support for IMAS-Python. Requires [netcdf] extra dependencies.
-"""
-
-from typing import Iterator, Tuple
+"""NetCDF IO support for IMAS-Python. Requires [netcdf] extra dependencies."""
 
 import netCDF4
 import numpy
 from packaging import version
 
 from imas.backends.netcdf.nc_metadata import NCMetadata
+from imas.backends.netcdf.iterators import indexed_tree_iter
 from imas.exception import InvalidNetCDFEntry
-from imas.ids_base import IDSBase
 from imas.ids_data_type import IDSDataType
 from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
-from imas.ids_struct_array import IDSStructArray
-from imas.ids_structure import IDSStructure
 from imas.ids_toplevel import IDSToplevel
 
 default_fillvals = {
@@ -31,26 +26,6 @@ dtypes = {
     IDSDataType.CPX: numpy.dtype(numpy.complex128),
 }
 SHAPE_DTYPE = numpy.int32
-
-
-def nc_tree_iter(
-    node: IDSStructure, aos_index: Tuple[int, ...] = ()
-) -> Iterator[Tuple[Tuple[int, ...], IDSBase]]:
-    """Tree iterator that tracks indices of all ancestor array of structures.
-
-    Args:
-        node: IDS node to iterate over
-
-    Yields:
-        (aos_index, node) for all filled nodes.
-    """
-    for child in node.iter_nonempty_():
-        yield (aos_index, child)
-        if isinstance(child, IDSStructArray):
-            for i in range(len(child)):
-                yield from nc_tree_iter(child[i], aos_index + (i,))
-        elif isinstance(child, IDSStructure):
-            yield from nc_tree_iter(child, aos_index)
 
 
 class IDS2NC:
@@ -105,7 +80,7 @@ class IDS2NC:
         dimension_size = {}
         get_dimensions = self.ncmeta.get_dimensions
 
-        for aos_index, node in nc_tree_iter(self.ids):
+        for aos_index, node in indexed_tree_iter(self.ids):
             path = node.metadata.path_string
             filled_data[path][aos_index] = node
             ndim = node.metadata.ndim
