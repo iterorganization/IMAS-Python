@@ -1,8 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Collection of useful helper methods when working with IMAS-Python.
-"""
-
+"""Collection of useful helper methods when working with IMAS-Python."""
 
 import logging
 import re
@@ -524,3 +522,55 @@ def get_data_dictionary_version(obj: Union[IDSBase, DBEntry, IDSFactory]) -> str
     if isinstance(obj, IDSBase):
         return obj._version
     raise TypeError(f"Cannot get data dictionary version of '{type(obj)}'")
+
+
+def to_xarray(ids: IDSToplevel, *paths: str) -> Any:
+    """Convert an IDS to an xarray Dataset.
+
+    Args:
+        ids: An IDS toplevel element
+        paths: Optional list of element paths to convert to xarray. The full IDS will be
+            converted to an xarray Dataset if no paths are provided.
+
+            Paths must not contain indices, and may use a ``/`` or a ``.`` as separator.
+            For example, ``"profiles_1d(itime)/electrons/density"`` is not allowed as
+            path, use ``"profiles_1d/electrons/density"`` or
+            ``profiles_1d.electrons.density"`` instead.
+
+            Coordinates to the quantities in the requested paths will also be included
+            in the xarray Dataset.
+
+    Returns:
+        An ``xarray.Dataset`` object.
+
+    Examples:
+        .. code-block:: python
+
+            # Convert the whole IDS to an xarray Dataset
+            ds = imas.util.to_xarray(ids)
+
+            # Convert only some elements in the IDS (including their coordinates)
+            ds = imas.util.to_xarray(
+                ids,
+                "profiles_1d/electrons/density",
+                "profiles_1d/electrons/temperature",
+            )
+
+            # Paths can be provided with "/" or "." as separator
+            ds = imas.util.to_xarray(
+                ids,
+                "profiles_1d.electrons.density",
+                "profiles_1d.electrons.temperature",
+            )
+
+    See Also:
+        https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html
+    """
+    try:
+        import xarray  # noqa: F401
+    except ImportError:
+        raise RuntimeError("xarray is not available, cannot convert the IDS to xarray.")
+
+    from imas._to_xarray import to_xarray
+
+    return to_xarray(ids, *paths)

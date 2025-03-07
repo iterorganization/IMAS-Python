@@ -2,6 +2,7 @@
 # You should have received the IMAS-Python LICENSE file with this project.
 """Tensorization logic to convert IDSs to netCDF files and/or xarray Datasets."""
 
+from collections import deque
 from typing import List
 
 import numpy
@@ -52,6 +53,26 @@ class IDSTensorizer:
         """True iff the IDS time mode is homogeneous."""
         self.shapes = {}
         """Map of IDS paths to data shape arrays."""
+
+    def include_coordinate_paths(self) -> None:
+        """Append all paths that are coordinates of self.paths_to_tensorize"""
+        # Use a queue so we can also take coordinates of coordinates into account
+        queue = deque(self.paths_to_tensorize)
+        # Include all parent AoS as well:
+        for path in self.paths_to_tensorize:
+            while path:
+                path, _, _ = path.rpartition("/")
+                if self.ncmeta.get_dimensions(path, self.homogeneous_time):
+                    queue.append(path)
+
+        self.paths_to_tensorize = []
+        while queue:
+            path = queue.popleft()
+            if path in self.paths_to_tensorize:
+                continue  # already processed
+            self.paths_to_tensorize.append(path)
+            for coordinate in self.ncmeta.get_coordinates(path, self.homogeneous_time):
+                queue.append(coordinate.replace(".", "/"))
 
     def collect_filled_data(self) -> None:
         """Collect all filled data in the IDS and determine dimension sizes.
