@@ -71,8 +71,7 @@ dependencies = [
 [project.optional-dependencies]
 # these self-dependencies are available since pip 21.2
 all = [
-    "imas-python[test,docs,netcdf,h5py]" 
-    # "imas-python[test,docs,imas-core,netcdf,h5py]" TODO enable when imas-core is available on pypi
+    "imas-python[test,docs]" 
 ]
 docs = [
     "sphinx>=6.0.0,<7.0.0",
@@ -90,6 +89,9 @@ netcdf = [
 h5py = [
     "h5py",
 ]
+xarray = [
+    "xarray",
+]
 test = [
     "pytest>=5.4.1",
     "pytest-cov>=0.6",
@@ -101,7 +103,9 @@ test = [
     "virtualenv",
     # Pint and xarray are used in training snippets
     "pint",
-    "xarray",
+    # Optional dependencies
+    # TODO add imas-core when it is available on pypi
+    "imas-python[netcdf,h5py,xarray]",
 ]
 
 [project.scripts]

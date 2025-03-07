@@ -28,7 +28,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip setuptools wheel
-          pip install .[h5py,netcdf,test]
+          pip install .[test]
 
       - name: Run tests
         run: |
