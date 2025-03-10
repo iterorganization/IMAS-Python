@@ -8,6 +8,8 @@ Create ``xarray.DataArray`` from an IDS
     recommend to use :py:func:`imas.util.to_xarray` instead of manually creating
     xarray ``DataArray``\ s.
 
+    See also: :ref:`Convert IMAS-Python IDSs directly to Xarray Datasets`.
+
 Let's start with an introduction of Xarray. According to `their website
 <https://docs.xarray.dev/en/stable/getting-started-guide/why-xarray.html>`_ (where you
 can also find an excellent summary of why that is useful):
