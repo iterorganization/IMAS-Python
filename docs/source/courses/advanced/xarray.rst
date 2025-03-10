@@ -3,9 +3,10 @@ Create ``xarray.DataArray`` from an IDS
 
 .. info::
 
-    In this lesson you will create a ``DataArray`` manually. In a future version of
-    IMAS-Python we plan to include functionality that will automatically do this for you.
-    That should further simplify working with data inside IDSs.
+    This lesson was written before :py:func:`imas.util.to_xarray` was
+    implemented. This lesson is retained for educational purposes, however we
+    recommend to use :py:func:`imas.util.to_xarray` instead of manually creating
+    xarray ``DataArray``\ s.
 
 Let's start with an introduction of Xarray. According to `their website
 <https://docs.xarray.dev/en/stable/getting-started-guide/why-xarray.html>`_ (where you
@@ -61,6 +62,10 @@ Exercise 1: create a ``DataArray`` for ``profiles_1d/temperature``
 
     .. md-tab-item:: Solution
 
+        This exercise was created before the implementation of
+        :py:func:`imas.util.to_xarray`. The original approach is available below
+        for educational purposes.
+
         .. literalinclude:: imas_snippets/ids_to_xarray.py
 
 
@@ -95,5 +100,10 @@ the ``profiles_1d`` array of structures. When the grid is not changing in the ID
                 norm=matplotlib.colors.LogNorm())``
 
     .. md-tab-item:: Solution
+
+        This exercise was created before the implementation of
+        :py:func:`imas.util.to_xarray`. Below code sample is updated to provide
+        two alternatives: the first is based on :py:func:`imas.util.to_xarray`,
+        the second is the original, manual approach.
 
         .. literalinclude:: imas_snippets/tensorized_ids_to_xarray.py
