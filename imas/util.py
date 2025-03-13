@@ -543,6 +543,22 @@ def to_xarray(ids: IDSToplevel, *paths: str) -> Any:
     Returns:
         An ``xarray.Dataset`` object.
 
+    Notes:
+        - Lazy loaded IDSs are not supported for full IDS conversion
+          (``imas.util.to_xarray(ids)`` will raise an exception for lazy loaded IDSs).
+          This function can work with lazy loaded IDSs when paths are explicitly
+          provided: this might take a while because it will load all data for the
+          provided paths and their coordinates.
+        - This function does not accept wildcards for the paths. However, it is possible
+          to combine this method with :py:func:`imas.util.find_paths`, see the Examples
+          below.
+        - This function may return an empty dataset in the following cases:
+
+          - The provided IDS does not contain any data.
+          - The IDS does not contain any data for the provided paths.
+          - The provided paths do not point to data nodes, but to (arrays of)
+            structures.
+
     Examples:
         .. code-block:: python
 
@@ -562,6 +578,12 @@ def to_xarray(ids: IDSToplevel, *paths: str) -> Any:
                 "profiles_1d.electrons.density",
                 "profiles_1d.electrons.temperature",
             )
+
+            # Combine with imas.util.find_paths to include all paths containing
+            # "profiles_1d" in the xarray conversion:
+            profiles_1d_paths = imas.util.find_paths(ids, "profiles_1d")
+            assert len(profiles_1d_paths) > 0
+            ds = imas.util.to_xarray(ids, *profiles_1d_paths)
 
     See Also:
         https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html
