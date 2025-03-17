@@ -32,11 +32,11 @@ equilibrium.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGE
 equilibrium.ids_properties.comment = "testing"
 equilibrium.time = [0.01]
 
-with imas.DBEntry("imas:hdf5?path=./testdb","w") as dbentry:
+with imas.DBEntry("imas:hdf5?path=./testdb", "w") as dbentry:
     dbentry.put(equilibrium)
 	
 # or without imas_core dependency
-with imas.DBEntry("./test.nc","w") as dbentry:
+with imas.DBEntry("./test.nc", "w") as dbentry:
     dbentry.put(equilibrium)
 
 ```
