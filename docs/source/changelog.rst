@@ -9,7 +9,7 @@ What's new in IMAS-Python 2.0.0
 Breaking change
 '''''''''''''''
 
-The package name was changed from `imaspy` to `imas` while porting the code to GitHub. This shall only affect the import statements in your code. 
+The package name was changed from ``imaspy`` to ``imas`` while porting the code to GitHub. This shall only affect the import statements in your code. 
 
 New features and improvements
 '''''''''''''''''''''''''''''
@@ -18,7 +18,7 @@ New features and improvements
 - Implements automatic DD version conversion on :py:meth:`imas.db_entry.DBEntry.get` (conversion during :py:meth:`imas.db_entry.DBEntry.put` is not supported as this is rarely needed and easily worked around).
 - Enable lazy loading when reading data from a netCDF file.
 - Minor performance improvement loading data from a netCDF file.
-- Replace ``versioneer`` by ``setuptools-scm`` to determine the version of the code.
+- Replace versioneer by setuptools-scm to determine the version of the code.
 - Use `saxonche <https://pypi.org/project/saxonche/>`__ instead of the JAR for XSL transforms (when building versions of the DD).
 - Updating the README, CONTRIBUTING guidelines and documentation after making the code open access.
 
