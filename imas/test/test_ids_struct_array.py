@@ -87,3 +87,15 @@ def test_struct_array_eq():
     assert cp1.profiles_1d != cp2.profiles_1d
     cp2.profiles_1d[0].time = 1
     assert cp1.profiles_1d == cp2.profiles_1d
+
+
+def test_struct_array_slice():
+    cp1 = IDSFactory("3.39.0").core_profiles()
+    cp1.profiles_1d.resize(20)
+
+    assert len(cp1.profiles_1d) == 20
+    assert len(cp1.profiles_1d[:]) == 20
+    assert len(cp1.profiles_1d[5:10]) == 5
+    assert len(cp1.profiles_1d[10:]) == 10
+    assert len(cp1.profiles_1d[:5]) == 5
+    assert len(cp1.profiles_1d[::2]) == 10

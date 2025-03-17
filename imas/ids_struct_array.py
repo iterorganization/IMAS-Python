@@ -4,6 +4,7 @@
 """
 
 import logging
+import sys
 from copy import deepcopy
 from typing import Optional, Tuple
 
@@ -121,12 +122,25 @@ class IDSStructArray(IDSBase):
         return struct
 
     def __getitem__(self, item):
-        # value is a list, so the given item should be convertable to integer
-        # TODO: perhaps we should allow slices as well?
-        list_idx = int(item)
-        if self._lazy:
-            self._load(item)
-        return self.value[list_idx]
+        # allow slices
+        if isinstance(item, slice):
+            if self._lazy:
+                start, stop, step = item.start, item.stop, item.step
+                if stop is None:
+                    stop = sys.maxsize
+
+                for i in range(start or 0, stop, step or 1):
+                    try:
+                        self._load(i)
+                    except IndexError:
+                        break
+            return self.value[item]
+        else:
+            # value is a list, so the given item should be convertable to integer
+            list_idx = int(item)
+            if self._lazy:
+                self._load(item)
+            return self.value[list_idx]
 
     def __setitem__(self, item, value):
         # value is a list, so the given item should be convertable to integer
