@@ -77,10 +77,14 @@ def get_children(
                 getattr(structure, name)._IDSPrimitive__value = data
 
 
-def _get_child(child: IDSBase, ctx: LazyALContext):
+def _get_child(child: IDSBase, ctx: Optional[LazyALContext]):
     """Get a single child when required (lazy loading)."""
     # NOTE: changes in this method must be propagated to _get_children and vice versa
     #   Performance: this method is specialized for the lazy get
+
+    # ctx can be None when the parent structure does not exist in the on-disk DD version
+    if ctx is None:
+        return  # There is no data to be loaded
 
     time_mode = ctx.time_mode
     if time_mode == IDS_TIME_MODE_INDEPENDENT and child.metadata.type.is_dynamic:
