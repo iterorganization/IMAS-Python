@@ -173,7 +173,7 @@ class IDSTensorizer:
         Tensorizes the data at the given path with the specified fill value.
 
         Args:
-            path: The path to the data in the NetCDF file.
+            path: The path to the data in the IDS.
             fillvalue: The value to fill the tensor with. Can be of any type,
                              including strings.
 
