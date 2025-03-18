@@ -318,10 +318,12 @@ class LazyContext:
 
     def get_child(self, child):
         """
-        Retrieves and sets the appropriate context or value for a given child node based on its metadata.
+        Retrieves and sets the appropriate context or value for a given
+        child node based on its metadata.
 
         Args:
-            child: The child node for which the context or value is to be set. The child node should have metadata attributes.
+            child: The child node for which the context or value is to be
+            set. The child node should have metadata attributes.
 
         """
         metadata = child.metadata
@@ -374,10 +376,11 @@ class LazyContext:
 
 class LazyArrayStructContext(LazyContext):
     """
-    LazyArrayStructContext is a subclass of LazyContext that provides a context for 
-    handling structured arrays in a lazy manner. It is initialized with a NetCDF to 
+    LazyArrayStructContext is a subclass of LazyContext that provides a context for
+    handling structured arrays in a lazy manner. It is initialized with a NetCDF to
     IDS mapping object, an index, and a size.
     """
+
     def __init__(self, nc2ids, index, size):
         """
         Initialize the instance with nc2ids, index, and size.
@@ -394,7 +397,7 @@ class LazyArrayStructContext(LazyContext):
         """
         Returns the current context.
 
-        This method returns the current instance of the class, which is expected 
+        This method returns the current instance of the class, which is expected
         to have a 'size' attribute as required by IDSStructArray.
 
         Returns:
