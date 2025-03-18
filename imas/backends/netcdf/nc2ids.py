@@ -322,8 +322,7 @@ class LazyContext:
         child node based on its metadata.
 
         Args:
-            child: The child node for which the context or value is to be
-        set. The child node should have metadata attributes.
+            child: The child IDS node which should be lazy loaded.
 
         """
         metadata = child.metadata
