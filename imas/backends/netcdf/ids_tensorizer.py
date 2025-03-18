@@ -173,12 +173,12 @@ class IDSTensorizer:
         Tensorizes the data at the given path with the specified fill value.
 
         Args:
-            path (str): The path to the data in the NetCDF file.
-            fillvalue (any): The value to fill the tensor with. Can be of any type,
+            path: The path to the data in the NetCDF file.
+            fillvalue: The value to fill the tensor with. Can be of any type,
                              including strings.
 
         Returns:
-            numpy.ndarray: A tensor filled with the data from the specified path.
+            A tensor filled with the data from the specified path.
         """
         dimensions = self.ncmeta.get_dimensions(path, self.homogeneous_time)
         shape = tuple(self.dimension_size[dim] for dim in dimensions)

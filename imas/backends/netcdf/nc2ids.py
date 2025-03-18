@@ -398,7 +398,7 @@ class LazyArrayStructContext(LazyContext):
         to have a 'size' attribute as required by IDSStructArray.
 
         Returns:
-            self: The current instance of the class.
+            The current instance of the class.
         """
         return self  # IDSStructArray expects to get something with a size attribute
 
