@@ -1,6 +1,9 @@
 name: build-wheel-and-publish-test-pypi
 
-on: push
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
