@@ -317,6 +317,14 @@ class LazyContext:
         self.index = index
 
     def get_child(self, child):
+        """
+        Retrieves and sets the appropriate context or value for a given
+        child node based on its metadata.
+
+        Args:
+            child: The child IDS node which should be lazy loaded.
+
+        """
         metadata = child.metadata
         path = metadata.path_string
         data_type = metadata.data_type
@@ -366,12 +374,44 @@ class LazyContext:
 
 
 class LazyArrayStructContext(LazyContext):
+    """
+    LazyArrayStructContext is a subclass of LazyContext that provides a context for
+    handling structured arrays in a lazy manner. It is initialized with a NetCDF to
+    IDS mapping object, an index, and a size.
+    """
+
     def __init__(self, nc2ids, index, size):
+        """
+        Initialize the instance with nc2ids, index, and size.
+
+        Args:
+            nc2ids: The NetCDF to IDS mapping object.
+            index: The index within the NetCDF file.
+            size: The size of the data to be processed.
+        """
         super().__init__(nc2ids, index)
         self.size = size
 
     def get_context(self):
+        """
+        Returns the current context.
+
+        This method returns the current instance of the class, which is expected
+        to have a 'size' attribute as required by IDSStructArray.
+
+        Returns:
+            The current instance of the class.
+        """
         return self  # IDSStructArray expects to get something with a size attribute
 
     def iterate_to_index(self, index: int) -> LazyContext:
+        """
+        Iterates to a specified index and returns a LazyContext object.
+
+        Args:
+            index (int): The index to iterate to.
+
+        Returns:
+            LazyContext: A LazyContext object initialized with the updated index.
+        """
         return LazyContext(self.nc2ids, self.index + (index,))

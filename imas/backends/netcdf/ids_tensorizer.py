@@ -169,6 +169,17 @@ class IDSTensorizer:
         )
 
     def tensorize(self, path, fillvalue):
+        """
+        Tensorizes the data at the given path with the specified fill value.
+
+        Args:
+            path: The path to the data in the IDS.
+            fillvalue: The value to fill the tensor with. Can be of any type,
+                             including strings.
+
+        Returns:
+            A tensor filled with the data from the specified path.
+        """
         dimensions = self.ncmeta.get_dimensions(path, self.homogeneous_time)
         shape = tuple(self.dimension_size[dim] for dim in dimensions)
 

@@ -282,6 +282,15 @@ class LazyALContext:
         """Potential weak reference to opened context."""
 
     def get_child(self, child):
+        """
+        Retrieve a child entry from the field.
+
+        Args:
+            child (str): The name or identifier of the child entry to retrieve.
+
+        Returns:
+            The child entry retrieved from the database.
+        """
         imas.backends.imas_core.db_entry_helpers._get_child(child, self)
 
     def get_context(self) -> ALContext:
