@@ -323,7 +323,7 @@ class LazyContext:
 
         Args:
             child: The child node for which the context or value is to be
-            set. The child node should have metadata attributes.
+        set. The child node should have metadata attributes.
 
         """
         metadata = child.metadata

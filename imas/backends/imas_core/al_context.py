@@ -290,10 +290,6 @@ class LazyALContext:
 
         Returns:
             The child entry retrieved from the database.
-
-        Raises:
-            Exception: If the child entry cannot be found or an error occurs
-            during retrieval.
         """
         imas.backends.imas_core.db_entry_helpers._get_child(child, self)
 
