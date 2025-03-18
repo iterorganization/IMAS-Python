@@ -4,12 +4,12 @@ Changelog
 =========
 
 What's new in IMAS-Python 1.2.0
---------------------------
+-------------------------------
 
 New features and improvements
 '''''''''''''''''''''''''''''
 
-- Add :py:func:`imaspy.DBEntry.get_sample` (requires imas_core >= 5.4.0)
+- Add :py:func:`imas.DBEntry.get_sample` previously imaspy.DBEntry.get_sample (requires imas_core >= 5.4.0)
 - Improved validation of netCDF files
 - Improve compatibility with the UDA backend in imas_core
 - Extend the support of netCDF to >= 1.4.1 (without complex numbers)
