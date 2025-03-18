@@ -51,6 +51,3 @@ jobs:
         run: |
           export SPHINXOPTS='-W -n --keep-going'
           make -C docs clean html
-
-      - name: Deactivate virtual environment
-        run: deactivate
