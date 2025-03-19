@@ -95,7 +95,7 @@ Load and store an IDS to disk with IMAS-Core
       :py:meth:`~imas.db_entry.DBEntry.put_slice` and
       :py:meth:`~imas.db_entry.DBEntry.get_sample` (with IMAS-Core>=5.4).
     - If you can't have access to it, you can save IDS to disk with the built-in
-      netCDF backend :ref:`Store and load an IDS to disk with netCDF`
+      netCDF backend :ref:`Load and store an IDS to disk with netCDF`
 
 To store an IDS to disk, we need to indicate the following URI to the
 IMAS-Core: ``imas:<backend>?path=<path_to_folder>`` or using the legacy query keys
@@ -129,8 +129,10 @@ can use ``<IDS>.get()`` to load IDS data from disk:
     >>> print(core_profiles2.ids_properties.comment.value)
 
 
-Load and store an IDS to disk with IMAS-Core
-''''''''''''''''''''''''''''''''''''''''''''
+.. _`Load and store an IDS to disk with netCDF`:
+
+Load and store an IDS to disk with netCDF
+'''''''''''''''''''''''''''''''''''''''''
 
 In IMAS-Python you do this as follows:
 

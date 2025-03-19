@@ -56,7 +56,7 @@ This is how to run the IMAS-Python test suite:
     # inside the IMAS-Python git repository
     pytest imas --mini
 
-    # run with a specific backend
+    # run with a specific backend, requires IMAS-Core installed
     pytest imas --ascii --mini
 
 And to build the IMAS-Python documentation, execute:

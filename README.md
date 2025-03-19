@@ -1,8 +1,8 @@
 # IMAS-Python
 
-IMAS-Python is a pure-python library to handle arbitrarily nested data structures.
-It is designed for, but not necessarily bound to, interacting with Interface 
-Data Structures (IDSs) as defined by the Integrated Modelling & Analysis Suite (IMAS) 
+IMAS-Python (formerly known as IMASPy its for versions < 2) is a pure-python library to handle 
+arbitrarily nested data structures. It is designed for, but not necessarily bound to, interacting 
+with Interface Data Structures (IDSs) as defined by the Integrated Modelling & Analysis Suite (IMAS) 
 Data Model.
 
 
