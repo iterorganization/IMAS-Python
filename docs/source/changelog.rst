@@ -122,7 +122,7 @@ New features
 
   .. code-block:: bash
 
-    pip install 'imaspy[imas-core] @ git+ssh://git@github.com/iterorganization/imaspy.git'
+    pip install 'imaspy[imas-core] @ git+ssh://git@git.iter.org/imas/imaspy.git'
 
 - A diff tool for IDSs: :py:func:`imas.util.idsdiff`.
 - Implement ``==`` equality checking for IDS Structures and Arrays of Structures
