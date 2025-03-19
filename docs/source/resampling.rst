@@ -14,14 +14,14 @@ find the value of new points. This can be used like so:
 
 .. code-block:: python
 
-    pulse_schedule = imaspy.IDSFactory().new("pulse_schedule")
+    pulse_schedule = imas.IDSFactory().new("pulse_schedule")
     f = scipy.interpolate.interp1d(pulse_schedule.time, pulse_schedule_some_1d_var)
     ids.pulse_schedule.some_1d_var = f(pulse_schedule.some_1d_var)
 
 
 A more general approach would work on the basis of scanning the tree for
 shared coordinates, and resampling those in the same manner (by creating a
-local interpolator and applying it). The :py:meth:`imaspy.util.visit_children`
+local interpolator and applying it). The :py:meth:`imas.util.visit_children`
 method can
 be used for this. For a proof-of-concept it is recommended to only resample
 in the time direction.
@@ -31,15 +31,15 @@ For example, a proposal implementation included in 0.4.0 can be used as such
 
 .. code-block:: python
 
-    import imaspy
-    nbi = imaspy.IDSFactory().new("nbi")
-    nbi.ids_properties.homogeneous_time = imaspy.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
+    import imas
+    nbi = imas.IDSFactory().new("nbi")
+    nbi.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
     nbi.time = [1, 2, 3]
     nbi.unit.resize(1)
     nbi.unit[0].energy.data = 2 * nbi.time
     old_id = id(nbi.unit[0].energy.data)
 
-    imaspy.util.resample(
+    imas.util.resample(
         nbi.unit[0].energy.data,
         nbi.time,
         [0.5, 1.5],
@@ -56,14 +56,14 @@ Or as such (explicit in-memory copy + interpolation, producing a new data leaf/c
 
 .. code-block:: python
 
-    nbi = imaspy.IDSFactory().new("nbi")
-    nbi.ids_properties.homogeneous_time = imaspy.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
+    nbi = imas.IDSFactory().new("nbi")
+    nbi.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
     nbi.time = [1, 2, 3]
     nbi.unit.resize(1)
     nbi.unit[0].energy.data = 2 * nbi.time
     old_id = id(nbi.unit[0].energy.data)
 
-    new_data = imaspy.util.resample(
+    new_data = imas.util.resample(
         nbi.unit[0].energy.data,
         nbi.time,
         [0.5, 1.5],

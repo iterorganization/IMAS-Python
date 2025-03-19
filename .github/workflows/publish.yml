@@ -1,0 +1,74 @@
+name: build-wheel-and-publish-test-pypi
+
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    name: Build distribution
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        # until saxonche is available in 3.13
+        # https://saxonica.plan.io/issues/6561
+        python-version: "<3.13"
+    - name: Install pypa/build
+      run: >-
+        python3 -m pip install pip setuptools wheel build
+    - name: Build a binary wheel and a source tarball
+      run: python3 -m build .
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+        
+  publish-to-pypi:
+    name: Publish IMAS-Python distribution to PyPI
+    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
+    needs:
+    - build
+    runs-on: ubuntu-22.04
+    environment:
+      name: pypi
+      url: https://pypi.org/p/imas-python
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      
+  publish-to-testpypi:
+    name: Publish IMAS-Python distribution to TestPyPI
+    if: github.ref=='refs/heads/develop'  # only publish to TestPyPI on develop pushes
+    needs:
+    - build
+    runs-on: ubuntu-22.04
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/imas-python
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Publish distribution to TestPyPI
+      uses: pypa/gh-action-pypi-publish@unstable/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        verbose: true

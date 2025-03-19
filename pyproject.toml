@@ -1,23 +1,25 @@
 [build-system]
 # Minimum requirements for the build system to execute.
 # Keep this on a single line for the grep magic of build scripts to work
-requires = ["setuptools>=61", "wheel", "numpy", "gitpython", "packaging", "tomli;python_version<'3.11'", "versioneer[toml]"]
-# needs saxon9he.jar in CLASSPATH
+requires = ["setuptools>=61", "wheel", "numpy", "gitpython", "saxonche","packaging", "tomli;python_version<'3.11'", "setuptools_scm>8"]
 
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "imaspy"
+name = "imas-python"
 authors = [
-  {name = "IMASPy Developers"},
-  {name = "Olivier Hoenen", email = "olivier.hoenen@iter.org"},
+  {name = "Karel Lucas van de Plassche", email = "karelvandeplassche@gmail.com"},
+  {name = "Daan van Vugt", email = "dvanvugt@ignitioncomputing.com"},
+  {name = "Maarten Sebregts", email = "msebregts@ignitioncomputing.com"},
+  {name = "ITER Organization"},
+  {email = "imas-support@iter.org"},
 ]
 description = "Pythonic wrappers for the IMAS Access Layer"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.7"
 license = {file = "LICENSE.txt"}
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Environment :: Plugins",
     "Environment :: X11 Applications",
@@ -32,9 +34,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Intended Audience :: System Administrators",
-# The license is prepended by private which makes it a valid trove classifier,
-# it will also prevent uploading to package indices such as PyPI
-    "Private :: License :: ITER License",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Natural Language :: English",
     "Operating System :: POSIX",
     "Operating System :: POSIX :: Linux",
@@ -64,12 +64,14 @@ dependencies = [
     "importlib_resources;python_version<'3.9'",
     "packaging",
     "xxhash >= 2",
+    "saxonche",
+    "gitpython"
 ]
 
 [project.optional-dependencies]
 # these self-dependencies are available since pip 21.2
 all = [
-    "imaspy[test,docs,imas-core,netcdf,h5py]"
+    "imas-python[test,docs]" 
 ]
 docs = [
     "sphinx>=6.0.0,<7.0.0",
@@ -77,12 +79,18 @@ docs = [
     "sphinx-immaterial>=0.11.0,<0.12",
     "sphinx-click",
 ]
-imas-core = [ "imas-core@git+ssh://git@git.iter.org/imas/al-core.git@main" ]
+
+# TODO enable when imas-core is available on pypi
+# imas-core = [ "imas-core@git+https://github.com/iterorganization/imas-core.git@main" ]
+
 netcdf = [
     "netCDF4>=1.4.1",
 ]
 h5py = [
     "h5py",
+]
+xarray = [
+    "xarray",
 ]
 test = [
     "pytest>=5.4.1",
@@ -95,19 +103,21 @@ test = [
     "virtualenv",
     # Pint and xarray are used in training snippets
     "pint",
-    "xarray",
+    # Optional dependencies
+    # TODO add imas-core when it is available on pypi
+    "imas-python[netcdf,h5py,xarray]",
 ]
 
 [project.scripts]
-build_DD = "imaspy.dd_helpers:prepare_data_dictionaries"
-imaspy = "imaspy.command.cli:cli"
+build_DD = "imas.dd_helpers:prepare_data_dictionaries"
+imas = "imas.command.cli:cli"
 
 [project.urls]
-homepage = "https://git.iter.org/projects/IMAS/repos/imaspy"
+homepage = "https://github.com/iterorganization/imas-python"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["imaspy*"]
+include = ["imas*"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -116,19 +126,11 @@ markers = [
     "cli: Tests for the command line interface.",
     "slow: Slow tests.",
 ]
-testpaths = "imaspy"
+testpaths = "imas"
 
-[tool.versioneer]
-VCS = "git"
-style = "pep440"
-versionfile_source = "imaspy/_version.py"
-versionfile_build = "imaspy/_version.py"
-tag_prefix = ""
-parentdir_prefix = ""
-
-[tool.black]
-# Exclude versioneer-generated file
-extend-exclude = "imaspy/_version.py"
+[tool.setuptools_scm]
+write_to = "imas/_version.py"
+local_scheme = "no-local-version"
 
 [tool.isort]
 profile = "black"

@@ -1,18 +1,11 @@
-import imaspy
 import imas
 
 
-def timeraw_create_default_imaspy_factory():
+def timeraw_create_default_imas_factory():
     # timeraw to ensure that nothing is cached
     return """
-    import imaspy
-    imaspy.IDSFactory()
-    """
-
-
-def timeraw_import_imaspy():
-    return """
-    import imaspy
+    import imas
+    imas.IDSFactory()
     """
 
 
@@ -26,9 +19,10 @@ def timeraw_import_imas():
 # `asv compare` :(
 """
 def track_imas_versions():
-    equilibrium = imas.equilibrium()
-    equilibrium.ids_properties.homogeneous_time = imas.imasdef.IDS_TIME_MODE_INDEPENDENT
-    dbentry = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "test", 1, 1)
+    ids_factory = imas.IDSFactory()
+    equilibrium = ids_factory.equilibrium()
+    equilibrium.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_INDEPENDENT
+    dbentry = imas.DBEntry(imas.ids_defs.MEMORY_BACKEND, "test", 1, 1)
     dbentry.create()
     dbentry.put(equilibrium)
     equilibrium = dbentry.get("equilibrium")
@@ -38,6 +32,6 @@ def track_imas_versions():
     )
 
 
-def track_imaspy_dd_version():
-    return imaspy.IDSFactory().version
+def track_imas_dd_version():
+    return imas.IDSFactory().version
 """

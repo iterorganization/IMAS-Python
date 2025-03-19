@@ -3,30 +3,30 @@
 IDS validation
 ==============
 
-The IDSs you fill should be consistent. To help you in validating that, IMASPy has a
-:py:meth:`~imaspy.ids_toplevel.IDSToplevel.validate` method that executes the following
+The IDSs you fill should be consistent. To help you in validating that, IMAS-Python has a
+:py:meth:`~imas.ids_toplevel.IDSToplevel.validate` method that executes the following
 checks.
 
 .. contents:: Validation checks
     :local:
     :depth: 1
 
-If you call this method and your IDS fails validation, IMASPy raises an error explaining
+If you call this method and your IDS fails validation, IMAS-Python raises an error explaining
 the problem. See the following example:
 
->>> import imaspy
->>> core_profiles = imaspy.IDSFactory().core_profiles()
+>>> import imas
+>>> core_profiles = imas.IDSFactory().core_profiles()
 >>> core_profiles.validate()
-imaspy.exception.ValidationError: Invalid value for ids_properties.homogeneous_time: -999999999
+imas.exception.ValidationError: Invalid value for ids_properties.homogeneous_time: -999999999
 
-IMASPy also automatically validates an IDS every time you do a
-:py:meth:`~imaspy.db_entry.DBEntry.put` or
-:py:meth:`~imaspy.db_entry.DBEntry.put_slice`. To disable this feature, you must set the
+IMAS-Python also automatically validates an IDS every time you do a
+:py:meth:`~imas.db_entry.DBEntry.put` or
+:py:meth:`~imas.db_entry.DBEntry.put_slice`. To disable this feature, you must set the
 environment variable ``IMAS_AL_DISABLE_VALIDATE`` to ``1``.
 
 .. seealso::
     
-    API documentation: :py:meth:`IDSToplevel.validate() <imaspy.ids_toplevel.IDSToplevel.validate>`
+    API documentation: :py:meth:`IDSToplevel.validate() <imas.ids_toplevel.IDSToplevel.validate>`
 
 
 Validate the time mode

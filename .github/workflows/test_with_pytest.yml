@@ -1,0 +1,51 @@
+name: Test using pytest
+
+on: 
+    push:
+    pull_request:
+      types: [opened, synchronize, reopened]
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]  # Test on multiple Python versions
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+
+        uses: actions/setup-python@v4
+        with:
+          # until saxonche is available in 3.13
+          # https://saxonica.plan.io/issues/6561
+          python-version: ${{ matrix.python-version }}
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip setuptools wheel
+          pip install .[test]
+
+      - name: Run tests
+        run: |
+          source venv/bin/activate
+          python -m pytest -n=auto --cov=imas --cov-report=term-missing --cov-report=xml:coverage.xml --cov-report=html:htmlcov --junit-xml=junit.xml
+
+      - name: Upload coverage report ${{ matrix.python-version }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ matrix.python-version }}
+          path: htmlcov
+
+      - name: Upload test report ${{ matrix.python-version }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-${{ matrix.python-version }}
+          path: junit.xml

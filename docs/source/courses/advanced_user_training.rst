@@ -1,9 +1,9 @@
-Advanced IMASPy
-===============
+Advanced IMAS-Python
+====================
 
-In this IMASPy training, we dive into more advanced features of IMASPy. It is assumed
-you are familiar with the basic features of IMASPy, which are introduced in the
-:ref:`IMASPy 101` training.
+In this IMAS-Python training, we dive into more advanced features of IMAS-Python. It is assumed
+you are familiar with the basic features of IMAS-Python, which are introduced in the
+:ref:`IMAS-Python 101` training.
 
 .. note::
 
