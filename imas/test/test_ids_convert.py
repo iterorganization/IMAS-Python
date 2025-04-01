@@ -368,6 +368,26 @@ def test_3to4_cocos_change(dd4factory):
     cp3 = convert_ids(cp4, "3.39.0")
     compare_children(cp, cp3)
 
+    eq = IDSFactory("3.39.0").equilibrium()
+    eq.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    eq.time = [1.0]
+    eq.time_slice.resize(1)
+    eq.time_slice[0].profiles_1d.psi = numpy.linspace(0, 1, 11)
+    eq.time_slice[0].profiles_1d.dpressure_dpsi = numpy.linspace(1, 2, 11)
+
+    eq4 = convert_ids(eq, None, factory=dd4factory)
+    assert numpy.array_equal(
+        eq4.time_slice[0].profiles_1d.psi,
+        -eq.time_slice[0].profiles_1d.psi,
+    )
+    assert numpy.array_equal(
+        eq4.time_slice[0].profiles_1d.dpressure_dpsi,
+        -eq.time_slice[0].profiles_1d.dpressure_dpsi,
+    )
+
+    eq3 = convert_ids(eq4, "3.39.0")
+    compare_children(eq, eq3)
+
 
 def test_3to4_circuit_connections(dd4factory, caplog):
     pfa = IDSFactory("3.39.0").pf_active()

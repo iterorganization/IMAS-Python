@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Functionality for converting IDSToplevels between DD versions.
-"""
+"""Functionality for converting IDSToplevels between DD versions."""
 
 import copy
 import datetime
@@ -334,12 +333,13 @@ class DDVersionMap:
         # Additional conversion rules for DDv3 to DDv4
         if self.version_old.major == 3 and new_version and new_version.major == 4:
             # Postprocessing for COCOS definition change:
-            xpath_query = ".//field[@cocos_label_transformation='psi_like']"
-            for old_item in old.iterfind(xpath_query):
-                old_path = old_item.get("path")
-                new_path = self.old_to_new.path.get(old_path, old_path)
-                self.new_to_old.post_process[new_path] = _cocos_change
-                self.old_to_new.post_process[old_path] = _cocos_change
+            for psi_like in ["psi_like", "dodpsi_like"]:
+                xpath_query = f".//field[@cocos_label_transformation='{psi_like}']"
+                for old_item in old.iterfind(xpath_query):
+                    old_path = old_item.get("path")
+                    new_path = self.old_to_new.path.get(old_path, old_path)
+                    self.new_to_old.post_process[new_path] = _cocos_change
+                    self.old_to_new.post_process[old_path] = _cocos_change
             # Definition change for pf_active circuit/connections
             if self.ids_name == "pf_active":
                 path = "circuit/connections"
