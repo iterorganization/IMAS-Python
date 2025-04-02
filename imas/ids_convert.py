@@ -12,19 +12,16 @@ from xml.etree.ElementTree import Element, ElementTree
 
 import numpy
 from packaging.version import InvalidVersion, Version
+from scipy.interpolate import interp1d
 
 import imas
 from imas.dd_zip import parse_dd_version
 from imas.ids_base import IDSBase
 from imas.ids_data_type import IDSDataType
+from imas.ids_defs import IDS_TIME_MODE_HETEROGENEOUS
 from imas.ids_factory import IDSFactory
 from imas.ids_path import IDSPath
-from imas.ids_primitive import (
-    IDSNumeric0D,
-    IDSNumericArray,
-    IDSPrimitive,
-    IDSString0D,
-)
+from imas.ids_primitive import IDSNumeric0D, IDSNumericArray, IDSPrimitive, IDSString0D
 from imas.ids_struct_array import IDSStructArray
 from imas.ids_structure import IDSStructure
 from imas.ids_toplevel import IDSToplevel
@@ -495,7 +492,17 @@ def convert_ids(
     else:
         version_map = _DDVersionMap(ids_name, source_tree, target_tree, source_version)
 
-    _copy_structure(toplevel, target_ids, deepcopy, source_is_new, version_map)
+    # Special case for DD3to4 pulse_schedule conversion
+    if (
+        toplevel.metadata.name == "pulse_schedule"
+        and toplevel.ids_properties.homogeneous_time == IDS_TIME_MODE_HETEROGENEOUS
+        and source_version < Version("3.40.0")
+        and target_version.major == 4
+    ):
+        _pulse_schedule_3to4(toplevel, target_ids, deepcopy, version_map)
+    else:
+        _copy_structure(toplevel, target_ids, deepcopy, source_is_new, version_map)
+
     logger.info("Conversion of IDS %s finished.", ids_name)
     if provenance_origin_uri:
         _add_provenance_entry(target_ids, toplevel._version, provenance_origin_uri)
@@ -541,6 +548,41 @@ def _add_provenance_entry(
         node.sources.append(source_txt)  # sources is a STR_1D (=list of strings)
 
 
+def _get_target_item(
+    item: IDSBase, target: IDSStructure, rename_map: NBCPathMap
+) -> Optional[IDSBase]:
+    """Find and return the corresponding target item if it exists.
+
+    This method follows NBC renames (as stored in the rename map). It returns None if
+    there is no corresponding target item in the target structure.
+    """
+    path = item.metadata.path_string
+
+    # Follow NBC renames:
+    if path in rename_map:
+        if rename_map.path[path] is None:
+            if path not in rename_map.ignore_missing_paths:
+                if path in rename_map.type_change:
+                    msg = "Element %r changed type in the target IDS."
+                else:
+                    msg = "Element %r does not exist in the target IDS."
+                logger.warning(msg + " Data is not copied.", path)
+            return None
+        else:
+            return IDSPath(rename_map.path[path]).goto(target)
+
+    # No NBC renames:
+    try:
+        return target[item.metadata.name]
+    except AttributeError:
+        # In exceptional cases the item does not exist in the target. Example:
+        # neutron_diagnostic IDS between DD 3.40.1 and 3.41.0. has renamed
+        # synthetic_signals/fusion_power -> fusion_power. The synthetic_signals
+        # structure no longer exists but we need to descend into it to get the
+        # total_neutron_flux.
+        return target
+
+
 def _copy_structure(
     source: IDSStructure,
     target: IDSStructure,
@@ -561,27 +603,10 @@ def _copy_structure(
     rename_map = version_map.new_to_old if source_is_new else version_map.old_to_new
     for item in source.iter_nonempty_():
         path = item.metadata.path_string
-        if path in rename_map:
-            if rename_map.path[path] is None:
-                if path not in rename_map.ignore_missing_paths:
-                    if path in rename_map.type_change:
-                        msg = "Element %r changed type in the target IDS."
-                    else:
-                        msg = "Element %r does not exist in the target IDS."
-                    logger.warning(msg + " Data is not copied.", path)
-                continue
-            else:
-                target_item = IDSPath(rename_map.path[path]).goto(target)
-        else:
-            try:
-                target_item = target[item.metadata.name]
-            except AttributeError:
-                # In exceptional cases the item does not exist in the target. Example:
-                # neutron_diagnostic IDS between DD 3.40.1 and 3.41.0. has renamed
-                # synthetic_signals/fusion_power -> fusion_power. The synthetic_signals
-                # structure no longer exists but we need to descend into it to get the
-                # total_neutron_flux.
-                target_item = target
+        target_item = _get_target_item(item, target, rename_map)
+        if target_item is None:
+            continue
+
         if path in rename_map.type_change:
             # Handle type change
             new_items = rename_map.type_change[path](item, target_item)
@@ -600,11 +625,7 @@ def _copy_structure(
         elif isinstance(item, IDSStructure):
             _copy_structure(item, target_item, deepcopy, source_is_new, version_map)
         else:
-            if deepcopy:
-                # No nested types are used as data, so a shallow copy is sufficient
-                target_item.value = copy.copy(item.value)
-            else:
-                target_item.value = item.value
+            target_item.value = copy.copy(item.value) if deepcopy else item.value
 
         # Post-process the node:
         if path in rename_map.post_process:
@@ -919,3 +940,103 @@ def _ids_properties_source(source: IDSString0D, provenance: IDSStructure) -> Non
     provenance.node.resize(1)
     provenance.node[0].reference.resize(1)
     provenance.node[0].reference[0].name = source.value
+
+
+def _pulse_schedule_3to4(
+    source: IDSStructure,
+    target: IDSStructure,
+    deepcopy: bool,
+    version_map: DDVersionMap,
+):
+    """Recursively copy data, following NBC renames, and converting time bases for the
+    pulse_schedule IDS.
+
+    Args:
+        source: Source structure.
+        target: Target structure.
+        deepcopy: See :func:`convert_ids`.
+        version_map: Version map containing NBC renames.
+    """
+    # All prerequisites are checked before calling this function:
+    # - source and target are pulse_schedule IDSs
+    # - source has DD version < 3.40.0
+    # - target has DD version >= 4.0.0, < 5.0
+    # - IDS is using heterogeneous time
+    rename_map = version_map.old_to_new
+
+    def copy_and_interpolate(
+        source: IDSStructure, target: IDSStructure, timebase: numpy.ndarray
+    ):
+        """Reimplementation of _copy_structure that can interpolate nodes to the common
+        timebase."""
+        for item in source.iter_nonempty_():
+            path = item.metadata.path_string
+            if path.endswith("/time"):
+                continue  # Skip time bases
+
+            target_item = _get_target_item(item, target, rename_map)
+            if target_item is None:
+                continue
+            # We don't implement type changes and post process in this conversion:
+            assert path not in rename_map.type_change
+            assert path not in rename_map.post_process
+
+            if isinstance(item, IDSStructArray):
+                size = len(item)
+                target_item.resize(size)
+                for i in range(size):
+                    copy_and_interpolate(item[i], target_item[i], timebase)
+            elif isinstance(item, IDSStructure):
+                copy_and_interpolate(item, target_item, timebase)
+            elif (
+                item.metadata.ndim == 1
+                and item.metadata.coordinates[0].is_time_coordinate
+            ):
+                # Interpolate 1D dynamic quantities to the common time base
+                time = item.coordinates[0]  # TODO, this can fail?
+                if len(item) != len(time):
+                    raise ValueError(
+                        f"Array {item} has a different size than its time base {time}."
+                    )
+                is_integer = item.metadata.data_type is IDSDataType.INT
+                value = interp1d(
+                    time.value,
+                    item.value,
+                    "previous" if is_integer else "linear",
+                    copy=False,
+                    bounds_error=False,
+                    fill_value=(item[0], item[-1]),
+                    assume_sorted=True,
+                )(timebase)
+                target_item.value = value.astype(numpy.int32) if is_integer else value
+            else:  # Default copy
+                target_item.value = copy.copy(item.value) if deepcopy else item.value
+
+    for item in source.iter_nonempty_():
+        # Special cases for non-dynamic stuff
+        name = item.metadata.name
+        target_item = _get_target_item(item, target, rename_map)
+        if target_item is None:
+            continue
+
+        if name in ["ids_properties", "code"]:
+            _copy_structure(item, target_item, deepcopy, False, version_map)
+        elif name == "time":
+            target_item.value = item.value if not deepcopy else copy.copy(item.value)
+        elif name == "event":
+            size = len(item)
+            target_item.resize(size)
+            for i in range(size):
+                _copy_structure(item[i], target_item[i], deepcopy, False, version_map)
+        else:
+            # Find all time bases
+            time_bases = [
+                node.value
+                for node in imas.util.tree_iter(item)
+                if node.metadata.name == "time"
+            ]
+            # Construct the common time base
+            timebase = numpy.unique(numpy.concatenate(time_bases)) if time_bases else []
+            target_item.time = timebase
+            # Do the conversion
+            copy_and_interpolate(item, target_item, timebase)
