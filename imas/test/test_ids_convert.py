@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock
 
 import numpy
+from numpy import array_equal
 import pytest
 
 from imas import identifiers
@@ -27,7 +28,7 @@ from imas.ids_defs import (
 from imas.ids_factory import IDSFactory
 from imas.ids_struct_array import IDSStructArray
 from imas.ids_structure import IDSStructure
-from imas.test.test_helpers import compare_children, open_dbentry
+from imas.test.test_helpers import compare_children, fill_consistent, open_dbentry
 
 UTC = timezone.utc
 
@@ -287,22 +288,22 @@ def test_3to4_repeat_children_first_point_conditional(dd4factory):
     for i in range(2):
         outline_inner = wall4.description_2d[0].vessel.unit[i].annular.outline_inner
         if i == 0:  # open outline, first point not repeated:
-            assert numpy.array_equal(outline_inner.r, [1.0, 2.0, 3.0])
-            assert numpy.array_equal(outline_inner.z, [-1.0, -2.0, -3.0])
+            assert array_equal(outline_inner.r, [1.0, 2.0, 3.0])
+            assert array_equal(outline_inner.z, [-1.0, -2.0, -3.0])
         else:  # closed outline, first point repeated:
-            assert numpy.array_equal(outline_inner.r, [1.0, 2.0, 3.0, 1.0])
-            assert numpy.array_equal(outline_inner.z, [-1.0, -2.0, -3.0, -1.0])
+            assert array_equal(outline_inner.r, [1.0, 2.0, 3.0, 1.0])
+            assert array_equal(outline_inner.z, [-1.0, -2.0, -3.0, -1.0])
 
     # Test conversion for case 2:
     assert len(wall4.description_2d[0].limiter.unit) == 2
     for i in range(2):
         unit = wall4.description_2d[0].limiter.unit[i]
         if i == 0:  # open outline, first point not repeated:
-            assert numpy.array_equal(unit.outline.r, [1.0, 2.0, 3.0])
-            assert numpy.array_equal(unit.outline.z, [-1.0, -2.0, -3.0])
+            assert array_equal(unit.outline.r, [1.0, 2.0, 3.0])
+            assert array_equal(unit.outline.z, [-1.0, -2.0, -3.0])
         else:  # closed outline, first point repeated:
-            assert numpy.array_equal(unit.outline.r, [1.0, 2.0, 3.0, 1.0])
-            assert numpy.array_equal(unit.outline.z, [-1.0, -2.0, -3.0, -1.0])
+            assert array_equal(unit.outline.r, [1.0, 2.0, 3.0, 1.0])
+            assert array_equal(unit.outline.z, [-1.0, -2.0, -3.0, -1.0])
 
     # Test conversion for case 3:
     assert len(wall4.description_2d[0].mobile.unit) == 2
@@ -310,11 +311,11 @@ def test_3to4_repeat_children_first_point_conditional(dd4factory):
         unit = wall4.description_2d[0].mobile.unit[i]
         for j in range(3):
             if i == 0:  # open outline, first point not repeated:
-                assert numpy.array_equal(unit.outline[j].r, [1.0, 2.0, 3.0])
-                assert numpy.array_equal(unit.outline[j].z, [-1.0, -2.0, -3.0])
+                assert array_equal(unit.outline[j].r, [1.0, 2.0, 3.0])
+                assert array_equal(unit.outline[j].z, [-1.0, -2.0, -3.0])
             else:  # closed outline, first point repeated:
-                assert numpy.array_equal(unit.outline[j].r, [1.0, 2.0, 3.0, 1.0])
-                assert numpy.array_equal(unit.outline[j].z, [-1.0, -2.0, -3.0, -1.0])
+                assert array_equal(unit.outline[j].r, [1.0, 2.0, 3.0, 1.0])
+                assert array_equal(unit.outline[j].z, [-1.0, -2.0, -3.0, -1.0])
             assert unit.outline[j].time == pytest.approx(j / 5)
 
     # Test conversion for case 4:
@@ -322,9 +323,9 @@ def test_3to4_repeat_children_first_point_conditional(dd4factory):
     for i in range(2):
         thickness = wall4.description_2d[1].vessel.unit[i].annular.thickness
         if i == 0:  # open outline, there was one value too many, drop the last one
-            assert numpy.array_equal(thickness, [1, 0.9])
+            assert array_equal(thickness, [1, 0.9])
         else:  # closed outline, thickness values kept
-            assert numpy.array_equal(thickness, [1, 0.9, 0.9])
+            assert array_equal(thickness, [1, 0.9, 0.9])
 
     # Test conversion back
     wall3 = convert_ids(wall4, "3.39.0")
@@ -340,8 +341,8 @@ def test_3to4_repeat_children_first_point(dd4factory):
 
     iron_core4 = convert_ids(iron_core, None, factory=dd4factory)
     geometry = iron_core4.segment[0].geometry
-    assert numpy.array_equal(geometry.outline.r, [1.0, 2.0, 3.0, 1.0])
-    assert numpy.array_equal(geometry.outline.z, [-1.0, -2.0, -3.0, -1.0])
+    assert array_equal(geometry.outline.r, [1.0, 2.0, 3.0, 1.0])
+    assert array_equal(geometry.outline.z, [-1.0, -2.0, -3.0, -1.0])
 
     iron_core3 = convert_ids(iron_core4, "3.39.0")
     compare_children(iron_core, iron_core3)
@@ -356,11 +357,11 @@ def test_3to4_cocos_change(dd4factory):
     cp.profiles_1d[0].grid.psi = numpy.linspace(10, 20, 11)
 
     cp4 = convert_ids(cp, None, factory=dd4factory)
-    assert numpy.array_equal(
+    assert array_equal(
         cp4.profiles_1d[0].grid.rho_tor_norm,
         cp.profiles_1d[0].grid.rho_tor_norm,
     )
-    assert numpy.array_equal(
+    assert array_equal(
         cp4.profiles_1d[0].grid.psi,
         -cp.profiles_1d[0].grid.psi,
     )
@@ -376,11 +377,11 @@ def test_3to4_cocos_change(dd4factory):
     eq.time_slice[0].profiles_1d.dpressure_dpsi = numpy.linspace(1, 2, 11)
 
     eq4 = convert_ids(eq, None, factory=dd4factory)
-    assert numpy.array_equal(
+    assert array_equal(
         eq4.time_slice[0].profiles_1d.psi,
         -eq.time_slice[0].profiles_1d.psi,
     )
-    assert numpy.array_equal(
+    assert array_equal(
         eq4.time_slice[0].profiles_1d.dpressure_dpsi,
         -eq.time_slice[0].profiles_1d.dpressure_dpsi,
     )
@@ -400,7 +401,7 @@ def test_3to4_circuit_connections(dd4factory, caplog):
     ]
 
     pfa4 = convert_ids(pfa, None, factory=dd4factory)
-    assert numpy.array_equal(
+    assert array_equal(
         pfa4.circuit[0].connections, [[-1, 0, 1], [0, 1, -1], [1, -1, 0]]
     )
 
@@ -417,7 +418,7 @@ def test_3to4_circuit_connections(dd4factory, caplog):
     with caplog.at_level(logging.ERROR):
         pfa4 = convert_ids(pfa, None, factory=dd4factory)
     # Incorrect shape, data is not converted:
-    assert numpy.array_equal(pfa.circuit[0].connections, pfa4.circuit[0].connections)
+    assert array_equal(pfa.circuit[0].connections, pfa4.circuit[0].connections)
     # Check that a message with ERROR severity was logged
     assert len(caplog.record_tuples) == 1
     assert caplog.record_tuples[0][1] == logging.ERROR
@@ -430,7 +431,53 @@ def test_3to4_cocos_magnetics_workaround(dd4factory):
     mag.flux_loop[0].flux.data = [1.0, 2.0]
 
     mag4 = convert_ids(mag, None, factory=dd4factory)
-    assert numpy.array_equal(mag4.flux_loop[0].flux.data, [-1.0, -2.0])
+    assert array_equal(mag4.flux_loop[0].flux.data, [-1.0, -2.0])
 
     mag3 = convert_ids(mag4, "3.39.0")
     compare_children(mag, mag3)
+
+
+def test_3to4_pulse_schedule():
+    ps = IDSFactory("3.39.0").pulse_schedule()
+    ps.ids_properties.homogeneous_time = IDS_TIME_MODE_HETEROGENEOUS
+
+    ps.ec.launcher.resize(3)
+    ps.ec.launcher[0].power.reference.data = [1.0, 2.0, 3.0]
+    ps.ec.launcher[0].power.reference.time = [1.0, 2.0, 3.0]
+    ps.ec.launcher[1].power.reference.data = [0.0, 2.0, 5.0]
+    ps.ec.launcher[1].power.reference.time = [0.0, 2.0, 5.0]
+    ps.ec.launcher[2].power.reference.data = [1.0, 1.5]
+    ps.ec.launcher[2].power.reference.time = [1.0, 1.5]
+
+    ps.ec.mode.data = [1, 2, 5]
+    ps.ec.mode.time = [1.0, 2.0, 5.0]
+
+    ps4 = convert_ids(ps, "4.0.0")
+    assert array_equal(ps4.ec.time, [0.0, 1.0, 1.5, 2.0, 3.0, 5.0])
+    item = "power_launched/reference"
+    assert array_equal(ps4.ec.beam[0][item], [1.0, 1.0, 1.5, 2.0, 3.0, 3.0])
+    assert array_equal(ps4.ec.beam[1][item], [0.0, 1.0, 1.5, 2.0, 3.0, 5.0])
+    assert array_equal(ps4.ec.beam[2][item], [1.0, 1.0, 1.5, 1.5, 1.5, 1.5])
+    assert array_equal(ps4.ec.mode, [1, 1, 1, 2, 2, 5])
+
+
+def test_3to4_pulse_schedule_exceptions():
+    ps = IDSFactory("3.39.0").pulse_schedule()
+    ps.ids_properties.homogeneous_time = IDS_TIME_MODE_HETEROGENEOUS
+
+    ps.ec.launcher.resize(3)
+    ps.ec.launcher[0].power.reference.data = [1.0, 2.0, 3.0]
+    with pytest.raises(ValueError):  # missing time base
+        convert_ids(ps, "4.0.0")
+
+    ps.ec.launcher[0].power.reference.time = [1.0, 2.0]
+    with pytest.raises(ValueError):  # incorrect size of time base
+        convert_ids(ps, "4.0.0")
+
+
+def test_3to4_pulse_schedule_fuzz():
+    ps = IDSFactory("3.39.0").pulse_schedule()
+    ps.ids_properties.homogeneous_time = IDS_TIME_MODE_HETEROGENEOUS
+
+    fill_consistent(ps)
+    convert_ids(ps, "4.0.0")
