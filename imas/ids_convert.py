@@ -471,12 +471,10 @@ def convert_ids(
             raise RuntimeError(
                 f"There is no IDS with name {ids_name} in DD version {version}."
             )
-        target_ids = factory.new(ids_name)
-    else:
-        target_ids = target
+        target = factory.new(ids_name)
 
     source_version = parse_dd_version(toplevel._version)
-    target_version = parse_dd_version(target_ids._version)
+    target_version = parse_dd_version(target._version)
     logger.info(
         "Starting conversion of IDS %s from version %s to version %s.",
         ids_name,
@@ -484,10 +482,9 @@ def convert_ids(
         target_version,
     )
 
-    source_is_new = source_version > target_version
     source_tree = toplevel._parent._etree
-    target_tree = target_ids._parent._etree
-    if source_is_new:
+    target_tree = target._parent._etree
+    if source_version > target_version:
         version_map = _DDVersionMap(ids_name, target_tree, source_tree, target_version)
         rename_map = version_map.new_to_old
     else:
@@ -504,16 +501,16 @@ def convert_ids(
         try:
             # Suppress "'.../time' does not exist in the target IDS." log messages.
             logger.addFilter(_pulse_schedule_3to4_logfilter)
-            _pulse_schedule_3to4(toplevel, target_ids, deepcopy, rename_map)
+            _pulse_schedule_3to4(toplevel, target, deepcopy, rename_map)
         finally:
             logger.removeFilter(_pulse_schedule_3to4_logfilter)
     else:
-        _copy_structure(toplevel, target_ids, deepcopy, rename_map)
+        _copy_structure(toplevel, target, deepcopy, rename_map)
 
     logger.info("Conversion of IDS %s finished.", ids_name)
     if provenance_origin_uri:
-        _add_provenance_entry(target_ids, toplevel._version, provenance_origin_uri)
-    return target_ids
+        _add_provenance_entry(target, toplevel._version, provenance_origin_uri)
+    return target
 
 
 def _add_provenance_entry(
