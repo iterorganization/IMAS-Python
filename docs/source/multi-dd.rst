@@ -180,7 +180,7 @@ explicit conversion mechanisms.
     ``pulse_schedule`` IDS had their own time array. In DD 4.0.0 this was
     restructured to one time array per component (for example `ec/time
     <https://imas-data-dictionary.readthedocs.io/en/latest/generated/ids/pulse_schedule.html#pulse_schedule-ec-time>`__).
-    This migration constructs a common time base per subroup, and interpolates
+    This migration constructs a common time base per subgroup, and interpolates
     the dynamic quantities within the group to the new time base. Resampling
     uses `previous neighbour` interpolation for integer quantities, and linear
     interpolation otherwise. See also:
