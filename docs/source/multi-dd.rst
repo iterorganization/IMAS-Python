@@ -146,6 +146,7 @@ explicit conversion mechanisms.
   Changed definition of open/closed contours, Yes, No
   Changed definition of ``space/coordinates_type`` in GGD grids, Yes, No
   Migrate obsolescent ``ids_properties/source`` to ``ids_properties/provenance``, Yes, No
+  Convert the multiple time-bases in the ``pulse_schedule`` IDS [#ps3to4]_, Yes, No
 
 .. [#rename] Quantities which have been renamed between the two DD versions. For
   example, the ``ec/beam`` Array of Structures in the ``pulse_schedule`` IDS,
@@ -175,6 +176,15 @@ explicit conversion mechanisms.
 .. [#ignore_type_change] These type changes are not supported. Quantities in the
     destination IDS will remain empty.
 
+.. [#ps3to4] In Data Dictionary 3.39.0 and older, all dynamic quantities in the
+    ``pulse_schedule`` IDS had their own time array. In DD 4.0.0 this was
+    restructured to one time array per component (for example `ec/time
+    <https://imas-data-dictionary.readthedocs.io/en/latest/generated/ids/pulse_schedule.html#pulse_schedule-ec-time>`__).
+    This migration constructs a common time base per subroup, and interpolates
+    the dynamic quantities within the group to the new time base. Resampling
+    uses `previous neighbour` interpolation for integer quantities, and linear
+    interpolation otherwise. See also:
+    https://github.com/iterorganization/IMAS-Python/issues/21.
 
 .. _`DD background`:
 

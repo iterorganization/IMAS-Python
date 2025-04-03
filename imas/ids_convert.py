@@ -1004,6 +1004,7 @@ def _pulse_schedule_3to4_logfilter(logrecord: logging.LogRecord) -> bool:
 
 
 def _pulse_schedule_resample_callback(timebase, item: IDSBase, target_item: IDSBase):
+    """Callback from _copy_structure to resample dynamic data on the new timebase"""
     if item.metadata.ndim == 1 and item.metadata.coordinates[0].is_time_coordinate:
         # Interpolate 1D dynamic quantities to the common time base
         time = item.coordinates[0]
