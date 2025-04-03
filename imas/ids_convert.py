@@ -489,8 +489,10 @@ def convert_ids(
     target_tree = target_ids._parent._etree
     if source_is_new:
         version_map = _DDVersionMap(ids_name, target_tree, source_tree, target_version)
+        rename_map = version_map.new_to_old
     else:
         version_map = _DDVersionMap(ids_name, source_tree, target_tree, source_version)
+        rename_map = version_map.old_to_new
 
     # Special case for DD3to4 pulse_schedule conversion
     if (
@@ -499,9 +501,14 @@ def convert_ids(
         and source_version < Version("3.40.0")
         and target_version.major == 4
     ):
-        _pulse_schedule_3to4(toplevel, target_ids, deepcopy, version_map)
+        try:
+            # Suppress "'.../time' does not exist in the target IDS." log messages.
+            logger.addFilter(_pulse_schedule_3to4_logfilter)
+            _pulse_schedule_3to4(toplevel, target_ids, deepcopy, rename_map)
+        finally:
+            logger.removeFilter(_pulse_schedule_3to4_logfilter)
     else:
-        _copy_structure(toplevel, target_ids, deepcopy, source_is_new, version_map)
+        _copy_structure(toplevel, target_ids, deepcopy, rename_map)
 
     logger.info("Conversion of IDS %s finished.", ids_name)
     if provenance_origin_uri:
@@ -587,8 +594,7 @@ def _copy_structure(
     source: IDSStructure,
     target: IDSStructure,
     deepcopy: bool,
-    source_is_new: bool,
-    version_map: DDVersionMap,
+    rename_map: NBCPathMap,
     callback: Optional[Callable] = None,
 ):
     """Recursively copy data, following NBC renames.
@@ -602,7 +608,6 @@ def _copy_structure(
         version_map: Version map containing NBC renames.
         callback: Optional callback that is called for every copied node.
     """
-    rename_map = version_map.new_to_old if source_is_new else version_map.old_to_new
     for item in source.iter_nonempty_():
         path = item.metadata.path_string
         target_item = _get_target_item(item, target, rename_map)
@@ -621,18 +626,9 @@ def _copy_structure(
             size = len(item)
             target_item.resize(size)
             for i in range(size):
-                _copy_structure(
-                    item[i],
-                    target_item[i],
-                    deepcopy,
-                    source_is_new,
-                    version_map,
-                    callback,
-                )
+                _copy_structure(item[i], target_item[i], deepcopy, rename_map, callback)
         elif isinstance(item, IDSStructure):
-            _copy_structure(
-                item, target_item, deepcopy, source_is_new, version_map, callback
-            )
+            _copy_structure(item, target_item, deepcopy, rename_map, callback)
         else:
             target_item.value = copy.copy(item.value) if deepcopy else item.value
 
@@ -957,7 +953,7 @@ def _pulse_schedule_3to4(
     source: IDSStructure,
     target: IDSStructure,
     deepcopy: bool,
-    version_map: DDVersionMap,
+    rename_map: NBCPathMap,
 ):
     """Recursively copy data, following NBC renames, and converting time bases for the
     pulse_schedule IDS.
@@ -966,14 +962,13 @@ def _pulse_schedule_3to4(
         source: Source structure.
         target: Target structure.
         deepcopy: See :func:`convert_ids`.
-        version_map: Version map containing NBC renames.
+        rename_map: Map containing NBC renames.
     """
     # All prerequisites are checked before calling this function:
     # - source and target are pulse_schedule IDSs
     # - source has DD version < 3.40.0
     # - target has DD version >= 4.0.0, < 5.0
     # - IDS is using heterogeneous time
-    rename_map = version_map.old_to_new
 
     for item in source.iter_nonempty_():
         name = item.metadata.name
@@ -983,14 +978,14 @@ def _pulse_schedule_3to4(
 
         # Special cases for non-dynamic stuff
         if name in ["ids_properties", "code"]:
-            _copy_structure(item, target_item, deepcopy, False, version_map)
+            _copy_structure(item, target_item, deepcopy, rename_map)
         elif name == "time":
             target_item.value = item.value if not deepcopy else copy.copy(item.value)
         elif name == "event":
             size = len(item)
             target_item.resize(size)
             for i in range(size):
-                _copy_structure(item[i], target_item[i], deepcopy, False, version_map)
+                _copy_structure(item[i], target_item[i], deepcopy, rename_map)
         else:
             # Find all time bases
             time_bases = [
@@ -1002,14 +997,13 @@ def _pulse_schedule_3to4(
             timebase = numpy.unique(numpy.concatenate(time_bases)) if time_bases else []
             target_item.time = timebase
             # Do the conversion
-            _copy_structure(
-                item,
-                target_item,
-                deepcopy,
-                False,
-                version_map,
-                partial(_pulse_schedule_resample_callback, timebase),
-            )
+            callback = partial(_pulse_schedule_resample_callback, timebase)
+            _copy_structure(item, target_item, deepcopy, rename_map, callback)
+
+
+def _pulse_schedule_3to4_logfilter(logrecord: logging.LogRecord) -> bool:
+    """Suppress "'.../time' does not exist in the target IDS." log messages."""
+    return not (logrecord.args and str(logrecord.args[0]).endswith("/time"))
 
 
 def _pulse_schedule_resample_callback(timebase, item: IDSBase, target_item: IDSBase):
