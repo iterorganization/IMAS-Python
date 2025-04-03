@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Logic for interacting with IMAS Data Entries.
-"""
+"""Logic for interacting with IMAS Data Entries."""
 
 import logging
 import os
@@ -189,10 +188,10 @@ class DBEntry:
     @staticmethod
     def _select_implementation(uri: Optional[str]) -> Type[DBEntryImpl]:
         """Select which DBEntry implementation to use based on the URI."""
-        if uri and uri.endswith(".nc") and not uri.startswith("imas:"):
-            from imas.backends.netcdf.db_entry_nc import NCDBEntryImpl as impl
-        else:
+        if not uri or uri.startswith("imas:"):
             from imas.backends.imas_core.db_entry_al import ALDBEntryImpl as impl
+        else:  # Assume it's a netCDF file or NCZarr URI
+            from imas.backends.netcdf.db_entry_nc import NCDBEntryImpl as impl
         return impl
 
     def __enter__(self):
