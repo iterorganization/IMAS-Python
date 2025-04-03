@@ -5,7 +5,7 @@
 import copy
 import datetime
 import logging
-from functools import lru_cache
+from functools import lru_cache, partial
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Set, Tuple
 from xml.etree.ElementTree import Element, ElementTree
@@ -589,6 +589,7 @@ def _copy_structure(
     deepcopy: bool,
     source_is_new: bool,
     version_map: DDVersionMap,
+    callback: Optional[Callable] = None,
 ):
     """Recursively copy data, following NBC renames.
 
@@ -599,6 +600,7 @@ def _copy_structure(
         source_is_new: True iff the DD version of the source is newer than that of the
             target.
         version_map: Version map containing NBC renames.
+        callback: Optional callback that is called for every copied node.
     """
     rename_map = version_map.new_to_old if source_is_new else version_map.old_to_new
     for item in source.iter_nonempty_():
@@ -620,16 +622,25 @@ def _copy_structure(
             target_item.resize(size)
             for i in range(size):
                 _copy_structure(
-                    item[i], target_item[i], deepcopy, source_is_new, version_map
+                    item[i],
+                    target_item[i],
+                    deepcopy,
+                    source_is_new,
+                    version_map,
+                    callback,
                 )
         elif isinstance(item, IDSStructure):
-            _copy_structure(item, target_item, deepcopy, source_is_new, version_map)
+            _copy_structure(
+                item, target_item, deepcopy, source_is_new, version_map, callback
+            )
         else:
             target_item.value = copy.copy(item.value) if deepcopy else item.value
 
         # Post-process the node:
         if path in rename_map.post_process:
             rename_map.post_process[path](target_item)
+        if callback is not None:
+            callback(item, target_item)
 
 
 ########################################################################################
@@ -964,61 +975,13 @@ def _pulse_schedule_3to4(
     # - IDS is using heterogeneous time
     rename_map = version_map.old_to_new
 
-    def copy_and_interpolate(
-        source: IDSStructure, target: IDSStructure, timebase: numpy.ndarray
-    ):
-        """Reimplementation of _copy_structure that can interpolate nodes to the common
-        timebase."""
-        for item in source.iter_nonempty_():
-            path = item.metadata.path_string
-            if path.endswith("/time"):
-                continue  # Skip time bases
-
-            target_item = _get_target_item(item, target, rename_map)
-            if target_item is None:
-                continue
-            # We don't implement type changes and post process in this conversion:
-            assert path not in rename_map.type_change
-            assert path not in rename_map.post_process
-
-            if isinstance(item, IDSStructArray):
-                size = len(item)
-                target_item.resize(size)
-                for i in range(size):
-                    copy_and_interpolate(item[i], target_item[i], timebase)
-            elif isinstance(item, IDSStructure):
-                copy_and_interpolate(item, target_item, timebase)
-            elif (
-                item.metadata.ndim == 1
-                and item.metadata.coordinates[0].is_time_coordinate
-            ):
-                # Interpolate 1D dynamic quantities to the common time base
-                time = item.coordinates[0]  # TODO, this can fail?
-                if len(item) != len(time):
-                    raise ValueError(
-                        f"Array {item} has a different size than its time base {time}."
-                    )
-                is_integer = item.metadata.data_type is IDSDataType.INT
-                value = interp1d(
-                    time.value,
-                    item.value,
-                    "previous" if is_integer else "linear",
-                    copy=False,
-                    bounds_error=False,
-                    fill_value=(item[0], item[-1]),
-                    assume_sorted=True,
-                )(timebase)
-                target_item.value = value.astype(numpy.int32) if is_integer else value
-            else:  # Default copy
-                target_item.value = copy.copy(item.value) if deepcopy else item.value
-
     for item in source.iter_nonempty_():
-        # Special cases for non-dynamic stuff
         name = item.metadata.name
         target_item = _get_target_item(item, target, rename_map)
         if target_item is None:
             continue
 
+        # Special cases for non-dynamic stuff
         if name in ["ids_properties", "code"]:
             _copy_structure(item, target_item, deepcopy, False, version_map)
         elif name == "time":
@@ -1039,4 +1002,32 @@ def _pulse_schedule_3to4(
             timebase = numpy.unique(numpy.concatenate(time_bases)) if time_bases else []
             target_item.time = timebase
             # Do the conversion
-            copy_and_interpolate(item, target_item, timebase)
+            _copy_structure(
+                item,
+                target_item,
+                deepcopy,
+                False,
+                version_map,
+                partial(_pulse_schedule_resample_callback, timebase),
+            )
+
+
+def _pulse_schedule_resample_callback(timebase, item: IDSBase, target_item: IDSBase):
+    if item.metadata.ndim == 1 and item.metadata.coordinates[0].is_time_coordinate:
+        # Interpolate 1D dynamic quantities to the common time base
+        time = item.coordinates[0]
+        if len(item) != len(time):
+            raise ValueError(
+                f"Array {item} has a different size than its time base {time}."
+            )
+        is_integer = item.metadata.data_type is IDSDataType.INT
+        value = interp1d(
+            time.value,
+            item.value,
+            "previous" if is_integer else "linear",
+            copy=False,
+            bounds_error=False,
+            fill_value=(item[0], item[-1]),
+            assume_sorted=True,
+        )(timebase)
+        target_item.value = value.astype(numpy.int32) if is_integer else value
