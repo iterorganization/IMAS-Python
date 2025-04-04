@@ -496,7 +496,7 @@ def convert_ids(
         toplevel.metadata.name == "pulse_schedule"
         and toplevel.ids_properties.homogeneous_time == IDS_TIME_MODE_HETEROGENEOUS
         and source_version < Version("3.40.0")
-        and target_version.major == 4
+        and target_version >= Version("3.40.0")
     ):
         try:
             # Suppress "'.../time' does not exist in the target IDS." log messages.
