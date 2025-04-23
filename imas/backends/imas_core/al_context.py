@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Object-oriented interface to the IMAS lowlevel.
-"""
+"""Object-oriented interface to the IMAS lowlevel."""
 
 import logging
 import weakref
@@ -61,17 +60,21 @@ class ALContext:
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         ll_interface.end_action(self.ctx)
 
-    def global_action(self, path: str, rwmode: int) -> "ALContext":
+    def global_action(self, path: str, rwmode: int, datapath: str = "") -> "ALContext":
         """Begin a new global action for use in a ``with`` context.
 
         Args:
             path: access layer path for this global action: ``<idsname>[/<occurrence>]``
             rwmode: read-only or read-write operation mode: ``READ_OP``/``WRITE_OP``
+            datapath: used by UDA backend to fetch only part of the data.
 
         Returns:
             The created context.
         """
-        status, ctx = ll_interface.begin_global_action(self.ctx, path, rwmode)
+        args = [self.ctx, path, rwmode]
+        if datapath:  # AL4 compatibility: datapath arg was added in AL5
+            args.append(datapath)
+        status, ctx = ll_interface.begin_global_action(*args)
         if status != 0:
             raise LowlevelError("global_action", status)
         return ALContext(ctx)
