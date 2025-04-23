@@ -257,7 +257,8 @@ class ALDBEntryImpl(DBEntryImpl):
         if occurrence != 0:
             ll_path += f"/{occurrence}"
 
-        with self._db_ctx.global_action(ll_path, READ_OP) as read_ctx:
+        datapath = "ids_properties" if self.backend == "uda" else ""
+        with self._db_ctx.global_action(ll_path, READ_OP, datapath) as read_ctx:
             time_mode_path = "ids_properties/homogeneous_time"
             time_mode = read_ctx.read_data(time_mode_path, "", INTEGER_DATA, 0)
             # This is already checked by read_dd_version, but ensure:
@@ -314,7 +315,8 @@ class ALDBEntryImpl(DBEntryImpl):
         if occurrence != 0:
             ll_path += f"/{occurrence}"
 
-        with self._db_ctx.global_action(ll_path, READ_OP) as read_ctx:
+        datapath = "ids_properties" if self.backend == "uda" else ""
+        with self._db_ctx.global_action(ll_path, READ_OP, datapath) as read_ctx:
             time_mode_path = "ids_properties/homogeneous_time"
             time_mode = read_ctx.read_data(time_mode_path, "", INTEGER_DATA, 0)
             dd_version_path = "ids_properties/version_put/data_dictionary"
