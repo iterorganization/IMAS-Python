@@ -27,6 +27,9 @@ from imas.ids_structure import IDSStructure
 from imas.ids_toplevel import IDSToplevel
 
 logger = logging.getLogger(__name__)
+# Store for which paths we already emitted a warning that the target could not be found
+# to prevent polluting the output with lots of repeated items.
+_missing_paths_warning = set()
 
 
 def iter_parents(path: str) -> Iterator[str]:
@@ -481,6 +484,8 @@ def convert_ids(
         source_version,
         target_version,
     )
+    global _missing_paths_warning
+    _missing_paths_warning = set()  # clear for which paths we emitted a warning
 
     source_tree = toplevel._parent._etree
     target_tree = target._parent._etree
@@ -566,11 +571,14 @@ def _get_target_item(
     if path in rename_map:
         if rename_map.path[path] is None:
             if path not in rename_map.ignore_missing_paths:
-                if path in rename_map.type_change:
-                    msg = "Element %r changed type in the target IDS."
-                else:
-                    msg = "Element %r does not exist in the target IDS."
-                logger.warning(msg + " Data is not copied.", path)
+                # Only warn the first time that we encounter this path:
+                if path not in _missing_paths_warning:
+                    if path in rename_map.type_change:
+                        msg = "Element %r changed type in the target IDS."
+                    else:
+                        msg = "Element %r does not exist in the target IDS."
+                    logger.warning(msg + " Data is not copied.", path)
+                    _missing_paths_warning.add(path)
             return None
         else:
             return IDSPath(rename_map.path[path]).goto(target)
