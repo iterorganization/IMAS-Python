@@ -1,101 +1,25 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-""" Extract DD versions from a zip file.
+"""Extract DD versions from the imas-data-dictionaries distribution."""
 
-The zip file contains files as
-* `data-dictionary/3.30.0.xml`
-* `data-dictionary/3.29.0.xml`
-
-multiple paths are checked. See `ZIPFILE_LOCATIONS`.
-First the environment variable IMAS_DDZIP is checked.
-If that exists and points to a file we will attempt to open it.
-Then, IDSDef.zip is searched in site-packages, the current folder,
-in .config/imas/ (`$$XDG_CONFIG_HOME`) and in
-the assets/ folder within the IMAS-Python package.
-
-1. `$$IMAS_DDZIP`
-2. The virtual environment
-3. USER_BASE`imas/IDSDef.zip`
-4. All `site-packages/imas/IDSDef.zip`
-5. `./IDSDef.zip`
-6. `~/.config/imas/IDSDef.zip`
-7. `__file__/../../imas/assets/IDSDef.zip`
-
-All files are checked, i.e. if your .config/imas/IDSDef.zip is outdated
-the IMAS-Python-packaged version will be used.
-
-The `assets/IDSDef.zip` provided with the package can be updated
-with the `python setup.py build_DD` command, which is also performed on install
-if you have access to the ITER data-dictionary git repo.
-Reinstalling imas thus also will give you access to the latest DD versions.
-"""
 import logging
 import os
-import re
 import xml.etree.ElementTree as ET
-from contextlib import contextmanager, nullcontext
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, Iterator, List, Tuple, Union
-from zipfile import ZipFile
 
-try:
-    from importlib.resources import as_file, files
-
-    try:
-        from importlib.resources.abc import Traversable
-    except ModuleNotFoundError:  # Python 3.9/3.10 support
-        from importlib.abc import Traversable
-
-except ImportError:  # Python 3.8 support
-    from importlib_resources import as_file, files
-    from importlib_resources.abc import Traversable
-
-from packaging.version import InvalidVersion, Version
+# These methods in imas_data_dictionaries used to be defined here. We import them here
+# for backwards compatibility:
+from imas_data_dictionaries import dd_identifiers  # noqa: F401
+from imas_data_dictionaries import get_dd_xml_crc  # noqa: F401
+from imas_data_dictionaries import get_identifier_xml  # noqa: F401
+from imas_data_dictionaries import dd_xml_versions, get_dd_xml, parse_dd_version
+from packaging.version import InvalidVersion
 
 import imas
-from imas.exception import UnknownDDVersion
+from imas.exception import UnknownDDVersion  # noqa: F401
 
 logger = logging.getLogger(__name__)
-
-
-def _get_xdg_config_dir():
-    """
-    Return the XDG config directory, according to the XDG base directory spec:
-
-    https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
-    """
-    return os.environ.get("XDG_CONFIG_HOME") or str(Path.home() / ".config")
-
-
-def _generate_zipfile_locations() -> Iterator[Union[Path, Traversable]]:
-    """Build a list of potential data dictionary locations.
-    We start with the path (if any) of the IMAS_DDZIP env var.
-    Then we look for IDSDef.zip in the current folder, in the
-    default XDG config dir (~/.config/imas/IDSDef.zip) and
-    finally in the assets distributed with this package.
-    """
-    zip_name = "IDSDef.zip"
-
-    environ = os.environ.get("IMAS_DDZIP")
-    if environ:
-        yield Path(environ).resolve()
-
-    yield Path(zip_name).resolve()
-    yield Path(_get_xdg_config_dir()).resolve() / "imas" / zip_name
-    yield files(imas) / "assets" / zip_name
-
-
-def parse_dd_version(version: str) -> Version:
-    try:
-        return Version(version)
-    except InvalidVersion:
-        # This is probably a dev build of the DD, of which the version is obtained with
-        # `git describe` in the format X.Y.Z-<ncommits>-g<hash> with X.Y.Z the previous
-        # released version: try again after converting the first dash to a + and treat
-        # it like a `local` version specifier, which is recognized as newer.
-        # https://packaging.python.org/en/latest/specifications/version-specifiers/
-        return Version(version.replace("-", "+", 1))
 
 
 # Expected use case is one, maximum two DD versions
@@ -112,7 +36,6 @@ def parse_dd_version(version: str) -> Version:
 #   - IDS_minimal_struct_array.xml
 #   - IDS_minimal_types.xml
 _DD_CACHE_SIZE = 8
-ZIPFILE_LOCATIONS = list(_generate_zipfile_locations())
 
 
 def dd_etree(version=None, xml_path=None):
@@ -166,117 +89,6 @@ def _load_etree(version, xml_path):
         logger.info("Parsing data dictionary version %s", version)
         tree = ET.ElementTree(ET.fromstring(xml))
     return tree
-
-
-@contextmanager
-def _open_zipfile(path: Union[Path, Traversable]) -> Iterator[ZipFile]:
-    """Open a zipfile, given a Path or Traversable."""
-    if isinstance(path, Path):
-        ctx = nullcontext(path)
-    else:
-        ctx = as_file(path)
-    with ctx as file:
-        with ZipFile(file) as zipfile:
-            yield zipfile
-
-
-@lru_cache
-def _read_dd_versions() -> Dict[str, Tuple[Union[Path, Traversable], str]]:
-    """Traverse all possible DD zip files and return a map of known versions.
-
-    Returns:
-        version_map: version -> (zipfile path, filename)
-    """
-    versions = {}
-    xml_re = re.compile(r"^data-dictionary/([0-9.]+)\.xml$")
-    for path in ZIPFILE_LOCATIONS:
-        if not path.is_file():
-            continue
-        with _open_zipfile(path) as zipfile:
-            for fname in zipfile.namelist():
-                match = xml_re.match(fname)
-                if match:
-                    version = match.group(1)
-                    if version not in versions:
-                        versions[version] = (path, fname)
-    if not versions:
-        raise RuntimeError(
-            "Could not find any data dictionary definitions. "
-            f"Looked in: {', '.join(map(repr, ZIPFILE_LOCATIONS))}."
-        )
-    return versions
-
-
-@lru_cache
-def _read_identifiers() -> Dict[str, Tuple[Union[Path, Traversable], str]]:
-    """Traverse all possible DD zip files and return a map of known identifiers.
-
-    Returns:
-        identifier_map: identifier -> (zipfile path, filename)
-    """
-    identifiers = {}
-    xml_re = re.compile(r"^identifiers/\w+/(\w+_identifier).xml$")
-    for path in ZIPFILE_LOCATIONS:
-        if not path.is_file():
-            continue
-        with _open_zipfile(path) as zipfile:
-            for fname in zipfile.namelist():
-                match = xml_re.match(fname)
-                if match:
-                    identifier_name = match.group(1)
-                    if identifier_name not in identifiers:
-                        identifiers[identifier_name] = (path, fname)
-    return identifiers
-
-
-@lru_cache
-def dd_xml_versions() -> List[str]:
-    """Parse IDSDef.zip to find version numbers available"""
-
-    def sort_key(version):
-        try:
-            return parse_dd_version(version)
-        except InvalidVersion:
-            # Don't fail when a malformatted version is present in the DD zip
-            logger.error(
-                f"Could not convert DD XML version {version} to a Version.", exc_info=1
-            )
-            return Version(0)
-
-    return sorted(_read_dd_versions(), key=sort_key)
-
-
-@lru_cache
-def dd_identifiers() -> List[str]:
-    """Parse IDSDef.zip to find available identifiers"""
-
-    return sorted(_read_identifiers())
-
-
-def get_dd_xml(version):
-    """Read XML file for the given data dictionary version."""
-    dd_versions = dd_xml_versions()
-    if version not in dd_versions:
-        raise UnknownDDVersion(version, dd_versions)
-    path, fname = _read_dd_versions()[version]
-    with _open_zipfile(path) as zipfile:
-        return zipfile.read(fname)
-
-
-def get_dd_xml_crc(version):
-    """Given a version string, return its CRC checksum"""
-    # Note, by this time get_dd_xml is already called, so we don't need to check if the
-    # version is known
-    path, fname = _read_dd_versions()[version]
-    with _open_zipfile(path) as zipfile:
-        return zipfile.getinfo(fname).CRC
-
-
-def get_identifier_xml(identifier_name):
-    """Get identifier XML for the given identifier name"""
-    path, fname = _read_identifiers()[identifier_name]
-    with _open_zipfile(path) as zipfile:
-        return zipfile.read(fname)
 
 
 def print_supported_version_warning(version):

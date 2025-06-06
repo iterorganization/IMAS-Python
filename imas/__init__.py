@@ -20,7 +20,6 @@ from .ids_identifiers import identifiers
 # Load the IMAS-Python IMAS AL/DD core
 from . import (
     db_entry,
-    dd_helpers,
     dd_zip,
     util,
 )
