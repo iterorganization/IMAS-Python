@@ -7,8 +7,8 @@ In this part of the training, we will learn how to use Python to explore data
 saved in IDSs.
 
 
-Explore which IDSs are available
---------------------------------
+Explore which IDS structures are available
+------------------------------------------
 
 Most codes will touch multiple IDSs inside a single IMAS data entry. For example
 a heating code using a magnetic equilibrium from the ``equilibrium`` IDS with a
