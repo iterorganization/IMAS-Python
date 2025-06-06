@@ -251,7 +251,7 @@ Exercise 5
 Explore the DBEntry and occurrences
 '''''''''''''''''''''''''''''''''''
 
-You may not know apriori which types of IDSs are available within an IMAS database entry.
+You may not know a priori which types of IDSs are available within an IMAS database entry.
 It can also happen that several IDSs objects of the same type are stored within
 this entry, in that case each IDS is stored as a separate `occurrence`
 (occurrences are identified with an integer value, 0 being the default).
