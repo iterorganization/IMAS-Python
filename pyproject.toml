@@ -64,7 +64,8 @@ dependencies = [
     "packaging",
     "xxhash >= 2",
     "saxonche",
-    "gitpython"
+    "gitpython",
+    "imas_data_dictionaries",
 ]
 
 [project.optional-dependencies]
@@ -108,7 +109,6 @@ test = [
 ]
 
 [project.scripts]
-build_DD = "imas.dd_helpers:prepare_data_dictionaries"
 imas = "imas.command.cli:cli"
 
 [project.urls]

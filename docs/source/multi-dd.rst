@@ -207,21 +207,14 @@ Automated tests have been provided that check the loading of all of the DD
 versions tagged in the data-dictionary git repository.
 
 
-Extending the DD set
-''''''''''''''''''''
+Data Dictionary definitions
+'''''''''''''''''''''''''''
 
-Use the command ``python setup.py build_DD`` to build a new ``IDSDef.zip``. This
-fetches all tags from the data dictionary git repository and builds the ``IDSDef.zip``.
+The Data Dictionary definitions used by IMAS-Python are provided by the `IMAS Data
+Dictionaries <http://pypi.org/project/imas-data-dictionaries/>`__ package.
+Please update this package if you need a more recent version of the data dictionary. For
+example, using ``pip``:
 
-IMAS-Python searches for an ``IDSDef.zip`` in the following locations:
+.. code-block:: bash
 
-1.  The environment variable ``$IMAS_DDZIP`` (path to a zip file)
-2.  The file ``./IDSDef.zip`` in the current working directory
-3.  In the local configuration folder: ``~/.config/imas/IDSDef.zip``, or
-    ``$XDG_CONFIG_DIR/imas/IDSDef.zip`` (if the environment variable
-    ``$XDG_CONFIG_DIR`` is set)
-4.  The zipfile bundled with the IMAS-Python installation: ``assets/IDSDef.zip``
-
-All paths are searched in order when loading the definitions of a specific data
-dictionary version: the first zip file that contains the definitions of the requested
-version is used.
+  pip install --upgrade imas-data-dictionaries

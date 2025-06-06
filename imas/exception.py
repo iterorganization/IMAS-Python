@@ -1,11 +1,14 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Exception classes used in IMAS-Python.
-"""
+"""Exception classes used in IMAS-Python."""
 
 import difflib
 import logging
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
+
+# This exception from imas_data_dictionaries used to be defined here. We import it here
+# for backwards compatibility:
+from imas_data_dictionaries import UnknownDDVersion  # noqa: F401
 
 from imas.backends.imas_core import imas_interface as _imas_interface
 
@@ -21,20 +24,6 @@ if _imas_interface.has_imas:
     ALException = _imas_interface.lowlevel.ALException
 else:
     ALException = None
-
-
-class UnknownDDVersion(ValueError):
-    """Error raised when an unknown DD version is specified."""
-
-    def __init__(self, version: str, available: List[str], note: str = "") -> None:
-        close_matches = difflib.get_close_matches(version, available, n=1)
-        if close_matches:
-            suggestions = f"Did you mean {close_matches[0]!r}?"
-        else:
-            suggestions = f"Available versions are {', '.join(reversed(available))}"
-        super().__init__(
-            f"Data dictionary version {version!r} cannot be found. {suggestions}{note}"
-        )
 
 
 class IDSNameError(ValueError):
