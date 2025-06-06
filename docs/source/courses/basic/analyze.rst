@@ -246,3 +246,20 @@ Exercise 5
             A plot of :math:`T_e` vs :math:`t`.
 
 .. seealso:: :ref:`Lazy loading`
+
+
+Explore the DBEntry
+'''''''''''''''''''
+
+You may not know apriori which types of IDSs are available within an IMAS database entry.
+It can also happen that several IDSs objects of the same type are stored within
+this entry, in that case each IDS is stored as a separate `occurrence`
+(occurrences are identified with an integer value, 0 being the default).
+
+In IMAS-Python, the function :meth:`~imas.db_entry.DBEntry.list_all_occurrences()` will
+help you finding which occurrences are available in a given database entry and for a given
+IDS type.
+
+The following snippet shows how to list the available IDSs in a given database entry:
+
+.. literalinclude:: imas_snippets/explore_data_entry.py
