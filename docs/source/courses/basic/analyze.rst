@@ -248,8 +248,8 @@ Exercise 5
 .. seealso:: :ref:`Lazy loading`
 
 
-Explore the DBEntry
-'''''''''''''''''''
+Explore the DBEntry and occurrences
+'''''''''''''''''''''''''''''''''''
 
 You may not know apriori which types of IDSs are available within an IMAS database entry.
 It can also happen that several IDSs objects of the same type are stored within
