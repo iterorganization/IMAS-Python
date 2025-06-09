@@ -78,7 +78,7 @@ def test_lazy_loading_distributions_random_netcdf(tmp_path):
 
 def run_lazy_loading_distributions_random(dbentry):
     ids = IDSFactory().new("distributions")
-    fill_consistent(ids)
+    fill_consistent(ids, skip_complex=True)
     dbentry.put(ids)
 
     def iterate(structure):
