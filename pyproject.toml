@@ -1,7 +1,7 @@
 [build-system]
 # Minimum requirements for the build system to execute.
 # Keep this on a single line for the grep magic of build scripts to work
-requires = ["setuptools>=61", "wheel", "numpy", "gitpython", "saxonche","packaging", "tomli;python_version<'3.11'", "setuptools_scm>8"]
+requires = ["setuptools>=61", "wheel", "numpy", "packaging", "tomli;python_version<'3.11'", "setuptools_scm>8"]
 
 build-backend = "setuptools.build_meta"
 
@@ -63,8 +63,6 @@ dependencies = [
     "importlib_resources;python_version<'3.9'",
     "packaging",
     "xxhash >= 2",
-    "saxonche",
-    "gitpython",
     "imas_data_dictionaries",
 ]
 
@@ -92,6 +90,9 @@ h5py = [
 xarray = [
     "xarray",
 ]
+saxonche = [
+    "saxonche",
+]
 test = [
     "pytest>=5.4.1",
     "pytest-cov>=0.6",
@@ -101,11 +102,11 @@ test = [
     "asv == 0.6.1",
     # virtualenv is a dependency of asv
     "virtualenv",
-    # Pint and xarray are used in training snippets
+    # Pint is used in training snippets
     "pint",
     # Optional dependencies
     # TODO add imas-core when it is available on pypi
-    "imas-python[netcdf,h5py,xarray]",
+    "imas-python[netcdf,h5py,xarray,saxonche]",
 ]
 
 [project.scripts]
