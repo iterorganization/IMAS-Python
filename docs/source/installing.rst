@@ -28,6 +28,7 @@ List of optional dependencies
 - ``h5py``: enables ``analyze-db`` CLI option 
 - ``docs``: installs required packages to build the Sphinx documentation
 - ``test``: installs required packages to run the tests with ``pytest`` and ``asv``
+- ``saxonche``: installs saxonche to enable creation of MDSplus models for the selected versions of the IMAS Data Dictionary (only relevant when working with ``imas_core``)
 
 .. note::
 
