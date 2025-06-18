@@ -11,7 +11,6 @@ Improvements
 
 - improve DD3-->DD4 conversion (sign conversion to dodpsi_like)
 - improve conversion of pulse_schedule IDS >= 3.39.0
-- allow using nzcarr for storing netCDF format
 - numpy 2 compatibility
 - improve UDA data fetch
 - improve documentation
