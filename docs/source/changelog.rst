@@ -3,6 +3,22 @@
 Changelog
 =========
 
+What's new in IMAS-Python 2.0.1
+-------------------------------
+
+Improvements
+''''''''''''
+
+- improve DD3-->DD4 conversion (sign conversion to dodpsi_like)
+- improve conversion of pulse_schedule IDS >= 3.39.0
+- allow using nzcarr for storing netCDF format
+- numpy 2 compatibility
+- improve UDA data fetch
+- improve documentation
+- new dependency on `imas-data-dictionaries package <https://pypi.org/project/imas-data-dictionaries/>`__ (remove internal build via saxonche, except for the optional MDSplus models)
+- full compatibility of tests with netCDF<1.7 (no complex numbers)
+
+
 What's new in IMAS-Python 2.0.0
 -------------------------------
 
