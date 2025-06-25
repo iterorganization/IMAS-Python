@@ -51,6 +51,7 @@ Manual
    cli
    netcdf
    changelog
+   examples
 
 .. toctree::
    :caption: IMAS-Python training courses
