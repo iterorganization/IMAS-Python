@@ -481,3 +481,47 @@ def test_3to4_pulse_schedule_fuzz():
 
     fill_consistent(ps)
     convert_ids(ps, "4.0.0")
+
+
+def test_3to4_migrate_deprecated_fields():  # GH#55
+    # Test j_phi -> j_tor rename
+    eq342 = IDSFactory("3.42.0").equilibrium()
+    eq342.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    eq342.time = [0.0]
+    eq342.time_slice.resize(1)
+    eq342.time_slice[0].profiles_1d.j_tor = [0.3, 0.2, 0.1]
+    eq342.time_slice[0].profiles_1d.psi = [1.0, 0.5, 0.0]
+
+    # Basic case, check that j_tor (although deprecated) is migrated to j_phi:
+    eq4 = convert_ids(eq342, "4.0.0")
+    assert array_equal(eq4.time_slice[0].profiles_1d.j_phi.value, [0.3, 0.2, 0.1])
+
+    # When both j_tor and j_phi are present in the source IDS, we expect that j_phi
+    # takes precedence. This is a happy accident with how the DD defines both attributes
+    eq342.time_slice[0].profiles_1d.j_phi = [0.6, 0.4, 0.2]
+    eq4 = convert_ids(eq342, "4.0.0")
+    assert array_equal(eq4.time_slice[0].profiles_1d.j_phi.value, [0.6, 0.4, 0.2])
+
+    # Just to be sure, when j_tor has no value, it should also still work
+    del eq342.time_slice[0].profiles_1d.j_tor
+    eq4 = convert_ids(eq342, "4.0.0")
+    assert array_equal(eq4.time_slice[0].profiles_1d.j_phi.value, [0.6, 0.4, 0.2])
+
+    # Same applies to label -> name renames
+    cp342 = IDSFactory("3.42.0").core_profiles()
+    cp342.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    cp342.time = [0.0]
+    cp342.profiles_1d.resize(1)
+    cp342.profiles_1d[0].ion.resize(1)
+    cp342.profiles_1d[0].ion[0].label = "x"
+
+    cp4 = convert_ids(cp342, "4.0.0")
+    assert cp4.profiles_1d[0].ion[0].name == "x"
+
+    cp342.profiles_1d[0].ion[0].name = "y"
+    cp4 = convert_ids(cp342, "4.0.0")
+    assert cp4.profiles_1d[0].ion[0].name == "y"
+
+    del cp342.profiles_1d[0].ion[0].label
+    cp4 = convert_ids(cp342, "4.0.0")
+    assert cp4.profiles_1d[0].ion[0].name == "y"
