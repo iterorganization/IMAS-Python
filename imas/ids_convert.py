@@ -15,7 +15,7 @@ from packaging.version import InvalidVersion, Version
 from scipy.interpolate import interp1d
 
 import imas
-from imas.dd_zip import parse_dd_version
+from imas.dd_zip import parse_dd_version, dd_etree
 from imas.ids_base import IDSBase
 from imas.ids_data_type import IDSDataType
 from imas.ids_defs import IDS_TIME_MODE_HETEROGENEOUS
@@ -332,27 +332,50 @@ class DDVersionMap:
             new_version = parse_dd_version(new_version_node.text)
         # Additional conversion rules for DDv3 to DDv4
         if self.version_old.major == 3 and new_version and new_version.major == 4:
-            # Postprocessing for COCOS definition change:
-            for psi_like in ["psi_like", "dodpsi_like"]:
-                xpath_query = f".//field[@cocos_label_transformation='{psi_like}']"
-                for old_item in old.iterfind(xpath_query):
-                    old_path = old_item.get("path")
-                    new_path = self.old_to_new.path.get(old_path, old_path)
-                    self.new_to_old.post_process[new_path] = _cocos_change
-                    self.old_to_new.post_process[old_path] = _cocos_change
-            # Definition change for pf_active circuit/connections
-            if self.ids_name == "pf_active":
-                path = "circuit/connections"
-                self.new_to_old.post_process[path] = _circuit_connections_4to3
-                self.old_to_new.post_process[path] = _circuit_connections_3to4
-            # Migrate ids_properties/source to ids_properties/provenance
-            # Only implement forward conversion (DD3 -> 4):
-            # - Pretend that this is a rename from ids_properties/source -> provenance
-            # - And register type_change handler which will be called with the source
-            #   element and the new provenance structure
-            path = "ids_properties/source"
-            self.old_to_new.path[path] = "ids_properties/provenance"
-            self.old_to_new.type_change[path] = _ids_properties_source
+            self._apply_3to4_conversion(old, new)
+
+    def _apply_3to4_conversion(self, old: Element, new: Element) -> None:
+        # Postprocessing for COCOS definition change:
+        for psi_like in ["psi_like", "dodpsi_like"]:
+            xpath_query = f".//field[@cocos_label_transformation='{psi_like}']"
+            for old_item in old.iterfind(xpath_query):
+                old_path = old_item.get("path")
+                new_path = self.old_to_new.path.get(old_path, old_path)
+                self.new_to_old.post_process[new_path] = _cocos_change
+                self.old_to_new.post_process[old_path] = _cocos_change
+        # Definition change for pf_active circuit/connections
+        if self.ids_name == "pf_active":
+            path = "circuit/connections"
+            self.new_to_old.post_process[path] = _circuit_connections_4to3
+            self.old_to_new.post_process[path] = _circuit_connections_3to4
+
+        # Migrate ids_properties/source to ids_properties/provenance
+        # Only implement forward conversion (DD3 -> 4):
+        # - Pretend that this is a rename from ids_properties/source -> provenance
+        # - And register type_change handler which will be called with the source
+        #   element and the new provenance structure
+        path = "ids_properties/source"
+        self.old_to_new.path[path] = "ids_properties/provenance"
+        self.old_to_new.type_change[path] = _ids_properties_source
+
+        # GH#55: add logic to migrate some obsolete nodes in DD3.42.0 -> 4.0
+        # These nodes (e.g. equilibrium profiles_1d/j_tor) have an NBC rename rule
+        # (to e.g. equilibrium profiles_1d/j_phi) applying to DD 3.41 and older.
+        # In DD 3.42, both the old AND new node names are present.
+        if self.version_old.minor >= 42:  # Only apply for DD 3.42+ -> DD 4
+            # Get a rename map for 3.41 -> new version
+            dd341_map = _DDVersionMap(
+                self.ids_name,
+                dd_etree("3.41.0"),
+                self.new_version,
+                Version("3.41.0"),
+            )
+            for path, newpath in self.old_to_new.path.items():
+                # Find all nodes that have disappeared in DD 4.x, and apply the rename
+                # rule from DD3.41 -> DD 4.x
+                if newpath is None and path in dd341_map.old_to_new:
+                    # Apply the rename available in 3.41.0
+                    self.old_to_new.path[path] = dd341_map.old_to_new.path[path]
 
     def _map_missing(self, is_new: bool, missing_paths: Set[str]):
         rename_map = self.new_to_old if is_new else self.old_to_new
