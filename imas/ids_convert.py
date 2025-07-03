@@ -364,18 +364,27 @@ class DDVersionMap:
         # In DD 3.42, both the old AND new node names are present.
         if self.version_old.minor >= 42:  # Only apply for DD 3.42+ -> DD 4
             # Get a rename map for 3.41 -> new version
-            dd341_map = _DDVersionMap(
-                self.ids_name,
-                dd_etree("3.41.0"),
-                self.new_version,
-                Version("3.41.0"),
-            )
-            for path, newpath in self.old_to_new.path.items():
-                # Find all nodes that have disappeared in DD 4.x, and apply the rename
-                # rule from DD3.41 -> DD 4.x
-                if newpath is None and path in dd341_map.old_to_new:
-                    # Apply the rename available in 3.41.0
-                    self.old_to_new.path[path] = dd341_map.old_to_new.path[path]
+            factory341 = imas.IDSFactory("3.41.0")
+            if self.ids_name in factory341.ids_names():  # Ensure the IDS exists in 3.41
+                dd341_map = _DDVersionMap(
+                    self.ids_name,
+                    dd_etree("3.41.0"),
+                    self.new_version,
+                    Version("3.41.0"),
+                )
+                to_update = {}
+                for path, newpath in self.old_to_new.path.items():
+                    # Find all nodes that have disappeared in DD 4.x, and apply the
+                    # rename rule from DD3.41 -> DD 4.x
+                    if newpath is None and path in dd341_map.old_to_new:
+                        self.old_to_new.path[path] = dd341_map.old_to_new.path[path]
+                        # Note: path could be a structure or AoS, so we also put all
+                        # child paths in our map:
+                        path = path + "/"  # All child nodes will start with this
+                        for p, v in dd341_map.old_to_new.path.items():
+                            if p.startswith(path):
+                                to_update[p] = v
+                self.old_to_new.path.update(to_update)
 
     def _map_missing(self, is_new: bool, missing_paths: Set[str]):
         rename_map = self.new_to_old if is_new else self.old_to_new
