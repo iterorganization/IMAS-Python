@@ -490,11 +490,15 @@ def test_3to4_migrate_deprecated_fields():  # GH#55
     eq342.time = [0.0]
     eq342.time_slice.resize(1)
     eq342.time_slice[0].profiles_1d.j_tor = [0.3, 0.2, 0.1]
+    eq342.time_slice[0].profiles_1d.j_tor_error_upper = [1.0]
+    eq342.time_slice[0].profiles_1d.j_tor_error_lower = [2.0]
     eq342.time_slice[0].profiles_1d.psi = [1.0, 0.5, 0.0]
 
     # Basic case, check that j_tor (although deprecated) is migrated to j_phi:
     eq4 = convert_ids(eq342, "4.0.0")
     assert array_equal(eq4.time_slice[0].profiles_1d.j_phi.value, [0.3, 0.2, 0.1])
+    assert array_equal(eq4.time_slice[0].profiles_1d.j_phi_error_upper.value, [1.0])
+    assert array_equal(eq4.time_slice[0].profiles_1d.j_phi_error_lower.value, [2.0])
 
     # When both j_tor and j_phi are present in the source IDS, we expect that j_phi
     # takes precedence. This is a happy accident with how the DD defines both attributes
