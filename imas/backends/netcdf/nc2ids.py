@@ -366,9 +366,12 @@ class LazyContext:
 
             if value is not None:
                 if isinstance(value, np.ndarray):
-                    # Convert the numpy array to a read-only view
-                    value = value.view()
-                    value.flags.writeable = False
+                    if value.ndim == 0:  # Unpack 0D numpy arrays:
+                        value = value.item()
+                    else:
+                        # Convert the numpy array to a read-only view
+                        value = value.view()
+                        value.flags.writeable = False
                 # NOTE: bypassing IDSPrimitive.value.setter logic
                 child._IDSPrimitive__value = value
 
