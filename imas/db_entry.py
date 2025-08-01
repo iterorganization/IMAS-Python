@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Logic for interacting with IMAS Data Entries.
-"""
+"""Logic for interacting with IMAS Data Entries."""
 
 import logging
 import os
@@ -734,7 +733,7 @@ class DBEntry:
             version_put = ids.ids_properties.version_put
             version_put.data_dictionary = self._ids_factory._version
             version_put.access_layer = self._dbe_impl.access_layer_version()
-            version_put.access_layer_language = f"imas {imas.__version__}"
+            version_put.access_layer_language = f"IMAS-Python {imas.__version__}"
 
         self._dbe_impl.put(ids, occurrence, is_slice)
 
