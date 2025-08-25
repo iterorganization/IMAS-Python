@@ -7,7 +7,7 @@ import datetime
 import logging
 from functools import lru_cache, partial
 from pathlib import Path
-from typing import Callable, Dict, Iterator, Optional, Set, Tuple
+from typing import Callable, Dict, Iterator, List, Optional, Set, Tuple
 from xml.etree.ElementTree import Element, ElementTree
 
 import numpy
@@ -85,6 +85,15 @@ class NBCPathMap:
 
         The postprocess function should be applied to the nodes after all the data is
         converted.
+        """
+
+        self.post_process_ids: List[
+            Callable[[IDSToplevel, IDSToplevel, bool], None]
+        ] = []
+        """Postprocess functions to be applied to the whole IDS.
+
+        These postprocess functions should be applied to the whole IDS after all data is
+        converted. The arguments supplied are: source IDS, target IDS, deepcopy boolean.
         """
 
         self.ignore_missing_paths: Set[str] = set()
@@ -343,6 +352,13 @@ class DDVersionMap:
                 new_path = self.old_to_new.path.get(old_path, old_path)
                 self.new_to_old.post_process[new_path] = _cocos_change
                 self.old_to_new.post_process[old_path] = _cocos_change
+        # Convert equilibrium boundary_separatrix and populate contour_tree
+        if self.ids_name == "equilibrium":
+            self.old_to_new.post_process_ids.append(_equilibrium_boundary_3to4)
+            self.old_to_new.ignore_missing_paths |= {
+                "time_slice/boundary_separatrix",
+                "time_slice/boundary_secondary_separatrix",
+            }
         # Definition change for pf_active circuit/connections
         if self.ids_name == "pf_active":
             path = "circuit/connections"
@@ -543,6 +559,10 @@ def convert_ids(
             logger.removeFilter(_pulse_schedule_3to4_logfilter)
     else:
         _copy_structure(toplevel, target, deepcopy, rename_map)
+
+    # Global post-processing functions
+    for callback in rename_map.post_process_ids:
+        callback(toplevel, target, deepcopy)
 
     logger.info("Conversion of IDS %s finished.", ids_name)
     if provenance_origin_uri:
@@ -1063,3 +1083,51 @@ def _pulse_schedule_resample_callback(timebase, item: IDSBase, target_item: IDSB
             assume_sorted=True,
         )(timebase)
         target_item.value = value.astype(numpy.int32) if is_integer else value
+
+
+def _equilibrium_boundary_3to4(eq3: IDSToplevel, eq4: IDSToplevel, deepcopy: bool):
+    """Convert DD3 boundary[[_secondary]_separatrix] to DD4 contour_tree"""
+    # Implement https://github.com/iterorganization/IMAS-Python/issues/60
+    copy = numpy.copy if deepcopy else lambda x: x
+    for ts3, ts4 in zip(eq3.time_slice, eq4.time_slice):
+        n_nodes = 1  # magnetic axis
+        if ts3.boundary_separatrix.psi.has_value:
+            n_nodes = 2
+            if (  # boundary_secondary_separatrix is introduced in DD 3.32.0
+                hasattr(ts3, "boundary_secondary_separatrix")
+                and ts3.boundary_secondary_separatrix.psi.has_value
+            ):
+                n_nodes = 3
+        ts4.contour_tree.node.resize(n_nodes)
+        # Magnetic axis (primary O-point)
+        node = ts4.contour_tree.node
+        node[0].critical_type = 0  # minimum (?)
+        node[0].r = ts3.global_quantities.magnetic_axis.r
+        node[0].z = ts3.global_quantities.magnetic_axis.z
+        node[0].psi = -ts3.global_quantities.psi_axis  # COCOS change
+
+        # X-points
+        if n_nodes >= 2:
+            if ts3.boundary_separatrix.type == 0:  # limiter plasma
+                node[1].critical_type = 2  # maximum (?)
+                node[1].r = ts3.boundary_separatrix.active_limiter_point.r
+                node[1].z = ts3.boundary_separatrix.active_limiter_point.z
+            else:
+                node[1].critical_type = 1  # saddle-point (x-point)
+                if len(ts3.boundary_separatrix.x_point):
+                    node[1].r = ts3.boundary_separatrix.x_point[0].r
+                    node[1].z = ts3.boundary_separatrix.x_point[0].z
+                    # TODO: what if there are multiple x-points?
+            node[1].psi = -ts3.boundary_separatrix.psi  # COCOS change
+            node[1].levelset.r = copy(ts3.boundary_separatrix.outline.r)
+            node[1].levelset.z = copy(ts3.boundary_separatrix.outline.z)
+
+        if n_nodes >= 3:
+            node[2].critical_type = 1  # saddle-point (x-point)
+            if len(ts3.boundary_secondary_separatrix.x_point):
+                node[2].r = ts3.boundary_secondary_separatrix.x_point[0].r
+                node[2].z = ts3.boundary_secondary_separatrix.x_point[0].z
+                # TODO: what if there are multiple x-points?
+            node[2].psi = -ts3.boundary_secondary_separatrix.psi  # COCOS change
+            node[2].levelset.r = copy(ts3.boundary_secondary_separatrix.outline.r)
+            node[2].levelset.z = copy(ts3.boundary_secondary_separatrix.outline.z)
