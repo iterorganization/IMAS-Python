@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""IDS StructArray represents an Array of Structures in the IDS tree.
-"""
+"""IDS StructArray represents an Array of Structures in the IDS tree."""
 
 import logging
 from copy import deepcopy
@@ -26,7 +25,7 @@ class IDSStructArray(IDSBase):
     """
 
     __doc__ = IDSDoc(__doc__)
-    __slots__ = ["_parent", "_lazy", "metadata", "value", "_lazy_ctx"]
+    __slots__ = ["_parent", "metadata", "value"]
 
     def __init__(self, parent: IDSBase, metadata: IDSMetadata):
         """Initialize IDSStructArray from XML specification
@@ -37,16 +36,9 @@ class IDSStructArray(IDSBase):
             metadata: IDSMetadata describing the structure of the IDS
         """
         self._parent = parent
-        self._lazy = parent._lazy
         self.metadata = metadata
-
-        # Initialize with an 0-length list or None when lazy loading
-        self.value = None if self._lazy else []
+        self.value = []
         """"""
-
-        # Lazy loading context, only applicable when self._lazy is True
-        # When lazy loading, all items in self.value are None until they are requested
-        self._lazy_ctx: Optional[LazyALArrayStructContext] = None
 
     @property
     def coordinates(self):
@@ -69,49 +61,6 @@ class IDSStructArray(IDSBase):
         # Equal if same size and all contained structures are the same
         return len(self) == len(other) and all(a == b for a, b in zip(self, other))
 
-    def _set_lazy_context(self, ctx: LazyALArrayStructContext) -> None:
-        """Called by DBEntry during a lazy get/get_slice.
-
-        Set the context that we can use for retrieving our size and children.
-        """
-        self._lazy_ctx = ctx
-
-    def _load(self, item: Optional[int]) -> None:
-        """When lazy loading, ensure that the requested item is loaded.
-
-        Args:
-            item: index of the item to load. When None, just ensure that our size is
-                loaded from the lowlevel.
-        """
-        assert self._lazy
-        if self.value is not None:  # We already loaded our size
-            if item is None:
-                return
-            if self.value[item] is not None:
-                return  # item is already loaded
-        # Load requested data from the backend
-        if self.value is None:
-            if self._lazy_ctx is None:
-                # Lazy context can be None when:
-                # 1. The element does not exist in the on-disk DD version
-                # 2. The element exists, but changed type compared to the on-disk DD
-                # In both cases we just report that we're empty
-                self.value = []
-            else:
-                ctx = self._lazy_ctx.get_context()
-                self.value = [None] * ctx.size
-
-        if item is not None:
-            if item < 0:
-                item += len(self)
-            if item < 0 or item >= len(self):
-                raise IndexError("list index out of range")
-            # Create the requested item
-            from imas.ids_structure import IDSStructure
-
-            element = self.value[item] = IDSStructure(self, self.metadata)
-            element._set_lazy_context(self._lazy_ctx.iterate_to_index(item))
-
     @property
     def _element_structure(self):
         """Prepare an element structure JIT"""
@@ -124,15 +73,11 @@ class IDSStructArray(IDSBase):
         # value is a list, so the given item should be convertable to integer
         # TODO: perhaps we should allow slices as well?
         list_idx = int(item)
-        if self._lazy:
-            self._load(item)
         return self.value[list_idx]
 
     def __setitem__(self, item, value):
         # value is a list, so the given item should be convertable to integer
         # TODO: perhaps we should allow slices as well?
-        if self._lazy:
-            raise ValueError("Lazy-loaded IDSs are read-only.")
         list_idx = int(item)
         if isinstance(value, (IDSIdentifier, str, int)):
             self.value[list_idx]._assign_identifier(value)
@@ -140,8 +85,6 @@ class IDSStructArray(IDSBase):
             self.value[list_idx] = value
 
     def __len__(self) -> int:
-        if self._lazy:
-            self._load(None)
         return len(self.value)
 
     @property
@@ -150,8 +93,6 @@ class IDSStructArray(IDSBase):
 
         This will always return a tuple: ``(len(self), )``.
         """
-        if self._lazy:
-            self._load(None)
         return (len(self.value),)
 
     def append(self, elt):
@@ -160,8 +101,6 @@ class IDSStructArray(IDSBase):
         Args:
             elt: IDS structure, or list of IDS structures, to append to this array
         """
-        if self._lazy:
-            raise ValueError("Lazy-loaded IDSs are read-only.")
         if not isinstance(elt, list):
             elements = [elt]
         else:
@@ -185,8 +124,6 @@ class IDSStructArray(IDSBase):
             keep: Specifies if the targeted array of structure should keep
                 existing data in remaining elements after resizing it.
         """
-        if self._lazy:
-            raise ValueError("Lazy-loaded IDSs are read-only.")
         if nbelt < 0:
             raise ValueError(f"Invalid size {nbelt}: size may not be negative")
         if not keep:
@@ -231,3 +168,83 @@ class IDSStructArray(IDSBase):
         for s in self:
             hsh.update(s._xxhash())
         return hsh.digest()
+
+
+class LazyIDSStructArray(IDSStructArray):
+    __slots__ = ["_lazy_context"]
+    _lazy = True
+
+    def __init__(self, parent, metadata):
+        super().__init__(parent, metadata)
+        # self.value set to None to indicate that we don't know our size yet. It will
+        # be set to a list when needed (with values equal to None when not yet loaded):
+        self.value = None
+        self._lazy_context: Optional[LazyALArrayStructContext] = None
+
+    def __deepcopy__(self, memo):
+        raise NotImplementedError("deepcopy is not implemented for lazy-loaded IDSs.")
+
+    def _set_lazy_context(self, ctx: LazyALArrayStructContext) -> None:
+        """Called by DBEntry during a lazy get/get_slice.
+
+        Set the context that we can use for retrieving our size and children.
+        """
+        self._lazy_context = ctx
+
+    def _load(self, item: Optional[int]) -> None:
+        """Ensure that the requested item is loaded.
+
+        Args:
+            item: index of the item to load. When None, just ensure that our size is
+                loaded from the lowlevel.
+        """
+        if self.value is not None:  # We already loaded our size
+            if item is None or self.value[item] is not None:
+                return
+        # Load requested data from the backend
+        if self.value is None:
+            if self._lazy_context is None:
+                # Lazy context can be None when:
+                # 1. The element does not exist in the on-disk DD version
+                # 2. The element exists, but changed type compared to the on-disk DD
+                # In both cases we just report that we're empty
+                self.value = []
+            else:
+                ctx = self._lazy_context.get_context()
+                self.value = [None] * ctx.size
+
+        if item is not None:
+            if item < 0:
+                item += len(self)
+            if item < 0 or item >= len(self):
+                raise IndexError("list index out of range")
+            # Create the requested item
+            from imas.ids_structure import LazyIDSStructure
+
+            element = self.value[item] = LazyIDSStructure(self, self.metadata)
+            element._set_lazy_context(self._lazy_context.iterate_to_index(item))
+
+    def __getitem__(self, item):
+        # value is a list, so the given item should be convertable to integer
+        # TODO: perhaps we should allow slices as well?
+        list_idx = int(item)
+        self._load(item)
+        return self.value[list_idx]
+
+    def __setitem__(self, item, value):
+        raise ValueError("Lazy-loaded IDSs are read-only.")
+
+    def __len__(self) -> int:
+        self._load(None)
+        return len(self.value)
+
+    @property
+    def shape(self) -> Tuple[int]:
+        self._load(None)
+        return (len(self.value),)
+
+    def append(self, elt):
+        raise ValueError("Lazy-loaded IDSs are read-only.")
+
+    def resize(self, nbelt: int, keep: bool = False):
+        raise ValueError("Lazy-loaded IDSs are read-only.")

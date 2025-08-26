@@ -1,7 +1,7 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Core of the IMAS-Python interpreted IDS metadata
-"""
+"""Core of the IMAS-Python interpreted IDS metadata"""
+
 import re
 import types
 from enum import Enum
@@ -79,6 +79,9 @@ def get_toplevel_metadata(structure_xml: Element) -> "IDSMetadata":
 
 _type_map: Dict[Tuple[IDSDataType, int], Type] = {}
 """Map of IDSDataType and ndim to IDSBase implementation class."""
+_lazy_types: Dict[Type, Type] = {}
+"""Maps IDSStructure, IDSStructArray and IDSToplevel to their lazy-loaded counterparts.
+"""
 
 
 def _build_type_map():
@@ -94,9 +97,9 @@ def _build_type_map():
         IDSString0D,
         IDSString1D,
     )
-    from imas.ids_struct_array import IDSStructArray
-    from imas.ids_structure import IDSStructure
-    from imas.ids_toplevel import IDSToplevel
+    from imas.ids_struct_array import IDSStructArray, LazyIDSStructArray
+    from imas.ids_structure import IDSStructure, LazyIDSStructure
+    from imas.ids_toplevel import IDSToplevel, LazyIDSToplevel
 
     _type_map[(None, 0)] = IDSToplevel
     _type_map[(IDSDataType.STRUCTURE, 0)] = IDSStructure
@@ -110,6 +113,10 @@ def _build_type_map():
         _type_map[(IDSDataType.INT, dim)] = IDSNumericArray
         _type_map[(IDSDataType.FLT, dim)] = IDSNumericArray
         _type_map[(IDSDataType.CPX, dim)] = IDSNumericArray
+
+    _lazy_types[IDSStructArray] = LazyIDSStructArray
+    _lazy_types[IDSStructure] = LazyIDSStructure
+    _lazy_types[IDSToplevel] = LazyIDSToplevel
 
 
 class IDSMetadata:
@@ -254,6 +261,7 @@ class IDSMetadata:
 
         # Cache node type
         self._node_type: Type = _type_map[self.data_type, self.ndim]
+        self._lazy_node_type: Type = _lazy_types.get(self._node_type, self._node_type)
         # AL expects ndim of STR types to be one more (STR_0D is 1D array of chars)
         self._al_ndim = self.ndim + (self.data_type is IDSDataType.STR)
 
