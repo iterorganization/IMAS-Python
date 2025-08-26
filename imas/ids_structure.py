@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""A structure in an IDS
-"""
+"""A structure in an IDS"""
 
 import logging
 from copy import deepcopy
@@ -151,7 +150,9 @@ class IDSStructure(IDSBase):
         for child in self._children:
             if child in self.__dict__:
                 child_copy = deepcopy(getattr(self, child), memo)
-                setattr(copy, child, child_copy)
+                # bypass __setattr__:
+                copy.__dict__[child] = child_copy
+                child_copy._parent = copy
         return copy
 
     def __dir__(self) -> List[str]:
