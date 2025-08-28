@@ -1090,6 +1090,9 @@ def _equilibrium_boundary_3to4(eq3: IDSToplevel, eq4: IDSToplevel, deepcopy: boo
     # Implement https://github.com/iterorganization/IMAS-Python/issues/60
     copy = numpy.copy if deepcopy else lambda x: x
     for ts3, ts4 in zip(eq3.time_slice, eq4.time_slice):
+        if not ts3.global_quantities.psi_axis.has_value:
+            # No magnetic axis, assume no boundary either:
+            continue
         n_nodes = 1  # magnetic axis
         if ts3.boundary_separatrix.psi.has_value:
             n_nodes = 2
