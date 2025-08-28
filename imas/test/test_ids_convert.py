@@ -569,7 +569,7 @@ def test_3to4_equilibrium_boundary():
             ts.boundary_separatrix.gap.resize(1)
         if i == 3:
             # Fill second_separatrix
-            ts.boundary_secondary_separatrix.psi = -1.0
+            ts.boundary_secondary_separatrix.psi = -1.1
             # Use limiter for time_slice[1], otherwise divertor:
             ts.boundary_secondary_separatrix.outline.r = [0.9, 3.1, 2.1, 0.9]
             ts.boundary_secondary_separatrix.outline.z = [0.9, 2.1, 3.1, 0.9]
@@ -588,10 +588,11 @@ def test_3to4_equilibrium_boundary():
     assert len(eq4.time_slice) == 5
     for i, ts in enumerate(eq4.time_slice):
         node = ts.contour_tree.node
-        assert len(node) == [1, 2, 2, 3, 2][i]
+        assert len(node) == [1, 2, 2, 3, 3][i]
         # Test magnetic axis
         assert node[0].critical_type == 0
         assert node[0].r == node[0].z == 2.0
+        assert node[0].psi == -1.0
         assert len(node[0].levelset.r) == len(node[0].levelset.z) == 0
         # boundary_separatrix
         if i == 1:  # node[1] is boundary for limiter plasma
@@ -602,6 +603,7 @@ def test_3to4_equilibrium_boundary():
             assert node[1].critical_type == 1
             assert node[1].r == node[1].z == 1.0
         if i > 0:
+            assert node[1].psi == 1.0
             assert numpy.array_equal(node[1].levelset.r, [1.0, 3.0, 2.0, 1.0])
             assert numpy.array_equal(node[1].levelset.z, [1.0, 2.0, 3.0, 1.0])
         # boundary_secondary_separatrix
@@ -609,11 +611,25 @@ def test_3to4_equilibrium_boundary():
             assert node[2].critical_type == 1
             assert node[2].r == 2.1
             assert node[2].z == 3.1
+            assert node[2].psi == 1.1
             assert numpy.array_equal(node[2].levelset.r, [0.9, 3.1, 2.1, 0.9])
             assert numpy.array_equal(node[2].levelset.z, [0.9, 2.1, 3.1, 0.9])
+        # Second x-point from boundary_separatrix
+        if i == 4:
+            assert node[2].critical_type == 1
+            assert node[2].r == 2.0
+            assert node[2].z == 3.0
+            assert node[2].psi == node[1].psi == 1.0
+            # Levelset is only filled for the main x-point (node[1])
+            assert not node[2].levelset.r.has_value
+            assert not node[2].levelset.z.has_value
 
     # not deepcopied, should share numpy arrays
-    assert (
-        eq342.time_slice[1].boundary_separatrix.outline.r.value
-        is eq4.time_slice[1].contour_tree.node[1].levelset.r.value
+    slice1_outline_r = eq342.time_slice[1].boundary_separatrix.outline.r.value
+    assert slice1_outline_r is eq4.time_slice[1].contour_tree.node[1].levelset.r.value
+
+    # deepcopy should create a copy of the numpy arrays
+    eq4_cp = convert_ids(eq342, "4.0.0", deepcopy=True)
+    assert not numpy.may_share_memory(
+        slice1_outline_r, eq4_cp.time_slice[1].contour_tree.node[1].levelset.r.value
     )

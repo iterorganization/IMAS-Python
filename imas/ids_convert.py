@@ -1098,10 +1098,14 @@ def _equilibrium_boundary_3to4(eq3: IDSToplevel, eq4: IDSToplevel, deepcopy: boo
                 and ts3.boundary_secondary_separatrix.psi.has_value
             ):
                 n_nodes = 3
-        ts4.contour_tree.node.resize(n_nodes)
-        # Magnetic axis (primary O-point)
         node = ts4.contour_tree.node
-        node[0].critical_type = 0  # minimum (?)
+        node.resize(n_nodes)
+        # Magnetic axis (primary O-point)
+        axis_is_psi_minimum = (
+            # Note the sign flip for psi due to the COCOS change between DD3 and DD4!
+            -ts3.global_quantities.psi_axis < -ts3.global_quantities.psi_boundary
+        )
+        node[0].critical_type = 0 if axis_is_psi_minimum else 2
         node[0].r = ts3.global_quantities.magnetic_axis.r
         node[0].z = ts3.global_quantities.magnetic_axis.z
         node[0].psi = -ts3.global_quantities.psi_axis  # COCOS change
@@ -1109,7 +1113,7 @@ def _equilibrium_boundary_3to4(eq3: IDSToplevel, eq4: IDSToplevel, deepcopy: boo
         # X-points
         if n_nodes >= 2:
             if ts3.boundary_separatrix.type == 0:  # limiter plasma
-                node[1].critical_type = 2  # maximum (?)
+                node[1].critical_type = 2 if axis_is_psi_minimum else 0
                 node[1].r = ts3.boundary_separatrix.active_limiter_point.r
                 node[1].z = ts3.boundary_separatrix.active_limiter_point.z
             else:
@@ -1117,7 +1121,13 @@ def _equilibrium_boundary_3to4(eq3: IDSToplevel, eq4: IDSToplevel, deepcopy: boo
                 if len(ts3.boundary_separatrix.x_point):
                     node[1].r = ts3.boundary_separatrix.x_point[0].r
                     node[1].z = ts3.boundary_separatrix.x_point[0].z
-                    # TODO: what if there are multiple x-points?
+                # Additional x-points. N.B. levelset is only stored on the first node
+                for i in range(1, len(ts3.boundary_separatrix.x_point)):
+                    node.resize(len(node) + 1, keep=True)
+                    node[-1].critical_type = 1
+                    node[-1].r = ts3.boundary_separatrix.x_point[i].r
+                    node[-1].z = ts3.boundary_separatrix.x_point[i].z
+                    node[-1].psi = -ts3.boundary_separatrix.psi
             node[1].psi = -ts3.boundary_separatrix.psi  # COCOS change
             node[1].levelset.r = copy(ts3.boundary_separatrix.outline.r)
             node[1].levelset.z = copy(ts3.boundary_separatrix.outline.z)
@@ -1127,7 +1137,13 @@ def _equilibrium_boundary_3to4(eq3: IDSToplevel, eq4: IDSToplevel, deepcopy: boo
             if len(ts3.boundary_secondary_separatrix.x_point):
                 node[2].r = ts3.boundary_secondary_separatrix.x_point[0].r
                 node[2].z = ts3.boundary_secondary_separatrix.x_point[0].z
-                # TODO: what if there are multiple x-points?
+                # Additional x-points. N.B. levelset is only stored on the first node
+                for i in range(1, len(ts3.boundary_secondary_separatrix.x_point)):
+                    node.resize(len(node) + 1, keep=True)
+                    node[-1].critical_type = 1
+                    node[-1].r = ts3.boundary_secondary_separatrix.x_point[i].r
+                    node[-1].z = ts3.boundary_secondary_separatrix.x_point[i].z
+                    node[-1].psi = -ts3.boundary_secondary_separatrix.psi
             node[2].psi = -ts3.boundary_secondary_separatrix.psi  # COCOS change
             node[2].levelset.r = copy(ts3.boundary_secondary_separatrix.outline.r)
             node[2].levelset.z = copy(ts3.boundary_secondary_separatrix.outline.z)
