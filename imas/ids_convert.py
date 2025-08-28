@@ -1101,14 +1101,14 @@ def _equilibrium_boundary_3to4(eq3: IDSToplevel, eq4: IDSToplevel, deepcopy: boo
         node = ts4.contour_tree.node
         node.resize(n_nodes)
         # Magnetic axis (primary O-point)
-        axis_is_psi_minimum = (
-            # Note the sign flip for psi due to the COCOS change between DD3 and DD4!
-            -ts3.global_quantities.psi_axis < -ts3.global_quantities.psi_boundary
-        )
+        gq = ts3.global_quantities
+        # Note the sign flip for psi due to the COCOS change between DD3 and DD4!
+        axis_is_psi_minimum = -gq.psi_axis < -gq.psi_boundary
+
         node[0].critical_type = 0 if axis_is_psi_minimum else 2
-        node[0].r = ts3.global_quantities.magnetic_axis.r
-        node[0].z = ts3.global_quantities.magnetic_axis.z
-        node[0].psi = -ts3.global_quantities.psi_axis  # COCOS change
+        node[0].r = gq.magnetic_axis.r
+        node[0].z = gq.magnetic_axis.z
+        node[0].psi = -gq.psi_axis  # COCOS change
 
         # X-points
         if n_nodes >= 2:
