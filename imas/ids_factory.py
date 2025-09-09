@@ -1,11 +1,14 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Tools for generating IDSs from a Data Dictionary version.
-"""
+"""Tools for generating IDSs from a Data Dictionary version."""
+
+from __future__ import annotations
 
 import logging
+from collections.abc import Iterable, Iterator
 from functools import partial
-from typing import Any, Iterable, Iterator, List, Optional
+from pathlib import Path
+from typing import Any
 
 from imas import dd_zip
 from imas.exception import IDSNameError
@@ -27,7 +30,7 @@ class IDSFactory:
     """
 
     def __init__(
-        self, version: Optional[str] = None, xml_path: Optional[str] = None
+        self, version: str | None = None, xml_path: str | Path | None = None
     ) -> None:
         """Create a new IDS Factory
 
@@ -77,7 +80,7 @@ class IDSFactory:
         """Iterate over the IDS names defined by the loaded Data Dictionary"""
         return iter(self._ids_elements)
 
-    def ids_names(self) -> List[str]:
+    def ids_names(self) -> list[str]:
         """Get a list of all known IDS names in the loaded Data Dictionary"""
         return list(self._ids_elements)
 
