@@ -33,38 +33,29 @@ class IDSStructure(IDSBase):
 
     __doc__ = IDSDoc(__doc__)
     _children: "MappingProxyType[str, IDSMetadata]"
-    _lazy_context: Optional["LazyALContext"]
+    _lazy = False
 
     def __init__(self, parent: IDSBase, metadata: IDSMetadata):
         """Initialize IDSStructure from metadata specification
 
         Args:
-            parent: Parent structure. Can be anything, but at database write
-                time should be something with a path attribute
+            parent: Parent structure or structarray
             metadata: IDSMetadata describing the structure of the IDS
         """
         # Performance hack: bypass our __setattr__ implementation during __init__:
         dct = self.__dict__
         dct["_parent"] = parent
-        # parent._lazy is undefined for IDSToplevel, but then _lazy is already set
-        if "_lazy" not in dct:
-            dct["_lazy"] = parent._lazy
         dct["metadata"] = metadata
 
         dct["_children"] = metadata._children
-        dct["_lazy_context"] = None
 
     def __getattr__(self, name):
         if name not in self._children:
-            raise AttributeError(
-                f"IDS structure '{self._path}' has no attribute '{name}'"
-            )
+            raise AttributeError(f"'{self!r}' has no attribute '{name}'")
         # Create child node
         child_meta = self._children[name]
         child = child_meta._node_type(self, child_meta)
         self.__dict__[name] = child  # bypass setattr logic below: avoid recursion
-        if self._lazy and self._lazy_context is not None:  # lazy load the child
-            self._lazy_context.get_child(child)
         return child
 
     def _assign_identifier(self, value: Union[IDSIdentifier, str, int]) -> None:
@@ -142,10 +133,6 @@ class IDSStructure(IDSBase):
             attr.value = value
 
     def __deepcopy__(self, memo):
-        if self._lazy:
-            raise NotImplementedError(
-                "deepcopy is not implemented for lazy-loaded IDSs."
-            )
         copy = self.__class__(self._parent, self.metadata)
         for child in self._children:
             if child in self.__dict__:
@@ -169,13 +156,6 @@ class IDSStructure(IDSBase):
             return False  # Not equal if there is any difference
         return True  # Equal when there are no differences
 
-    def _set_lazy_context(self, ctx: "LazyALContext") -> None:
-        """Called by DBEntry during a lazy get/get_slice.
-
-        Set the context that we can use for retrieving our children.
-        """
-        self._lazy_context = ctx
-
     @property
     def _dd_parent(self) -> IDSBase:
         if self.metadata.data_type is IDSDataType.STRUCT_ARRAY:
@@ -185,10 +165,6 @@ class IDSStructure(IDSBase):
     @property
     def has_value(self) -> bool:
         """True if any of the children has a non-default value"""
-        if self._lazy:
-            raise NotImplementedError(
-                "`has_value` is not implemented for lazy-loaded structures."
-            )
         for _ in self.iter_nonempty_():
             return True
         return False
@@ -248,22 +224,10 @@ class IDSStructure(IDSBase):
                 lazy-loaded IDS. Non-empty nodes that have not been loaded from the
                 backend are not iterated over. See detailed explanation above.
         """
-        if self._lazy and not accept_lazy:
-            raise RuntimeError(
-                "Iterating over non-empty nodes of a lazy loaded IDS will skip nodes "
-                "that are not loaded. Set accept_lazy=True to continue. "
-                "See the documentation for more information: "
-                "https://imas-python.readthedocs.io/en/latest"
-                "/generated/imas.ids_structure."
-                "IDSStructure.html#imas.ids_structure.IDSStructure.iter_nonempty_"
-            )
         for child in self._children:
-            if child in self.__dict__:
-                child_node = getattr(self, child)
-                if (  # IDSStructure.has_value is not implemented when lazy-loaded:
-                    self._lazy and isinstance(child_node, IDSStructure)
-                ) or child_node.has_value:
-                    yield child_node
+            child_node = self.__dict__.get(child, None)
+            if child_node is not None and child_node.has_value:
+                yield child_node
 
     def __iter__(self):
         """Iterate over this structure's children"""
@@ -330,3 +294,58 @@ class IDSStructure(IDSBase):
             hsh.update(child._xxhash())
 
         return hsh.digest()
+
+
+class LazyIDSStructure(IDSStructure):
+    _lazy_context: Optional["LazyALContext"]
+    _lazy = True
+
+    def __init__(self, parent, metadata):
+        super().__init__(parent, metadata)
+        # Bypass setattr logic:
+        self.__dict__["_lazy_context"] = None
+
+    def __getattr__(self, name):
+        if name not in self._children:
+            raise AttributeError(f"'{self!r}' has no attribute '{name}'")
+        # Create child node
+        child_meta = self._children[name]
+        child = child_meta._lazy_node_type(self, child_meta)
+        if self._lazy_context is not None:  # lazy load the child
+            self._lazy_context.get_child(child)
+        self.__dict__[name] = child  # bypass setattr logic
+        return child
+
+    def __deepcopy__(self, memo):
+        raise NotImplementedError("deepcopy is not implemented for lazy-loaded IDSs.")
+
+    def _set_lazy_context(self, ctx: "LazyALContext") -> None:
+        """Called by DBEntry during a lazy get/get_slice.
+
+        Set the context that we can use for retrieving our children.
+        """
+        self._lazy_context = ctx
+
+    @property
+    def has_value(self) -> bool:
+        """True if any of the children has a non-default value"""
+        raise NotImplementedError(
+            "`has_value` is not implemented for lazy-loaded structures."
+        )
+
+    def iter_nonempty_(self, *, accept_lazy=False):
+        if not accept_lazy:
+            raise RuntimeError(
+                "Iterating over non-empty nodes of a lazy loaded IDS will skip nodes "
+                "that are not loaded. Set accept_lazy=True to continue. "
+                "See the documentation for more information: "
+                "https://imas-python.readthedocs.io/en/latest"
+                "/generated/imas.ids_structure."
+                "IDSStructure.html#imas.ids_structure.IDSStructure.iter_nonempty_"
+            )
+        for child in self._children:
+            child_node = self.__dict__.get(child, None)
+            if child_node is not None:
+                # LazyIDSStructure.has_value is not implemented:
+                if isinstance(child_node, LazyIDSStructure) or child_node.has_value:
+                    yield child_node

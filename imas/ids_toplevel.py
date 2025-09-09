@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Represents a Top-level IDS (like ``core_profiles``, ``equilibrium``, etc)
-"""
+"""Represents a Top-level IDS (like ``core_profiles``, ``equilibrium``, etc)"""
 
 import logging
 import os
@@ -27,7 +26,7 @@ from imas.ids_defs import (
     needs_imas,
 )
 from imas.ids_metadata import IDSMetadata, IDSType, get_toplevel_metadata
-from imas.ids_structure import IDSStructure
+from imas.ids_structure import IDSStructure, LazyIDSStructure
 
 if TYPE_CHECKING:
     from imas.db_entry import DBEntry
@@ -71,16 +70,15 @@ class IDSToplevel(IDSStructure):
 
     __doc__ = IDSDoc(__doc__)
     _path = ""  # Path to ourselves without the IDS name and slashes
+    _lazy = False
 
-    def __init__(self, parent: "IDSFactory", structure_xml, lazy=False):
-        """Save backend_version and backend_xml and build translation layer.
+    def __init__(self, parent: "IDSFactory", structure_xml):
+        """Initialize toplevel IDS.
 
         Args:
             parent: Parent of ``self``.
             structure_xml: XML structure that defines this IDS toplevel.
-            lazy: Whether this toplevel is used for a lazy-loaded get() or get_slice()
         """
-        self._lazy = lazy
         # structure_xml might be an IDSMetadata already when initializing from __copy__
         # or __deepcopy__
         if isinstance(structure_xml, IDSMetadata):
@@ -88,11 +86,6 @@ class IDSToplevel(IDSStructure):
         else:
             metadata = get_toplevel_metadata(structure_xml)
         super().__init__(parent, metadata)
-
-    def __deepcopy__(self, memo):
-        copy = super().__deepcopy__(memo)
-        copy._lazy = self._lazy
-        return copy
 
     @property
     def _dd_version(self) -> str:
@@ -379,3 +372,28 @@ class IDSToplevel(IDSStructure):
         """Return ourselves"""
         # Used to cut off recursive call
         return self
+
+
+class LazyIDSToplevel(LazyIDSStructure, IDSToplevel):
+    """Represents a lazy loaded IDS."""
+
+    # A note on multi-inheritance an MRO (method resolution order) and why we do not
+    # need to implement anything in this class:
+    #
+    # The method resolution order for this class (accessible with __mro__) is:
+    # - LazyIDSToplevel
+    # - LazyIDSStructure
+    # - IDSToplevel
+    # - IDSStructure
+    # - IDSBase
+    # - object
+    #
+    # Any class method or attribute is looked up according to the MRO. Some examples:
+    # - _lazy is defined on both LazyIDSStructure (True) and IDSToplevel (False). Since
+    #   LazyIDSStructure is higher in the MRO, LazyIDSToplevel._lazy is True.
+    # - _validate is defined on both IDSToplevel and IDSStructure. Since IDSToplevel is
+    #   higher in the MRO, LazyIDSToplevel._validate refers to the method from
+    #   IDSToplevel.
+    #
+    # More details on MRO can be found in the Python docs:
+    # https://docs.python.org/3/howto/mro.html

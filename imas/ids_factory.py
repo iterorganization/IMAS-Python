@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Tools for generating IDSs from a Data Dictionary version.
-"""
+"""Tools for generating IDSs from a Data Dictionary version."""
 
 import logging
 from functools import partial
@@ -9,7 +8,7 @@ from typing import Any, Iterable, Iterator, List, Optional
 
 from imas import dd_zip
 from imas.exception import IDSNameError
-from imas.ids_toplevel import IDSToplevel
+from imas.ids_toplevel import IDSToplevel, LazyIDSToplevel
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +92,9 @@ class IDSFactory:
         """
         if ids_name not in self._ids_elements:
             raise IDSNameError(ids_name, self)
-        return IDSToplevel(self, self._ids_elements[ids_name], _lazy)
+        if _lazy:
+            return LazyIDSToplevel(self, self._ids_elements[ids_name])
+        return IDSToplevel(self, self._ids_elements[ids_name])
 
     def exists(self, ids_name: str) -> bool:
         """Check if an IDS type with the given name exists."""
