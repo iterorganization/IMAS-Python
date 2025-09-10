@@ -529,3 +529,45 @@ def test_3to4_migrate_deprecated_fields():  # GH#55
     del cp342.profiles_1d[0].ion[0].label
     cp4 = convert_ids(cp342, "4.0.0")
     assert cp4.profiles_1d[0].ion[0].name == "y"
+
+
+def test_3to4_name_identifier_mapping_magnetics():
+    # Create source IDS using DD 3.40.1
+    factory = IDSFactory("3.40.1")
+
+    src = factory.magnetics()
+    src.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    # Populate a parent that has name + identifier (no 'index' sibling)
+    src.b_field_pol_probe.resize(1)
+    src.b_field_pol_probe[0].name = "TEST_NAME"
+    src.b_field_pol_probe[0].identifier = "TEST_IDENTIFIER"
+
+    # Convert to DD 4.0.0
+    dst = convert_ids(src, "4.0.0")
+
+    # DD3 name -> DD4 description
+    assert dst.b_field_pol_probe[0].description == "TEST_NAME"
+
+    # DD3 identifier -> DD4 name
+    assert dst.b_field_pol_probe[0].name == "TEST_IDENTIFIER"
+
+
+def test_4to3_name_identifier_mapping_magnetics():
+    # Create source IDS using DD 4.0.0
+    factory = IDSFactory("4.0.0")
+
+    src = factory.magnetics()
+    src.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    # Populate a parent that has description + name (no 'index' sibling)
+    src.b_field_pol_probe.resize(1)
+    src.b_field_pol_probe[0].description = "TEST_DESCRIPTION"
+    src.b_field_pol_probe[0].name = "TEST_NAME"
+
+    # Convert to DD 3.40.1
+    dst = convert_ids(src, "3.40.1")
+
+    # DD4 description -> DD3 name
+    assert dst.b_field_pol_probe[0].name == "TEST_DESCRIPTION"
+
+    # DD4 name -> DD3 identifier
+    assert dst.b_field_pol_probe[0].identifier == "TEST_NAME"
