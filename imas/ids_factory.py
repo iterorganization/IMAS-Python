@@ -5,9 +5,9 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 from collections.abc import Iterable, Iterator
 from functools import partial
-from pathlib import Path
 from typing import Any
 
 from imas import dd_zip
@@ -30,7 +30,7 @@ class IDSFactory:
     """
 
     def __init__(
-        self, version: str | None = None, xml_path: str | Path | None = None
+        self, version: str | None = None, xml_path: str | pathlib.Path | None = None
     ) -> None:
         """Create a new IDS Factory
 
