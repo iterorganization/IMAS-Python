@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import logging
 import os
-from pathlib import Path
+import pathlib
 from typing import Any, Type, overload
 
 import numpy
@@ -78,7 +78,7 @@ class DBEntry:
         mode: str,
         *,
         dd_version: str | None = None,
-        xml_path: str | Path | None = None,
+        xml_path: str | pathlib.Path | None = None,
     ) -> None: ...
 
     @overload
@@ -93,14 +93,14 @@ class DBEntry:
         *,
         shot: int | None = None,
         dd_version: str | None = None,
-        xml_path: str | Path | None = None,
+        xml_path: str | pathlib.Path | None = None,
     ) -> None: ...
 
     def __init__(
         self,
         *args,
         dd_version: str | None = None,
-        xml_path: str | Path | None = None,
+        xml_path: str | pathlib.Path | None = None,
         **kwargs,
     ):
         """Open or create a Data Entry based on the provided URI and mode, or prepare a
