@@ -336,13 +336,18 @@ class DDVersionMap:
 
     def _apply_3to4_conversion(self, old: Element, new: Element) -> None:
         # Postprocessing for COCOS definition change:
+        cocos_paths = []
         for psi_like in ["psi_like", "dodpsi_like"]:
             xpath_query = f".//field[@cocos_label_transformation='{psi_like}']"
             for old_item in old.iterfind(xpath_query):
-                old_path = old_item.get("path")
-                new_path = self.old_to_new.path.get(old_path, old_path)
-                self.new_to_old.post_process[new_path] = _cocos_change
-                self.old_to_new.post_process[old_path] = _cocos_change
+                cocos_paths.append(old_item.get("path"))
+        # Sign flips not covered by the generic rule:
+        cocos_paths.extend(_3to4_sign_flip_paths.get(self.ids_name, []))
+        for old_path in cocos_paths:
+            new_path = self.old_to_new.path.get(old_path, old_path)
+            self.new_to_old.post_process[new_path] = _cocos_change
+            self.old_to_new.post_process[old_path] = _cocos_change
+
         # Definition change for pf_active circuit/connections
         if self.ids_name == "pf_active":
             path = "circuit/connections"
@@ -674,6 +679,121 @@ def _copy_structure(
             rename_map.post_process[path](target_item)
         if callback is not None:
             callback(item, target_item)
+
+
+_3to4_sign_flip_paths = {
+    "core_instant_changes": [
+        "change/profiles_1d/grid/psi_magnetic_axis",
+        "change/profiles_1d/grid/psi_boundary",
+    ],
+    "core_profiles": [
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "core_sources": [
+        "source/profiles_1d/grid/psi_magnetic_axis",
+        "source/profiles_1d/grid/psi_boundary",
+    ],
+    "core_transport": [
+        "model/profiles_1d/grid_d/psi_magnetic_axis",
+        "model/profiles_1d/grid_d/psi_boundary",
+        "model/profiles_1d/grid_v/psi_magnetic_axis",
+        "model/profiles_1d/grid_v/psi_boundary",
+        "model/profiles_1d/grid_flux/psi_magnetic_axis",
+        "model/profiles_1d/grid_flux/psi_boundary",
+    ],
+    "disruption": [
+        "global_quantities/psi_halo_boundary",
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "ece": [
+        "channel/beam_tracing/beam/position/psi",
+        "psi_normalization/psi_magnetic_axis",
+        "psi_normalization/psi_boundary",
+    ],
+    "edge_profiles": [
+        "profiles_1d/grid/psi",
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "equilibrium": [
+        "time_slice/boundary/psi",
+        "time_slice/global_quantities/q_min/psi",
+        "time_slice/ggd/psi/values",
+        "time_slice/ggd/psi/coefficients",
+    ],
+    "mhd": [
+        "ggd/psi/values",
+        "ggd/psi/coefficients",
+    ],
+    "pellets": ["time_slice/pellet/path_profiles/psi"],
+    "plasma_profiles": [
+        "profiles_1d/grid/psi",
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+        "ggd/psi/values",
+        "ggd/psi/coefficients",
+    ],
+    "plasma_sources": [
+        "source/profiles_1d/grid/psi",
+        "source/profiles_1d/grid/psi_magnetic_axis",
+        "source/profiles_1d/grid/psi_boundary",
+    ],
+    "plasma_transport": [
+        "model/profiles_1d/grid_d/psi",
+        "model/profiles_1d/grid_d/psi_magnetic_axis",
+        "model/profiles_1d/grid_d/psi_boundary",
+        "model/profiles_1d/grid_v/psi",
+        "model/profiles_1d/grid_v/psi_magnetic_axis",
+        "model/profiles_1d/grid_v/psi_boundary",
+        "model/profiles_1d/grid_flux/psi",
+        "model/profiles_1d/grid_flux/psi_magnetic_axis",
+        "model/profiles_1d/grid_flux/psi_boundary",
+    ],
+    "radiation": [
+        "process/profiles_1d/grid/psi_magnetic_axis",
+        "process/profiles_1d/grid/psi_boundary",
+    ],
+    "reflectometer_profile": [
+        "psi_normalization/psi_magnetic_axis",
+        "psi_normalization/psi_boundary",
+    ],
+    "reflectometer_fluctuation": [
+        "psi_normalization/psi_magnetic_axis",
+        "psi_normalization/psi_boundary",
+    ],
+    "runaway_electrons": [
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "sawteeth": [
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "summary": [
+        "global_quantities/psi_external_average/value",
+        "local/magnetic_axis/position/psi",
+    ],
+    "transport_solver_numerics": [
+        "solver_1d/grid/psi_magnetic_axis",
+        "solver_1d/grid/psi_boundary",
+        "derivatives_1d/grid/psi_magnetic_axis",
+        "derivatives_1d/grid/psi_boundary",
+    ],
+    "wall": [
+        "description_ggd/ggd/psi/values",
+        "description_ggd/ggd/psi/coefficients",
+    ],
+    "waves": [
+        "coherent_wave/profiles_1d/grid/psi_magnetic_axis",
+        "coherent_wave/profiles_1d/grid/psi_boundary",
+        "coherent_wave/profiles_2d/grid/psi",
+        "coherent_wave/beam_tracing/beam/position/psi",
+    ],
+}
+"""List of paths per IDS that require a COCOS sign change, but aren't covered by the
+generic rule."""
 
 
 ########################################################################################
