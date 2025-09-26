@@ -721,19 +721,14 @@ _3to4_sign_flip_paths = {
         "time_slice/boundary/psi",
         "time_slice/global_quantities/q_min/psi",
         "time_slice/ggd/psi/values",
-        "time_slice/ggd/psi/coefficients",
     ],
-    "mhd": [
-        "ggd/psi/values",
-        "ggd/psi/coefficients",
-    ],
+    "mhd": ["ggd/psi/values"],
     "pellets": ["time_slice/pellet/path_profiles/psi"],
     "plasma_profiles": [
         "profiles_1d/grid/psi",
         "profiles_1d/grid/psi_magnetic_axis",
         "profiles_1d/grid/psi_boundary",
         "ggd/psi/values",
-        "ggd/psi/coefficients",
     ],
     "plasma_sources": [
         "source/profiles_1d/grid/psi",
@@ -781,10 +776,7 @@ _3to4_sign_flip_paths = {
         "derivatives_1d/grid/psi_magnetic_axis",
         "derivatives_1d/grid/psi_boundary",
     ],
-    "wall": [
-        "description_ggd/ggd/psi/values",
-        "description_ggd/ggd/psi/coefficients",
-    ],
+    "wall": ["description_ggd/ggd/psi/values"],
     "waves": [
         "coherent_wave/profiles_1d/grid/psi_magnetic_axis",
         "coherent_wave/profiles_1d/grid/psi_boundary",
