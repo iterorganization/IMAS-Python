@@ -2,9 +2,12 @@
 # You should have received the IMAS-Python LICENSE file with this project.
 """Logic for interacting with IMAS Data Entries."""
 
+from __future__ import annotations
+
 import logging
 import os
-from typing import Any, List, Optional, Tuple, Type, Union, overload
+import pathlib
+from typing import Any, Type, overload
 
 import numpy
 
@@ -33,14 +36,14 @@ from imas.ids_toplevel import IDSToplevel
 logger = logging.getLogger(__name__)
 
 
-def _get_uri_mode(uri, mode) -> Tuple[str, str]:
+def _get_uri_mode(uri, mode) -> tuple[str, str]:
     """Helper method to parse arguments of DBEntry.__init__."""
     return uri, mode
 
 
 def _get_legacy_params(
     backend_id, db_name, pulse, run, user_name=None, data_version=None
-) -> Tuple[int, str, int, int, Optional[str], Optional[str]]:
+) -> tuple[int, str, int, int, str | None, str | None]:
     """Helper method to parse arguments of DBEntry.__init__."""
     return backend_id, db_name, pulse, run, user_name, data_version
 
@@ -74,8 +77,8 @@ class DBEntry:
         uri: str,
         mode: str,
         *,
-        dd_version: Optional[str] = None,
-        xml_path: Optional[str] = None,
+        dd_version: str | None = None,
+        xml_path: str | pathlib.Path | None = None,
     ) -> None: ...
 
     @overload
@@ -85,19 +88,19 @@ class DBEntry:
         db_name: str,
         pulse: int,
         run: int,
-        user_name: Optional[str] = None,
-        data_version: Optional[str] = None,
+        user_name: str | None = None,
+        data_version: str | None = None,
         *,
-        shot: Optional[int] = None,
-        dd_version: Optional[str] = None,
-        xml_path: Optional[str] = None,
+        shot: int | None = None,
+        dd_version: str | None = None,
+        xml_path: str | pathlib.Path | None = None,
     ) -> None: ...
 
     def __init__(
         self,
         *args,
-        dd_version: Optional[str] = None,
-        xml_path: Optional[str] = None,
+        dd_version: str | None = None,
+        xml_path: str | pathlib.Path | None = None,
         **kwargs,
     ):
         """Open or create a Data Entry based on the provided URI and mode, or prepare a
@@ -162,7 +165,7 @@ class DBEntry:
                 ) from None
 
         # Actual intializiation
-        self._dbe_impl: Optional[DBEntryImpl] = None
+        self._dbe_impl: DBEntryImpl | None = None
         self._dd_version = dd_version
         self._xml_path = xml_path
         self._ids_factory = IDSFactory(dd_version, xml_path)
@@ -186,7 +189,7 @@ class DBEntry:
             self._dbe_impl = cls.from_uri(self.uri, mode, self._ids_factory)
 
     @staticmethod
-    def _select_implementation(uri: Optional[str]) -> Type[DBEntryImpl]:
+    def _select_implementation(uri: str | None) -> Type[DBEntryImpl]:
         """Select which DBEntry implementation to use based on the URI."""
         if uri and uri.endswith(".nc") and not uri.startswith("imas:"):
             from imas.backends.netcdf.db_entry_nc import NCDBEntryImpl as impl
@@ -307,7 +310,7 @@ class DBEntry:
         lazy: bool = False,
         autoconvert: bool = True,
         ignore_unknown_dd_version: bool = False,
-        destination: Optional[IDSToplevel] = None,
+        destination: IDSToplevel | None = None,
     ) -> IDSToplevel:
         """Read the contents of an IDS into memory.
 
@@ -370,7 +373,7 @@ class DBEntry:
         lazy: bool = False,
         autoconvert: bool = True,
         ignore_unknown_dd_version: bool = False,
-        destination: Optional[IDSToplevel] = None,
+        destination: IDSToplevel | None = None,
     ) -> IDSToplevel:
         """Read a single time slice from an IDS in this Database Entry.
 
@@ -434,14 +437,14 @@ class DBEntry:
         ids_name: str,
         tmin: float,
         tmax: float,
-        dtime: Optional[Union[float, numpy.ndarray]] = None,
-        interpolation_method: Optional[int] = None,
+        dtime: float | numpy.ndarray | None = None,
+        interpolation_method: int | None = None,
         occurrence: int = 0,
         *,
         lazy: bool = False,
         autoconvert: bool = True,
         ignore_unknown_dd_version: bool = False,
-        destination: Optional[IDSToplevel] = None,
+        destination: IDSToplevel | None = None,
     ) -> IDSToplevel:
         """Read a range of time slices from an IDS in this Database Entry.
 
@@ -547,8 +550,8 @@ class DBEntry:
         self,
         ids_name: str,
         occurrence: int,
-        parameters: Union[None, GetSliceParameters, GetSampleParameters],
-        destination: Optional[IDSToplevel],
+        parameters: None | GetSliceParameters | GetSampleParameters,
+        destination: IDSToplevel | None,
         lazy: bool,
         autoconvert: bool,
         ignore_unknown_dd_version: bool,
@@ -751,12 +754,12 @@ class DBEntry:
     @overload
     def list_all_occurrences(
         self, ids_name: str, node_path: None = None
-    ) -> List[int]: ...
+    ) -> list[int]: ...
 
     @overload
     def list_all_occurrences(
         self, ids_name: str, node_path: str
-    ) -> Tuple[List[int], List[IDSBase]]: ...
+    ) -> tuple[list[int], list[IDSBase]]: ...
 
     def list_all_occurrences(self, ids_name, node_path=None):
         """List all non-empty occurrences of an IDS

@@ -12,12 +12,14 @@ import pytest
 
 from imas import identifiers
 from imas.ids_convert import (
+    _3to4_sign_flip_paths,
     _get_ctxpath,
     _get_tbp,
     convert_ids,
     dd_version_map_from_factories,
     iter_parents,
 )
+from imas.ids_data_type import IDSDataType
 from imas.ids_defs import (
     ASCII_BACKEND,
     IDS_TIME_MODE_HETEROGENEOUS,
@@ -571,3 +573,22 @@ def test_4to3_name_identifier_mapping_magnetics():
 
     # DD4 name -> DD3 identifier
     assert dst.b_field_pol_probe[0].identifier == "TEST_NAME"
+
+
+def test_3to4_cocos_hardcoded_paths():
+    # Check for existence in 3.42.0
+    factory = IDSFactory("3.42.0")
+    for ids_name, paths in _3to4_sign_flip_paths.items():
+        ids = factory.new(ids_name)
+        for path in paths:
+            # Check path exists and is not a FLT
+            metadata = ids.metadata[path]
+            assert metadata.data_type is IDSDataType.FLT
+
+    # Test a conversion
+    eq = factory.equilibrium()
+    eq.time_slice.resize(1)
+    eq.time_slice[0].boundary.psi = 3.141
+
+    eq4 = convert_ids(eq, "4.0.0")
+    assert eq4.time_slice[0].boundary.psi == -3.141
