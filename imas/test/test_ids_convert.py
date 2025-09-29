@@ -12,12 +12,14 @@ import pytest
 
 from imas import identifiers
 from imas.ids_convert import (
+    _3to4_sign_flip_paths,
     _get_ctxpath,
     _get_tbp,
     convert_ids,
     dd_version_map_from_factories,
     iter_parents,
 )
+from imas.ids_data_type import IDSDataType
 from imas.ids_defs import (
     ASCII_BACKEND,
     IDS_TIME_MODE_HETEROGENEOUS,
@@ -529,6 +531,67 @@ def test_3to4_migrate_deprecated_fields():  # GH#55
     del cp342.profiles_1d[0].ion[0].label
     cp4 = convert_ids(cp342, "4.0.0")
     assert cp4.profiles_1d[0].ion[0].name == "y"
+
+
+def test_3to4_name_identifier_mapping_magnetics():
+    # Create source IDS using DD 3.40.1
+    factory = IDSFactory("3.40.1")
+
+    src = factory.magnetics()
+    src.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    # Populate a parent that has name + identifier (no 'index' sibling)
+    src.b_field_pol_probe.resize(1)
+    src.b_field_pol_probe[0].name = "TEST_NAME"
+    src.b_field_pol_probe[0].identifier = "TEST_IDENTIFIER"
+
+    # Convert to DD 4.0.0
+    dst = convert_ids(src, "4.0.0")
+
+    # DD3 name -> DD4 description
+    assert dst.b_field_pol_probe[0].description == "TEST_NAME"
+
+    # DD3 identifier -> DD4 name
+    assert dst.b_field_pol_probe[0].name == "TEST_IDENTIFIER"
+
+
+def test_4to3_name_identifier_mapping_magnetics():
+    # Create source IDS using DD 4.0.0
+    factory = IDSFactory("4.0.0")
+
+    src = factory.magnetics()
+    src.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    # Populate a parent that has description + name (no 'index' sibling)
+    src.b_field_pol_probe.resize(1)
+    src.b_field_pol_probe[0].description = "TEST_DESCRIPTION"
+    src.b_field_pol_probe[0].name = "TEST_NAME"
+
+    # Convert to DD 3.40.1
+    dst = convert_ids(src, "3.40.1")
+
+    # DD4 description -> DD3 name
+    assert dst.b_field_pol_probe[0].name == "TEST_DESCRIPTION"
+
+    # DD4 name -> DD3 identifier
+    assert dst.b_field_pol_probe[0].identifier == "TEST_NAME"
+
+
+def test_3to4_cocos_hardcoded_paths():
+    # Check for existence in 3.42.0
+    factory = IDSFactory("3.42.0")
+    for ids_name, paths in _3to4_sign_flip_paths.items():
+        ids = factory.new(ids_name)
+        for path in paths:
+            # Check path exists and is not a FLT
+            metadata = ids.metadata[path]
+            assert metadata.data_type is IDSDataType.FLT
+
+    # Test a conversion
+    eq = factory.equilibrium()
+    eq.time_slice.resize(1)
+    eq.time_slice[0].boundary.psi = 3.141
+
+    eq4 = convert_ids(eq, "4.0.0")
+    assert eq4.time_slice[0].boundary.psi == -3.141
 
 
 def test_3to4_equilibrium_boundary():

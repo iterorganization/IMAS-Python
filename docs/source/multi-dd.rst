@@ -117,6 +117,25 @@ Explicit conversion
     versions, the corresponding data is not copied. IMAS-Python provides logging to indicate
     when this happens.
 
+.. rubric:: DD3 -> DD4 special rule: name + identifier -> description + name (GH#59)
+
+IMAS‑Python implements an additional explicit conversion rule (see GH#59) to improve 
+migration of Machine Description parts of IDSs when moving from major version 3 to 4. 
+The rule targets simple sibling pairs on the same parent that provide both a "name" 
+and an "identifier" field and that are NOT part of an "identifier structure" (the 
+parent must not also have an "index" sibling). When applicable the rule performs the 
+following renames during explicit DD3->DD4 conversion:
+
+- DD3: parent/name       -> DD4: parent/description
+- DD3: parent/identifier -> DD4: parent/name
+
+The conversion is applied only when the corresponding target fields exist in the
+DD4 definition and when no earlier mapping already covers the same paths. This
+is performed by the explicit conversion machinery (for example via
+imas.convert_ids or DBEntry explicit conversion) and is not guaranteed to be
+applied by automatic conversion when reading/writing from a backend.
+
+In some cases like the one above, reverse conversion is also allowed(DD 4.0.0 -> 3.41.1)
 
 .. _`Supported conversions`:
 

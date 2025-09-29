@@ -210,6 +210,10 @@ class DDVersionMap:
         old_path_set = set(old_paths)
         new_path_set = set(new_paths)
 
+        # expose the path->Element maps as members so other methods can reuse them
+        self.old_paths = old_paths
+        self.new_paths = new_paths
+
         def process_parent_renames(path: str) -> str:
             # Apply any parent AoS/structure rename
             # Loop in reverse order to find the closest parent which was renamed:
@@ -230,20 +234,6 @@ class DDVersionMap:
             else:
                 old_path = previous_name
             return process_parent_renames(old_path)
-
-        def add_rename(old_path: str, new_path: str):
-            old_item = old_paths[old_path]
-            new_item = new_paths[new_path]
-            self.new_to_old[new_path] = (
-                old_path,
-                _get_tbp(old_item, old_paths),
-                _get_ctxpath(old_path, old_paths),
-            )
-            self.old_to_new[old_path] = (
-                new_path,
-                _get_tbp(new_item, new_paths),
-                _get_ctxpath(new_path, new_paths),
-            )
 
         # Iterate through all NBC metadata and add entries
         for new_item in new.iterfind(".//field[@change_nbc_description]"):
@@ -284,14 +274,16 @@ class DDVersionMap:
                         self.version_old,
                     )
                 elif self._check_data_type(old_item, new_item):
-                    add_rename(old_path, new_path)
+                    # use class helper to register simple renames and
+                    # reciprocal mappings
+                    self._add_rename(old_path, new_path)
                     if old_item.get("data_type") in DDVersionMap.STRUCTURE_TYPES:
                         # Add entries for common sub-elements
                         for path in old_paths:
                             if path.startswith(old_path):
                                 npath = path.replace(old_path, new_path, 1)
                                 if npath in new_path_set:
-                                    add_rename(path, npath)
+                                    self._add_rename(path, npath)
             elif nbc_description == "type_changed":
                 pass  # We will handle this (if possible) in self._check_data_type
             elif nbc_description == "repeat_children_first_point":
@@ -343,15 +335,42 @@ class DDVersionMap:
         if self.version_old.major == 3 and new_version and new_version.major == 4:
             self._apply_3to4_conversion(old, new)
 
+    def _add_rename(self, old_path: str, new_path: str) -> None:
+        """Register a simple rename from old_path -> new_path using the
+        path->Element maps stored on the instance (self.old_paths/self.new_paths).
+        This will also add the reciprocal mapping when possible.
+        """
+        old_item = self.old_paths[old_path]
+        new_item = self.new_paths[new_path]
+
+        # forward mapping
+        self.old_to_new[old_path] = (
+            new_path,
+            _get_tbp(new_item, self.new_paths),
+            _get_ctxpath(new_path, self.new_paths),
+        )
+
+        # reciprocal mapping
+        self.new_to_old[new_path] = (
+            old_path,
+            _get_tbp(old_item, self.old_paths),
+            _get_ctxpath(old_path, self.old_paths),
+        )
+
     def _apply_3to4_conversion(self, old: Element, new: Element) -> None:
         # Postprocessing for COCOS definition change:
+        cocos_paths = []
         for psi_like in ["psi_like", "dodpsi_like"]:
             xpath_query = f".//field[@cocos_label_transformation='{psi_like}']"
             for old_item in old.iterfind(xpath_query):
-                old_path = old_item.get("path")
-                new_path = self.old_to_new.path.get(old_path, old_path)
-                self.new_to_old.post_process[new_path] = _cocos_change
-                self.old_to_new.post_process[old_path] = _cocos_change
+                cocos_paths.append(old_item.get("path"))
+        # Sign flips not covered by the generic rule:
+        cocos_paths.extend(_3to4_sign_flip_paths.get(self.ids_name, []))
+        for old_path in cocos_paths:
+            new_path = self.old_to_new.path.get(old_path, old_path)
+            self.new_to_old.post_process[new_path] = _cocos_change
+            self.old_to_new.post_process[old_path] = _cocos_change
+
         # Convert equilibrium boundary_separatrix and populate contour_tree
         if self.ids_name == "equilibrium":
             self.old_to_new.post_process_ids.append(_equilibrium_boundary_3to4)
@@ -401,6 +420,46 @@ class DDVersionMap:
                             if p.startswith(path):
                                 to_update[p] = v
                 self.old_to_new.path.update(to_update)
+
+        # GH#59: To improve further the conversion of DD3 to DD4, especially the
+        # Machine Description part of the IDSs, we would like to add a 3to4 specific
+        #  rule to convert any siblings name + identifier (that are not part of an
+        # identifier structure, meaning that there is no index sibling) into
+        # description + name. Meaning:
+        #        parent/name (DD3) -> parent/description (DD4)
+        #        parent/identifier (DD3) -> parent/name (DD4)
+        # Only perform the mapping if the corresponding target fields exist in the
+        # new DD and if we don't already have a mapping for the involved paths.
+        # use self.old_paths and self.new_paths set in _build_map
+        for p in self.old_paths:
+            # look for name children
+            if not p.endswith("/name"):
+                continue
+            parent = p.rsplit("/", 1)[0]
+            name_path = f"{parent}/name"
+            id_path = f"{parent}/identifier"
+            index_path = f"{parent}/index"
+            desc_path = f"{parent}/description"
+            new_name_path = name_path
+
+            # If neither 'name' nor 'identifier' existed in the old DD, skip this parent
+            if name_path not in self.old_paths or id_path not in self.old_paths:
+                continue
+            # exclude identifier-structure (has index sibling)
+            if index_path in self.old_paths:
+                continue
+
+            # Ensure the candidate target fields exist in the new DD
+            if desc_path not in self.new_paths or new_name_path not in self.new_paths:
+                continue
+
+            # Map DD3 name -> DD4 description
+            if name_path not in self.old_to_new.path:
+                self._add_rename(name_path, desc_path)
+
+            # Map DD3 identifier -> DD4 name
+            if id_path in self.old_to_new.path:
+                self._add_rename(id_path, new_name_path)
 
     def _map_missing(self, is_new: bool, missing_paths: Set[str]):
         rename_map = self.new_to_old if is_new else self.old_to_new
@@ -694,6 +753,113 @@ def _copy_structure(
             rename_map.post_process[path](target_item)
         if callback is not None:
             callback(item, target_item)
+
+
+_3to4_sign_flip_paths = {
+    "core_instant_changes": [
+        "change/profiles_1d/grid/psi_magnetic_axis",
+        "change/profiles_1d/grid/psi_boundary",
+    ],
+    "core_profiles": [
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "core_sources": [
+        "source/profiles_1d/grid/psi_magnetic_axis",
+        "source/profiles_1d/grid/psi_boundary",
+    ],
+    "core_transport": [
+        "model/profiles_1d/grid_d/psi_magnetic_axis",
+        "model/profiles_1d/grid_d/psi_boundary",
+        "model/profiles_1d/grid_v/psi_magnetic_axis",
+        "model/profiles_1d/grid_v/psi_boundary",
+        "model/profiles_1d/grid_flux/psi_magnetic_axis",
+        "model/profiles_1d/grid_flux/psi_boundary",
+    ],
+    "disruption": [
+        "global_quantities/psi_halo_boundary",
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "ece": [
+        "channel/beam_tracing/beam/position/psi",
+        "psi_normalization/psi_magnetic_axis",
+        "psi_normalization/psi_boundary",
+    ],
+    "edge_profiles": [
+        "profiles_1d/grid/psi",
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "equilibrium": [
+        "time_slice/boundary/psi",
+        "time_slice/global_quantities/q_min/psi",
+        "time_slice/ggd/psi/values",
+    ],
+    "mhd": ["ggd/psi/values"],
+    "pellets": ["time_slice/pellet/path_profiles/psi"],
+    "plasma_profiles": [
+        "profiles_1d/grid/psi",
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+        "ggd/psi/values",
+    ],
+    "plasma_sources": [
+        "source/profiles_1d/grid/psi",
+        "source/profiles_1d/grid/psi_magnetic_axis",
+        "source/profiles_1d/grid/psi_boundary",
+    ],
+    "plasma_transport": [
+        "model/profiles_1d/grid_d/psi",
+        "model/profiles_1d/grid_d/psi_magnetic_axis",
+        "model/profiles_1d/grid_d/psi_boundary",
+        "model/profiles_1d/grid_v/psi",
+        "model/profiles_1d/grid_v/psi_magnetic_axis",
+        "model/profiles_1d/grid_v/psi_boundary",
+        "model/profiles_1d/grid_flux/psi",
+        "model/profiles_1d/grid_flux/psi_magnetic_axis",
+        "model/profiles_1d/grid_flux/psi_boundary",
+    ],
+    "radiation": [
+        "process/profiles_1d/grid/psi_magnetic_axis",
+        "process/profiles_1d/grid/psi_boundary",
+    ],
+    "reflectometer_profile": [
+        "psi_normalization/psi_magnetic_axis",
+        "psi_normalization/psi_boundary",
+    ],
+    "reflectometer_fluctuation": [
+        "psi_normalization/psi_magnetic_axis",
+        "psi_normalization/psi_boundary",
+    ],
+    "runaway_electrons": [
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "sawteeth": [
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "summary": [
+        "global_quantities/psi_external_average/value",
+        "local/magnetic_axis/position/psi",
+    ],
+    "transport_solver_numerics": [
+        "solver_1d/grid/psi_magnetic_axis",
+        "solver_1d/grid/psi_boundary",
+        "derivatives_1d/grid/psi_magnetic_axis",
+        "derivatives_1d/grid/psi_boundary",
+    ],
+    "wall": ["description_ggd/ggd/psi/values"],
+    "waves": [
+        "coherent_wave/profiles_1d/grid/psi_magnetic_axis",
+        "coherent_wave/profiles_1d/grid/psi_boundary",
+        "coherent_wave/profiles_2d/grid/psi",
+        "coherent_wave/beam_tracing/beam/position/psi",
+    ],
+}
+"""List of paths per IDS that require a COCOS sign change, but aren't covered by the
+generic rule."""
 
 
 ########################################################################################
