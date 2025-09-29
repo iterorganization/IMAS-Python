@@ -608,7 +608,7 @@ class DBEntry:
                 logger.warning(
                     "On-disk data is stored in DD %s which has a different major "
                     "version than the requested DD version (%s). IMAS-Python will "
-                    "convert the data automatically, but this does not cover all"
+                    "convert the data automatically, but this does not cover all "
                     "changes. "
                     "See %s/multi-dd.html#conversion-of-idss-between-dd-versions",
                     dd_version,
