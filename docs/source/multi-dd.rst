@@ -166,6 +166,8 @@ explicit conversion mechanisms.
   Changed definition of ``space/coordinates_type`` in GGD grids, Yes, No
   Migrate obsolescent ``ids_properties/source`` to ``ids_properties/provenance``, Yes, No
   Convert the multiple time-bases in the ``pulse_schedule`` IDS [#ps3to4]_, Yes, No
+  Convert name + identifier -> description + name, Yes, Yes
+  Convert equilibrium ``boundary\_[secondary\_]separatrix`` to ``contour_tree`` [#contourtree]_, Yes, No
 
 .. [#rename] Quantities which have been renamed between the two DD versions. For
   example, the ``ec/beam`` Array of Structures in the ``pulse_schedule`` IDS,
@@ -204,6 +206,12 @@ explicit conversion mechanisms.
     uses `previous neighbour` interpolation for integer quantities, and linear
     interpolation otherwise. See also:
     https://github.com/iterorganization/IMAS-Python/issues/21.
+
+.. [#contourtree] Fills the `contour_tree
+    <https://imas-data-dictionary.readthedocs.io/en/latest/generated/ids/equilibrium.html#equilibrium-time_slice-contour_tree>`__
+    in the ``equilibrium`` IDS based on data in the ``boundary_separatrix`` and
+    ``boundary_secondary_separatrix`` structures from DD3. See also:
+    https://github.com/iterorganization/IMAS-Python/issues/60. 
 
 .. _`DD background`:
 

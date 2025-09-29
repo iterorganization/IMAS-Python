@@ -592,3 +592,107 @@ def test_3to4_cocos_hardcoded_paths():
 
     eq4 = convert_ids(eq, "4.0.0")
     assert eq4.time_slice[0].boundary.psi == -3.141
+
+
+def test_3to4_equilibrium_boundary():
+    eq342 = IDSFactory("3.42.0").equilibrium()
+    eq342.time_slice.resize(5)
+
+    for i, ts in enumerate(eq342.time_slice):
+        # Always fill boundary and magnetic axis
+        ts.boundary.psi = 1
+        ts.boundary.outline.r = [1.0, 3.0, 2.0, 1.0]
+        ts.boundary.outline.z = [1.0, 2.0, 3.0, 1.0]
+        ts.global_quantities.psi_axis = 1.0
+        ts.global_quantities.magnetic_axis.r = 2.0
+        ts.global_quantities.magnetic_axis.z = 2.0
+
+        if i > 0:
+            # Fill separatrix
+            ts.boundary_separatrix.psi = -1.0
+            # Use limiter for time_slice[1], otherwise divertor:
+            if i == 1:
+                ts.boundary_separatrix.type = 0
+                ts.boundary_separatrix.active_limiter_point.r = 3.0
+                ts.boundary_separatrix.active_limiter_point.z = 2.0
+            else:
+                ts.boundary_separatrix.type = 1
+            ts.boundary_separatrix.outline.r = [1.0, 3.0, 2.0, 1.0]
+            ts.boundary_separatrix.outline.z = [1.0, 2.0, 3.0, 1.0]
+            ts.boundary_separatrix.x_point.resize(1)
+            ts.boundary_separatrix.x_point[0].r = 1.0
+            ts.boundary_separatrix.x_point[0].z = 1.0
+            # These are not part of the conversion:
+            ts.boundary_separatrix.strike_point.resize(2)
+            ts.boundary_separatrix.closest_wall_point.r = 1.0
+            ts.boundary_separatrix.closest_wall_point.z = 1.0
+            ts.boundary_separatrix.closest_wall_point.distance = 0.2
+            ts.boundary_separatrix.dr_dz_zero_point.r = 3.0
+            ts.boundary_separatrix.dr_dz_zero_point.z = 2.0
+            ts.boundary_separatrix.gap.resize(1)
+        if i == 3:
+            # Fill second_separatrix
+            ts.boundary_secondary_separatrix.psi = -1.1
+            # Use limiter for time_slice[1], otherwise divertor:
+            ts.boundary_secondary_separatrix.outline.r = [0.9, 3.1, 2.1, 0.9]
+            ts.boundary_secondary_separatrix.outline.z = [0.9, 2.1, 3.1, 0.9]
+            ts.boundary_secondary_separatrix.x_point.resize(1)
+            ts.boundary_secondary_separatrix.x_point[0].r = 2.1
+            ts.boundary_secondary_separatrix.x_point[0].z = 3.1
+            # These are not part of the conversion:
+            ts.boundary_secondary_separatrix.distance_inner_outer = 0.1
+            ts.boundary_secondary_separatrix.strike_point.resize(2)
+        if i == 4:
+            ts.boundary_separatrix.x_point.resize(2, keep=True)
+            ts.boundary_separatrix.x_point[1].r = 2.0
+            ts.boundary_separatrix.x_point[1].z = 3.0
+
+    eq4 = convert_ids(eq342, "4.0.0")
+    assert len(eq4.time_slice) == 5
+    for i, ts in enumerate(eq4.time_slice):
+        node = ts.contour_tree.node
+        assert len(node) == [1, 2, 2, 3, 3][i]
+        # Test magnetic axis
+        assert node[0].critical_type == 0
+        assert node[0].r == node[0].z == 2.0
+        assert node[0].psi == -1.0
+        assert len(node[0].levelset.r) == len(node[0].levelset.z) == 0
+        # boundary_separatrix
+        if i == 1:  # node[1] is boundary for limiter plasma
+            assert node[1].critical_type == 2
+            assert node[1].r == 3.0
+            assert node[1].z == 2.0
+        elif i > 1:  # node[1] is boundary for divertor plasma
+            assert node[1].critical_type == 1
+            assert node[1].r == node[1].z == 1.0
+        if i > 0:
+            assert node[1].psi == 1.0
+            assert numpy.array_equal(node[1].levelset.r, [1.0, 3.0, 2.0, 1.0])
+            assert numpy.array_equal(node[1].levelset.z, [1.0, 2.0, 3.0, 1.0])
+        # boundary_secondary_separatrix
+        if i == 3:
+            assert node[2].critical_type == 1
+            assert node[2].r == 2.1
+            assert node[2].z == 3.1
+            assert node[2].psi == 1.1
+            assert numpy.array_equal(node[2].levelset.r, [0.9, 3.1, 2.1, 0.9])
+            assert numpy.array_equal(node[2].levelset.z, [0.9, 2.1, 3.1, 0.9])
+        # Second x-point from boundary_separatrix
+        if i == 4:
+            assert node[2].critical_type == 1
+            assert node[2].r == 2.0
+            assert node[2].z == 3.0
+            assert node[2].psi == node[1].psi == 1.0
+            # Levelset is only filled for the main x-point (node[1])
+            assert not node[2].levelset.r.has_value
+            assert not node[2].levelset.z.has_value
+
+    # not deepcopied, should share numpy arrays
+    slice1_outline_r = eq342.time_slice[1].boundary_separatrix.outline.r.value
+    assert slice1_outline_r is eq4.time_slice[1].contour_tree.node[1].levelset.r.value
+
+    # deepcopy should create a copy of the numpy arrays
+    eq4_cp = convert_ids(eq342, "4.0.0", deepcopy=True)
+    assert not numpy.may_share_memory(
+        slice1_outline_r, eq4_cp.time_slice[1].contour_tree.node[1].levelset.r.value
+    )
