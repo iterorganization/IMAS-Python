@@ -265,7 +265,8 @@ class DDVersionMap:
                         self.version_old,
                     )
                 elif self._check_data_type(old_item, new_item):
-                    # use class helper to register simple renames and reciprocal mappings
+                    # use class helper to register simple renames and
+                    # reciprocal mappings
                     self._add_rename(old_path, new_path)
                     if old_item.get("data_type") in DDVersionMap.STRUCTURE_TYPES:
                         # Add entries for common sub-elements
