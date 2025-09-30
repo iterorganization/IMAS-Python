@@ -31,7 +31,7 @@ except ImportError as exc:
     has_imas = False
     imasdef = None
     lowlevel = None
-    logger.critical(
+    logger.warning(
         "Could not import 'imas_core': %s. Some functionality is not available.",
         exc,
     )
