@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 
 class IDSIdentifierMeta(EnumMeta):
     """Custom metaclass for IDSIdentifier that handles aliases."""
-    
+
     def __getitem__(cls, name):
         # First try the standard enum lookup
         try:
             return super().__getitem__(name)
         except KeyError:
             # If that fails, check if it's an alias
-            if hasattr(cls, '_aliases') and name in cls._aliases:
+            if hasattr(cls, "_aliases") and name in cls._aliases:
                 canonical_name = cls._aliases[name]
                 return super().__getitem__(canonical_name)
             # If not an alias either, re-raise the original KeyError
@@ -52,7 +52,7 @@ class IDSIdentifier(Enum, metaclass=IDSIdentifierMeta):
             other_name = str(other.name)
             other_index = int(other.index)
             other_description = str(other.description)
-            other_alias = getattr(other, 'alias', None)
+            other_alias = getattr(other, "alias", None)
         except (AttributeError, TypeError, ValueError):
             # Attribute doesn't exist, or failed to convert
             return NotImplemented
@@ -60,11 +60,11 @@ class IDSIdentifier(Enum, metaclass=IDSIdentifierMeta):
         if other_index == self.index:
             # Name may be left empty, or match name or alias
             name_matches = (
-                other_name == self.name or 
-                other_name == "" or
-                (self.alias and other_name == self.alias) or
-                (other_alias and other_alias == self.name) or
-                (self.alias and other_alias and self.alias == other_alias)
+                other_name == self.name
+                or other_name == ""
+                or (self.alias and other_name == self.alias)
+                or (other_alias and other_alias == self.name)
+                or (self.alias and other_alias and self.alias == other_alias)
             )
             if name_matches:
                 # Description doesn't have to match, though we will warn when it doesn't
@@ -77,7 +77,8 @@ class IDSIdentifier(Enum, metaclass=IDSIdentifierMeta):
                 return True
             else:
                 logger.warning(
-                    "Name %r does not match identifier name %r or alias %r, but indexes are equal.",
+                    "Name %r does not match identifier name %r or "
+                    "alias %r, but indexes are equal.",
                     other.name,
                     self.name,
                     self.alias,
@@ -91,7 +92,11 @@ class IDSIdentifier(Enum, metaclass=IDSIdentifierMeta):
         aliases = {}
         for int_element in element.iterfind("int"):
             name = int_element.get("name")
-            alias = int_element.get("alias") if int_element.get("alias") is not None else None
+            alias = (
+                int_element.get("alias")
+                if int_element.get("alias") is not None
+                else None
+            )
             value = int_element.text
             description = int_element.get("description")
             enum_values[name] = (int(value), description, alias)
