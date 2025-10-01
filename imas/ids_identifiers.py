@@ -4,7 +4,7 @@
 """
 
 import logging
-from enum import Enum
+from enum import Enum, EnumMeta
 from typing import Iterable, List, Type
 from xml.etree.ElementTree import fromstring
 
@@ -13,19 +13,37 @@ from imas import dd_zip
 logger = logging.getLogger(__name__)
 
 
-class IDSIdentifier(Enum):
+class IDSIdentifierMeta(EnumMeta):
+    """Custom metaclass for IDSIdentifier that handles aliases."""
+    
+    def __getitem__(cls, name):
+        # First try the standard enum lookup
+        try:
+            return super().__getitem__(name)
+        except KeyError:
+            # If that fails, check if it's an alias
+            if hasattr(cls, '_aliases') and name in cls._aliases:
+                canonical_name = cls._aliases[name]
+                return super().__getitem__(canonical_name)
+            # If not an alias either, re-raise the original KeyError
+            raise
+
+
+class IDSIdentifier(Enum, metaclass=IDSIdentifierMeta):
     """Base class for all identifier enums."""
 
-    def __new__(self, value: int, description: str):
+    def __new__(self, value: int, description: str, alias: str = None):
         obj = object.__new__(self)
         obj._value_ = value
         return obj
 
-    def __init__(self, value: int, description: str) -> None:
+    def __init__(self, value: int, description: str, alias: str = None) -> None:
         self.index = value
         """Unique index for this identifier value."""
         self.description = description
         """Description for this identifier value."""
+        self.alias = alias
+        """Alias for this identifier value (if any)."""
 
     def __eq__(self, other):
         if self is other:
@@ -34,13 +52,21 @@ class IDSIdentifier(Enum):
             other_name = str(other.name)
             other_index = int(other.index)
             other_description = str(other.description)
+            other_alias = getattr(other, 'alias', None)
         except (AttributeError, TypeError, ValueError):
             # Attribute doesn't exist, or failed to convert
             return NotImplemented
         # Index must match
         if other_index == self.index:
-            # Name may be left empty
-            if other_name == self.name or other_name == "":
+            # Name may be left empty, or match name or alias
+            name_matches = (
+                other_name == self.name or 
+                other_name == "" or
+                (self.alias and other_name == self.alias) or
+                (other_alias and other_alias == self.name) or
+                (self.alias and other_alias and self.alias == other_alias)
+            )
+            if name_matches:
                 # Description doesn't have to match, though we will warn when it doesn't
                 if other_description != self.description and other_description != "":
                     logger.warning(
@@ -51,9 +77,10 @@ class IDSIdentifier(Enum):
                 return True
             else:
                 logger.warning(
-                    "Name %r does not match identifier name %r, but indexes are equal.",
+                    "Name %r does not match identifier name %r or alias %r, but indexes are equal.",
                     other.name,
                     self.name,
+                    self.alias,
                 )
         return False
 
@@ -61,11 +88,15 @@ class IDSIdentifier(Enum):
     def _from_xml(cls, identifier_name, xml) -> Type["IDSIdentifier"]:
         element = fromstring(xml)
         enum_values = {}
+        aliases = {}
         for int_element in element.iterfind("int"):
             name = int_element.get("name")
+            alias = int_element.get("alias") if int_element.get("alias") is not None else None
             value = int_element.text
             description = int_element.get("description")
-            enum_values[name] = (int(value), description)
+            enum_values[name] = (int(value), description, alias)
+            if alias:
+                aliases[alias] = name
         # Create the enumeration
         enum = cls(
             identifier_name,
@@ -74,6 +105,9 @@ class IDSIdentifier(Enum):
             qualname=f"{__name__}.{identifier_name}",
         )
         enum.__doc__ = element.find("header").text
+        enum._aliases = aliases
+        for alias, canonical_name in aliases.items():
+            setattr(enum, alias, getattr(enum, canonical_name))
         return enum
 
 
