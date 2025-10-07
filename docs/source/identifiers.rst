@@ -11,8 +11,8 @@ enumerated list of options for defining, for example:
   a neutron, or a photon.
 - Plasma heating may come from neutral beam injection, electron cyclotron heating,
   ion cyclotron heating, lower hybrid heating, alpha particles.
-- Chemical elements and isotopes, which may have alternative naming conventions
-  supported through aliases (e.g., "235U" and "U_235" for Uranium 235).
+- These may have alternative naming conventions supported through aliases 
+  (e.g., "235U" and "U_235" for Uranium 235).
 
 Identifiers are a list of possible valid labels. Each label has up to four
 representations:
@@ -127,9 +127,18 @@ Identifier aliases
 
 Some identifiers may have aliases defined in the Data Dictionary. An alias provides
 an alternative name for accessing the same identifier value. This is particularly
-useful for chemical elements and isotopes where multiple naming conventions exist.
+useful where multiple naming conventions exist.
 
-Aliases can be accessed in the same ways as canonical names:
+Aliases can be accessed in the same ways as canonical names.
+
+Aliases starting with a number can be accessible using ["235U"] but not 
+material_identifier.235U because of Python construct limitation.
+
+Aliases that begin with a number (e.g., 235U) cannot be accessed using dot notation 
+(e.g., material_identifier.235U) due to Python’s syntax restrictions. Instead, such 
+aliases must be accessed using dictionary-style indexing, 
+for example: material_identifier["235U"].
+
 
 .. code-block:: python
     :caption: Working with identifier aliases
