@@ -2,7 +2,6 @@ import pytest
 
 import imas
 import imas.ids_defs
-from imas.backends.imas_core.imas_interface import has_imas, ll_interface
 from imas.exception import UnknownDDVersion
 from imas.test.test_helpers import compare_children, open_dbentry
 
@@ -23,11 +22,7 @@ def test_dbentry_contextmanager(requires_imas):
     assert entry2._dbe_impl is None
 
 
-@pytest.mark.skipif(
-    not has_imas or ll_interface._al_version.major < 5,
-    reason="URI API not available",
-)
-def test_dbentry_contextmanager_uri(tmp_path):
+def test_dbentry_contextmanager_uri(tmp_path, requires_imas):
     entry = imas.DBEntry(f"imas:ascii?path={tmp_path}/testdb", "w")
     ids = entry.factory.core_profiles()
     ids.ids_properties.homogeneous_time = 0

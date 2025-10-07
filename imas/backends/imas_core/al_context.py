@@ -71,10 +71,7 @@ class ALContext:
         Returns:
             The created context.
         """
-        args = [self.ctx, path, rwmode]
-        if datapath:  # AL4 compatibility: datapath arg was added in AL5
-            args.append(datapath)
-        status, ctx = ll_interface.begin_global_action(*args)
+        status, ctx = ll_interface.begin_global_action(self.ctx, path, rwmode, datapath)
         if status != 0:
             raise LowlevelError("global_action", status)
         return ALContext(ctx)
