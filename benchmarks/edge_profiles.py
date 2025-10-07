@@ -5,7 +5,7 @@ import numpy as np
 
 import imas
 
-from .utils import available_backends, create_dbentry, factory, hlis
+from .utils import available_backends, create_dbentry
 
 N_POINTS = 600  # number of random R,Z points
 N_LINES = 1200  # number of random lines in R,Z plane
@@ -27,9 +27,7 @@ def fill_ggd(edge_profiles, times):
     edge_profiles.ids_properties.creation_date = datetime.date.today().isoformat()
     edge_profiles.code.name = "IMAS-Python ASV benchmark"
     edge_profiles.code.version = imas.__version__
-    edge_profiles.code.repository = (
-        "https://github.com/iterorganization/IMAS-Python"
-    )
+    edge_profiles.code.repository = "https://github.com/iterorganization/IMAS-Python"
 
     # This GGD grid is not a valid description, but it's a good stress test for the
     # typical access patterns that exist in GGD grids
@@ -124,45 +122,42 @@ def fill_ggd(edge_profiles, times):
 
 
 class Get:
-    params = [hlis, available_backends]
-    param_names = ["hli", "backend"]
+    params = [available_backends]
+    param_names = ["backend"]
 
-    def setup(self, hli, backend):
-        self.dbentry = create_dbentry(hli, backend)
-        edge_profiles = factory[hli].edge_profiles()
+    def setup(self, backend):
+        self.dbentry = create_dbentry(backend)
+        edge_profiles = imas.IDSFactory().edge_profiles()
         fill_ggd(edge_profiles, TIME)
         self.dbentry.put(edge_profiles)
 
-    def time_get(self, hli, backend):
+    def time_get(self, backend):
         self.dbentry.get("edge_profiles")
 
-    def teardown(self, hli, backend):
+    def teardown(self, backend):
         if hasattr(self, "dbentry"):  # imas + netCDF has no dbentry
             self.dbentry.close()
 
 
 class Generate:
-    params = [hlis]
-    param_names = ["hli"]
-
-    def time_generate(self, hli):
-        edge_profiles = factory[hli].edge_profiles()
+    def time_generate(self):
+        edge_profiles = imas.IDSFactory().edge_profiles()
         fill_ggd(edge_profiles, TIME)
 
-    def time_create_edge_profiles(self, hli):
-        factory[hli].edge_profiles()
+    def time_create_edge_profiles(self):
+        imas.IDSFactory().edge_profiles()
 
 
 class Put:
-    params = [["0", "1"], hlis, available_backends]
-    param_names = ["disable_validate", "hli", "backend"]
+    params = [["0", "1"], available_backends]
+    param_names = ["disable_validate", "backend"]
 
-    def setup(self, disable_validate, hli, backend):
-        create_dbentry(hli, backend).close()  # catch unsupported combinations
-        self.edge_profiles = factory[hli].edge_profiles()
+    def setup(self, disable_validate, backend):
+        create_dbentry(backend).close()  # catch unsupported combinations
+        self.edge_profiles = imas.IDSFactory().edge_profiles()
         fill_ggd(self.edge_profiles, TIME)
         os.environ["IMAS_AL_DISABLE_VALIDATE"] = disable_validate
 
-    def time_put(self, disable_validate, hli, backend):
-        with create_dbentry(hli, backend) as dbentry:
+    def time_put(self, disable_validate, backend):
+        with create_dbentry(backend) as dbentry:
             dbentry.put(self.edge_profiles)
