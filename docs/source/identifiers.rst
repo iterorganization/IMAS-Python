@@ -11,13 +11,16 @@ enumerated list of options for defining, for example:
   a neutron, or a photon.
 - Plasma heating may come from neutral beam injection, electron cyclotron heating,
   ion cyclotron heating, lower hybrid heating, alpha particles.
+- Chemical elements and isotopes, which may have alternative naming conventions
+  supported through aliases (e.g., "235U" and "U_235" for Uranium 235).
 
-Identifiers are a list of possible valid labels. Each label has three
+Identifiers are a list of possible valid labels. Each label has up to four
 representations:
 
 1. An index (integer)
 2. A name (short string)
 3. A description (long string)
+4. An alias (optional short string)
 
 
 Identifiers in IMAS-Python
@@ -44,6 +47,15 @@ the available identifiers is stored as ``imas.identifiers.identifiers``.
     print(csid.total.index)
     print(csid.total.description)
 
+    # Access identifiers with aliases (when available)
+    mid = imas.identifiers.materials_identifier
+    print(mid["235U"])        # Access by canonical name
+    print(mid["U_235"])       # Access by alias
+    print(mid["235U"].alias)  # Print the alias
+    
+    # Both return the same object
+    assert mid["235U"] is mid["U_235"]
+
     # Item access is also possible
     print(identifiers["edge_source_identifier"])
 
@@ -64,8 +76,8 @@ Assigning identifiers in IMAS-Python
 
 IMAS-Python implements smart assignment of identifiers. You may assign an identifier
 enum value (for example ``imas.identifiers.core_source_identifier.total``), a
-string (for example ``"total"``) or an integer (for example ``"1"``) to an
-identifier structure (for example ``core_profiles.source[0].identifier``) to set
+string (for example ``"total"`` or its alias), or an integer (for example ``"1"``) 
+to an identifier structure (for example ``core_profiles.source[0].identifier``) to set
 all three child nodes ``name``, ``index`` and ``description`` in one go. See
 below example:
 
@@ -86,6 +98,15 @@ below example:
     # 3. Assign an integer. This looks up the index in the identifier enum:
     core_sources.source[0].identifier = 1
 
+    # For identifiers with aliases, you can also assign using the alias:
+    materials = imas.IDSFactory().materials()
+    materials.material.resize(1)
+    mid = imas.identifiers.materials_identifier
+    # Assign using canonical name
+    materials.material[0].identifier = "235U"
+    # Or assign using alias (equivalent to above)
+    materials.material[0].identifier = "U_235"
+
     # Inspect the contents of the structure
     imas.util.inspect(core_sources.source[0].identifier)
 
@@ -101,6 +122,49 @@ below example:
     imas.util.inspect(core_sources.source[1].identifier)
 
 
+Identifier aliases
+------------------
+
+Some identifiers may have aliases defined in the Data Dictionary. An alias provides
+an alternative name for accessing the same identifier value. This is particularly
+useful for chemical elements and isotopes where multiple naming conventions exist.
+
+Aliases can be accessed in the same ways as canonical names:
+
+.. code-block:: python
+    :caption: Working with identifier aliases
+
+    import imas
+
+    # Get materials identifier which has some aliases defined
+    mid = imas.identifiers.materials_identifier
+    
+    # Access by canonical name
+    uranium235_by_name = mid["235U"]
+    print(f"Name: {uranium235_by_name.name}")
+    print(f"Alias: {uranium235_by_name.alias}")
+    print(f"Index: {uranium235_by_name.index}")
+    print(f"Description: {uranium235_by_name.description}")
+    
+    # Access by alias - returns the same object
+    uranium235_by_alias = mid["U_235"]
+    print(f"Same object: {uranium235_by_name is uranium235_by_alias}")
+    
+    # You can also use attribute access for aliases (when valid Python identifiers)
+    uranium235_by_attr = mid.U_235
+    print(f"Same object: {uranium235_by_name is uranium235_by_attr}")
+    
+    # When assigning to IDS structures, aliases work the same way
+    materials = imas.IDSFactory().materials()
+    materials.material.resize(1)
+    
+    # These assignments are equivalent:
+    materials.material[0].identifier = "235U"    # canonical name
+    materials.material[0].identifier = "U_235"   # alias
+    materials.material[0].identifier = mid["235U"]  # enum value
+    materials.material[0].identifier = mid.U_235    # enum value via alias
+
+
 Compare identifiers
 -------------------
 
@@ -108,11 +172,12 @@ Identifier structures can be compared against the identifier enum as well. They
 compare equal when:
 
 1.  ``index`` is an exact match
-2.  ``name`` is an exact match, or ``name`` is not filled in the IDS node
+2.  ``name`` is an exact match, or ``name`` matches an alias, or ``name`` is not filled in the IDS node
 
 The ``description`` does not have to match with the Data Dictionary definition,
 but a warning is logged if the description in the IDS node does not match with
-the Data Dictionary description:
+the Data Dictionary description. The comparison also takes aliases into account,
+so an identifier will match both its canonical name and any defined alias:
 
 .. code-block:: python
     :caption: Comparing identifiers
@@ -139,6 +204,15 @@ the Data Dictionary description:
     >>> core_sources.source[0].identifier.name = "totalX"
     >>> core_sources.source[0].identifier == csid.total
     False
+    >>> # Alias comparison example with materials identifier
+    >>> mid = imas.identifiers.materials_identifier
+    >>> materials = imas.IDSFactory().materials()
+    >>> materials.material.resize(1)
+    >>> materials.material[0].identifier.index = 20
+    >>> materials.material[0].identifier.name = "U_235"  # Using alias
+    >>> # Compares equal to the canonical identifier even though name is alias
+    >>> materials.material[0].identifier == mid["235U"]
+    True
 
 
 .. seealso::
