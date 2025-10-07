@@ -3,18 +3,15 @@ data dictionary version.
 """
 
 import logging
-import os
 
 import numpy as np
 import pytest
 
-from imas.backends.imas_core.mdsplus_model import ensure_data_dir, mdsplus_model_dir
 from imas.ids_defs import (
     ASCII_BACKEND,
     CLOSEST_INTERP,
     IDS_TIME_MODE_HETEROGENEOUS,
     IDS_TIME_MODE_HOMOGENEOUS,
-    MDSPLUS_BACKEND,
 )
 from imas.ids_factory import IDSFactory
 from imas.test.test_helpers import open_dbentry
@@ -97,10 +94,6 @@ def test_hli_time_slicing_put(backend, worker_id, tmp_path, time_mode):
     else:
         pulse = int(worker_id[2:]) + 1
 
-    # ensure presence of mdsplus model dir
-    if backend == MDSPLUS_BACKEND:
-        os.environ["ids_path"] = mdsplus_model_dir(IDSFactory())
-        ensure_data_dir(str(tmp_path), "test", "3", 9999)
     db_entry = imas.DBEntry(backend, "test", pulse, 9999, user_name=str(tmp_path))
     status, ctx = db_entry.create()
     if status != 0:

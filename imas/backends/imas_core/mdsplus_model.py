@@ -364,25 +364,3 @@ def jTraverser_jar() -> Path:
         return jar_path
     else:
         raise MDSPlusModelError("jTraverser.jar not found. Is MDSplus-Java available?")
-
-
-def ensure_data_dir(user: str, tokamak: str, version: str, run: int) -> None:
-    """Ensure that a data dir exists with a similar algorithm that
-    the MDSplus backend uses to set the data path.
-    See also mdsplus_backend.cpp:751 (setDataEnv)"""
-    if user == "public":
-        if "IMAS_HOME" not in os.environ:
-            raise RuntimeError(
-                "Environment variable IMAS_HOME must be set to access "
-                "the public database."
-            )
-        dbdir = Path(os.environ["IMAS_HOME"]) / "shared" / "imasdb" / tokamak / version
-    elif user[0] == "/":
-        dbdir = Path(user) / tokamak / version
-    else:
-        dbdir = Path.home() / "public" / "imasdb" / tokamak / version
-
-    # Check subfolder based on run
-    assert 0 <= run <= 99_999
-    index = run // 10_000
-    (dbdir / str(index)).mkdir(parents=True, exist_ok=True)
