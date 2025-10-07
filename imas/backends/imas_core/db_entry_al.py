@@ -5,6 +5,7 @@ import getpass
 import logging
 import os
 from collections import deque
+import re
 from typing import Any, Deque, List, Optional, Union
 from urllib.parse import urlparse
 
@@ -73,6 +74,13 @@ class ALDBEntryImpl(DBEntryImpl):
         self._lazy_ctx_cache: Deque[ALContext] = deque()
         self._uri = uri
 
+        # Parse query options, mimic logic in AL-Core instead of using
+        # urllib.parse.parse_qs(..). See https://github.com/jholloc/simple-uri-parser
+        self._querydict = {}
+        for option in re.split("[&;?]", urlparse(self._uri).query):
+            name, _, value = option.partition("=")
+            self._querydict[name] = value
+
     @classmethod
     def from_uri(cls, uri: str, mode: str, factory: IDSFactory) -> "ALDBEntryImpl":
         require_imas_available()
@@ -139,11 +147,6 @@ class ALDBEntryImpl(DBEntryImpl):
                 # Extract XML from the DD zip and point UDA to it
                 idsdef_path = extract_idsdef(factory.version)
             os.environ["IDSDEF_PATH"] = idsdef_path
-            logger.warning(
-                "The UDA backend is not tested with "
-                "IMAS-Python and may not work properly. "
-                "Please raise any issues you find."
-            )
 
         elif backend in ["hdf5", "memory", "ascii", "flexbuffers"]:
             pass  # nothing to set up
@@ -183,6 +186,14 @@ class ALDBEntryImpl(DBEntryImpl):
             raise RuntimeError("Database entry is not open.")
         if lazy and self.backend == "ascii":
             raise RuntimeError("Lazy loading is not supported by the ASCII backend.")
+        if self.backend == "uda":
+            # cache_mode=none doesn't work right now, so the warning won't recommend it
+            # See: https://jira.iter.org/browse/IMAS-5644
+            if lazy and self._querydict.get("cache_mode") != "none":
+                logger.warning(
+                    "The UDA backend will load all IDS data from the remote server. "
+                    "Lazy loading with the UDA backend may therefore still be slow."
+                )
 
         # Mixing contexts can be problematic, ensure all lazy contexts are closed:
         self._clear_lazy_ctx_cache()
