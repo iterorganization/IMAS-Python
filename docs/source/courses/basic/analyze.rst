@@ -25,15 +25,10 @@ can use the data.
 .. hint::
     Use the ASCII data supplied with IMAS-Python for all exercises. It contains two
     IDSs (``equilibrium`` and ``core_profiles``) filled  with data from three
-    time slices of ITER reference data. Two convenience methods are available in the
-    :mod:`imas.training` module to open the DBEntry for this training data.
-
-    1. :meth:`imas.training.get_training_db_entry()` returns an opened
-       ``imas.DBEntry`` object. Use this method if you want to use the IMAS-Python
-       interface.
-    2. :meth:`imas.training.get_training_imas_db_entry()` returns an opened
-       ``imas.DBEntry`` object. Use this method if you want to use the Python Access
-       Layer interface.
+    time slices of ITER reference data. A convenience method is available in the
+    :mod:`imas.training` module to open the DBEntry for this training data:
+    :meth:`imas.training.get_training_db_entry()` returns an opened
+    ``imas.DBEntry`` object.
 
 Exercise 1
 ''''''''''
