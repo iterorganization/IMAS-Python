@@ -90,4 +90,13 @@ Lazy loading of data may speed up your programs, but also comes with some limita
     more efficient to do a full :code:`get()` or :code:`get_slice()` when you intend to
     use most of the data stored in an IDS.
 5.  When using IMAS-Python with remote data access (i.e. the UDA backend), a full
-    :code:`get()` or :code:`get_slice()` is more efficient than lazy loading.
+    :code:`get()` or :code:`get_slice()` may be more efficient than using lazy loading.
+
+    It is recommended to add the parameter ``;cache_mode=none`` [#cache_mode_none]_ to
+    the end of a UDA IMAS URI when using lazy loading: otherwise the UDA backend will
+    still load the full IDS from the remote server.
+
+
+.. [#cache_mode_none] The option ``cache_mode=none`` requires IMAS Core version 5.5.1 or
+    newer, and a remote UDA server with `IMAS UDA-Plugins
+    <https://github.com/iterorganization/UDA-Plugins>`__ version 1.7.0 or newer.
