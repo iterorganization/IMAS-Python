@@ -9,6 +9,8 @@ import re
 from typing import Any, Deque, List, Optional, Union
 from urllib.parse import urlparse
 
+from packaging.version import Version
+
 from imas.backends.db_entry_impl import GetSampleParameters, GetSliceParameters
 from imas.db_entry import DBEntryImpl
 from imas.exception import DataEntryException, LowlevelError
@@ -187,13 +189,7 @@ class ALDBEntryImpl(DBEntryImpl):
         if lazy and self.backend == "ascii":
             raise RuntimeError("Lazy loading is not supported by the ASCII backend.")
         if self.backend == "uda":
-            # cache_mode=none doesn't work right now, so the warning won't recommend it
-            # See: https://jira.iter.org/browse/IMAS-5644
-            if lazy and self._querydict.get("cache_mode") != "none":
-                logger.warning(
-                    "The UDA backend will load all IDS data from the remote server. "
-                    "Lazy loading with the UDA backend may therefore still be slow."
-                )
+            self._check_uda_warnings(lazy)
 
         # Mixing contexts can be problematic, ensure all lazy contexts are closed:
         self._clear_lazy_ctx_cache()
@@ -350,3 +346,28 @@ class ALDBEntryImpl(DBEntryImpl):
                 "Access Layer 5.1 or newer is required."
             ) from None
         return occurrence_list
+
+    def _check_uda_warnings(self, lazy: bool) -> None:
+        """Various checks / warnings for the UDA backend."""
+        cache_mode = self._querydict.get("cache_mode")
+        if lazy and cache_mode != "none":
+            # cache_mode=none requires imas core 5.5.1 or newer, and a recent enough UDA
+            # server plugin (which we cannot check...)
+            cache_mode_hint = ""
+            if ll_interface._al_version >= Version("5.5.1"):
+                cache_mode_hint = (
+                    "\nYou may add the parameter ';cache_mode=none' to the IMAS URI "
+                    "to avoid loading all of the data from the remote server."
+                )
+            logger.warning(
+                "The UDA backend will load all IDS data from the remote server. "
+                "Lazy loading with the UDA backend may therefore still be slow.%s",
+                cache_mode_hint,
+            )
+
+        if cache_mode == "none" and ll_interface._al_version < Version("5.5.1"):
+            logger.warning(
+                "UDA option 'cache_mode=None' may not work correctly with "
+                "IMAS Core version %s.",
+                ll_interface._al_version,
+            )
