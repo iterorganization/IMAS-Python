@@ -4,7 +4,6 @@
 
 import logging
 from enum import Enum
-from enum import Enum
 from typing import Iterable, List, Type
 from xml.etree.ElementTree import fromstring
 
