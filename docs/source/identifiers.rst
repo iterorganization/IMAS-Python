@@ -20,7 +20,7 @@ representations:
 1. An index (integer)
 2. A name (short string)
 3. A description (long string)
-4. An alias (optional short string or list of short strings)
+4. List of aliases (list of short strings)
 
 
 Identifiers in IMAS-Python
