@@ -79,6 +79,39 @@ def test_identifier_struct_assignment(caplog):
     assert source.identifier != csid.total
 
 
+def test_identifiers_with_aliases():
+    # Custom identifier XML, based on materials identifier, with some more features
+    custom_identifier_xml = """\
+<?xml version="1.0"?>
+<constants name="materials" identifier="yes" create_mapping_function="yes">
+<header>
+Materials used in the device mechanical structures
+</header>
+<int name="235U" alias="U_235" description="Uranium 235 isotope">20</int>
+<int name="238U" alias="U_238" description="Uranium 238 isotope">21</int>
+<int name="Diamond" description="Diamond">22</int>
+<int name="CxHy" alias="alias1,alias2,3alias" description="Organic molecule">23</int>
+</constants>
+"""
+    identifier = IDSIdentifier._from_xml("custom_identifier", custom_identifier_xml)
+
+    assert len(identifier) == 4
+
+    # no aliases
+    assert identifier.Diamond.aliases == []
+    # 1 alias
+    assert identifier["235U"] is identifier.U_235
+    assert identifier["235U"].aliases == ["U_235"]
+    # 3 aliases
+    assert (
+        identifier.CxHy
+        is identifier.alias1
+        is identifier.alias2
+        is identifier["3alias"]
+    )
+    assert identifier.CxHy.aliases == ["alias1", "alias2", "3alias"]
+
+
 @requires_aliases
 def test_identifier_struct_assignment_with_aliases():
     """Test identifier struct assignment with aliases using materials_identifier."""

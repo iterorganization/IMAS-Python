@@ -4,6 +4,7 @@
 
 import logging
 from enum import Enum
+from enum import Enum
 from typing import Iterable, List, Type
 from xml.etree.ElementTree import fromstring
 
@@ -13,34 +14,20 @@ logger = logging.getLogger(__name__)
 
 
 class IDSIdentifier(Enum):
-    # class IDSIdentifier(Enum):
     """Base class for all identifier enums."""
 
-    def __new__(self, value: int, description: str, aliases=None):
-        obj = object.__new__(self)
+    def __new__(cls, value: int, description: str, aliases: list = []):
+        obj = object.__new__(cls)
         obj._value_ = value
         return obj
 
-    def __init__(self, value: int, description: str, aliases=None) -> None:
+    def __init__(self, value: int, description: str, aliases: list = []) -> None:
         self.index = value
         """Unique index for this identifier value."""
         self.description = description
         """Description for this identifier value."""
-
-        # Store aliases as a list for multi-alias support; keep a single 'alias'
-        # attribute pointing to the first alias for backwards compatibility.
-        if aliases is None:
-            self.aliases = []
-        else:
-            # Accept either a single string or list of strings
-            if isinstance(aliases, str):
-                # comma-separated string -> list
-                parsed = [a.strip() for a in aliases.split(",") if a.strip()]
-            else:
-                parsed = list(aliases)
-            self.aliases = parsed
-        if self.aliases:
-            self.alias = self.aliases[0]
+        self.aliases = aliases
+        """Alternative names for this identifier value."""
 
     def __eq__(self, other):
         if self is other:
@@ -59,7 +46,7 @@ class IDSIdentifier(Enum):
             if (
                 other_name == self.name
                 or other_name == ""
-                or other_name in getattr(self, "aliases", [])
+                or other_name in self.aliases
             ):
                 # Description doesn't have to match, though we will warn when it doesn't
                 if other_description not in (self.description, ""):
@@ -88,18 +75,13 @@ class IDSIdentifier(Enum):
             value = int_element.text
             description = int_element.get("description")
             # alias attribute may contain multiple comma-separated aliases
-            alias_attr = int_element.get("alias")
-            if alias_attr:
-                aliases = [a.strip() for a in alias_attr.split(",") if a.strip()]
-            else:
-                aliases = []
+            alias_attr = int_element.get("alias", "")
+            aliases = [a.strip() for a in alias_attr.split(",") if a.strip()]
             # Canonical entry: use the canonical 'name' as key
             enum_values[name] = (int(value), description, aliases)
             # Also add alias names as enum *aliases* (they become enum attributes)
-            # only if they are valid Python identifiers and not already present.
-            for match in aliases:
-                if match and match not in enum_values:
-                    enum_values[match] = (int(value), description, aliases)
+            for alias in aliases:
+                enum_values[alias] = (int(value), description, aliases)
         # Create the enumeration
         enum = cls(
             identifier_name,
