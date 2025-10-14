@@ -1,9 +1,17 @@
-from unittest.mock import Mock
+import importlib.metadata
+from packaging.version import Version
 
 import pytest
 from imas.dd_zip import dd_identifiers
 from imas.ids_factory import IDSFactory
 from imas.ids_identifiers import IDSIdentifier, identifiers
+
+has_aliases = Version(importlib.metadata.version("imas_data_dictionaries")) >= Version(
+    "4.1.0"
+)
+requires_aliases = pytest.mark.skipif(
+    not has_aliases, reason="Requires DD 4.1.0 for identifier aliases"
+)
 
 
 def test_list_identifiers():
@@ -71,54 +79,35 @@ def test_identifier_struct_assignment(caplog):
     assert source.identifier != csid.total
 
 
-def test_identifier_struct_assignment_with_aliases(caplog):
+@requires_aliases
+def test_identifier_struct_assignment_with_aliases():
     """Test identifier struct assignment with aliases using materials_identifier."""
     mid = identifiers.materials_identifier
 
-    # Create a mock struct to simulate identifier structure
-    mock_struct = Mock()
-    mock_struct.name = "235U"
-    mock_struct.index = 20
-    mock_struct.description = "Uranium 235 isotope"
-    mock_struct.alias = "U_235"
+    # Create an actual IDS structure
+    factory = IDSFactory("4.0.0").camera_x_rays()
+    mat = factory.filter_window.material
+    mat.name = "235U"
+    mat.index = 20
+    mat.description = "Uranium 235 isotope"
+    mat.alias = "U_235"
 
     # Basic attribute checks
-    if hasattr(mid, "235U"):
-        assert mock_struct.name == mid["235U"].name
-        assert mock_struct.alias == mid.U_235.alias
+    assert mat.name == mid["235U"].name
+    assert mat.alias == mid.U_235.alias
+    assert mat.index == mid.U_235.index
 
-    assert mock_struct.index == mid.U_235.index
+    # Test various equality scenarios
+    assert mat == mid.U_235
+    assert mat == mid["235U"]
 
-    # Test equality with identifier enum (this tests our updated __eq__ method)
-    caplog.clear()
+    # Modify material properties and test equality
+    mat.name = "some_name"
+    mat.alias = "U_235"
+    assert mat == mid.U_235
 
-    # Helper function to simulate equality logic
-    def mock_identifier_equals(name, index, description, alias=None, target=None):
-        name_matches = name in (target.name, target.alias)
-        alias_matches = (
-            alias in (target.name, target.alias) if alias is not None else False
-        )
-
-        return (
-            (name_matches or alias_matches)
-            and index == target.index
-            and description == target.description
-        )
-
-    # Simulate comparisons
-    if hasattr(mid, "235U"):
-        assert mock_identifier_equals(
-            "235U", 20, "Uranium 235 isotope", target=mid.U_235
-        )
-        assert mock_identifier_equals(
-            "U_235", 20, "Uranium 235 isotope", target=mid["235U"]
-        )
-        assert mock_identifier_equals(
-            "some_name", 20, "Uranium 235 isotope", alias="U_235", target=mid.U_235
-        )
-        assert mock_identifier_equals(
-            "some_name", 20, "Uranium 235 isotope", alias="235U", target=mid.U_235
-        )
+    mat.alias = "235U"
+    assert mat == mid.U_235
 
 
 def test_identifier_aos_assignment():
@@ -156,32 +145,22 @@ def test_invalid_identifier_assignment():
         cs.source[0].identifier = -1
 
 
+@requires_aliases
 def test_identifier_aliases():
     """Test identifier enum aliases functionality."""
     mid = identifiers.materials_identifier
 
-    # Test that aliases exist for specific entries
-    assert hasattr(mid, "U_235")
-    assert hasattr(mid, "U_238")
-    assert hasattr(mid, "In_115")
-    assert hasattr(mid, "He_4")
-
     # Test that alias points to the same object as the canonical name
-    if hasattr(mid, "235U"):
-        assert mid.U_235 is mid["235U"]
-    if hasattr(mid, "238U"):
-        assert mid.U_238 is mid["238U"]
-    if hasattr(mid, "115In"):
-        assert mid.In_115 is mid["115In"]
-    if hasattr(mid, "4He"):
-        assert mid.He_4 is mid["4He"]
+    assert mid.U_235 is mid["235U"]
+    assert mid.U_238 is mid["238U"]
+    assert mid.In_115 is mid["115In"]
+    assert mid.He_4 is mid["4He"]
 
     # Test that both name and alias have the same properties
-    if hasattr(mid, "235U"):
-        assert mid.U_235.name == "235U"
-        assert mid.U_235.index == mid["235U"].index
-        assert mid.U_235.description == mid["235U"].description
-        assert mid.U_235.alias == "U_235"
+    assert mid.U_235.name == "235U"
+    assert mid.U_235.index == mid["235U"].index
+    assert mid.U_235.description == mid["235U"].description
+    assert mid.U_235.alias == "U_235"
 
     # Test accessing by alias via bracket notation
     assert mid["U_235"] is mid.U_235
@@ -190,91 +169,114 @@ def test_identifier_aliases():
     assert mid["He_4"] is mid.He_4
 
 
+@requires_aliases
 def test_identifier_alias_equality():
-    """Test that identifiers with aliases are equal when comparing names
-    and aliases."""
+    """Test that identifiers with aliases are equal when comparing names and aliases."""
     mid = identifiers.materials_identifier
     target = mid.U_235
 
     # Test equality with canonical name
-    mock_canonical = Mock()
-    mock_canonical.name = "235U"
-    mock_canonical.index = 20
-    mock_canonical.description = "Uranium 235 isotope"
-    mock_canonical.alias = None
-    if hasattr(mid, "235U"):
-        assert (
-            mock_canonical.name in (target.name, target.alias)
-            and mock_canonical.index == target.index
-            and mock_canonical.description == target.description
-        )
+    factory1 = IDSFactory("4.0.0").camera_x_rays()
+    mat1 = factory1.filter_window.material
+    mat1.name = "235U"
+    mat1.index = 20
+    mat1.description = "Uranium 235 isotope"
+    assert mat1 == target
 
     # Test equality with alias name
-    mock_alias = Mock()
-    mock_alias.name = "U_235"
-    mock_alias.index = 20
-    mock_alias.description = "Uranium 235 isotope"
-    mock_alias.alias = None
-    if hasattr(mid, "235U"):
-        assert (
-            mock_alias.name in (target.name, target.alias)
-            and mock_alias.index == target.index
-            and mock_alias.description == target.description
-        )
+    factory2 = IDSFactory("4.0.0").camera_x_rays()
+    mat2 = factory2.filter_window.material
+    mat2.name = "U_235"
+    mat2.index = 20
+    mat2.description = "Uranium 235 isotope"
+    assert mat2 == target
 
-    # Test equality when mock has alias matching canonical name
-    mock_with_alias = Mock()
-    mock_with_alias.name = "test_name"
-    mock_with_alias.index = 20
-    mock_with_alias.description = "Uranium 235 isotope"
-    mock_with_alias.alias = "235U"
-    if hasattr(mid, "235U"):
-        assert (
-            mock_with_alias.alias in (target.name, target.alias)
-            and mock_with_alias.index == target.index
-            and mock_with_alias.description == target.description
-        )
-
-    # Test equality when both have matching aliases
-    mock_matching_aliases = Mock()
-    mock_matching_aliases.name = "sample_name"
-    mock_matching_aliases.index = 20
-    mock_matching_aliases.description = "Uranium 235 isotope"
-    mock_matching_aliases.alias = "U_235"
-    if hasattr(mid, "235U"):
-        assert (
-            mock_matching_aliases.alias in (target.name, target.alias)
-            and mock_matching_aliases.index == target.index
-            and mock_matching_aliases.description == target.description
-        )
+    # Test equality when material has alias matching canonical name
+    factory3 = IDSFactory("4.0.0").camera_x_rays()
+    mat3 = factory3.filter_window.material
+    mat3.name = "test_name"
+    mat3.index = 20
+    mat3.description = "Uranium 235 isotope"
+    mat3.alias = "235U"
+    assert mat3 == target
 
     # Test inequality when index doesn't match
-    mock_wrong_index = Mock()
-    mock_wrong_index.name = "235U"
-    mock_wrong_index.index = 999
-    mock_wrong_index.description = "Uranium 235 isotope"
-    mock_wrong_index.alias = None
-    if hasattr(mid, "235U"):
-        assert not (
-            mock_wrong_index.name in (target.name, target.alias)
-            and mock_wrong_index.index == target.index
-            and mock_wrong_index.description == target.description
-        )
+    factory4 = IDSFactory("4.0.0").camera_x_rays()
+    mat4 = factory4.filter_window.material
+    mat4.name = "235U"
+    mat4.index = 999
+    mat4.description = "Uranium 235 isotope"
+    assert mat4 != target
 
     # Test inequality when neither name nor alias matches
-    mock_no_match = Mock()
-    mock_no_match.name = "wrong_name"
-    mock_no_match.index = 20
-    mock_no_match.description = "Uranium 235 isotope"
-    mock_no_match.alias = "wrong_alias"
-    if hasattr(mid, "235U"):
-        assert not (
-            (
-                mock_no_match.name == target.name
-                or mock_no_match.name == target.alias
-                or mock_no_match.alias == target.name
-                or mock_no_match.alias == target.alias
-            )
-            and mock_no_match.index == target.index
-            and mock_no_match.description == target.description
-        )
+    factory5 = IDSFactory("4.0.0").camera_x_rays()
+    mat5 = factory5.filter_window.material
+    mat5.name = "wrong_name"
+    mat5.index = 20
+    mat5.description = "Uranium 235 isotope"
+    mat5.alias = "wrong_alias"
+    assert mat5 != target
+
+    # Test equality with material having alias matching canonical name
+    factory6 = IDSFactory("4.0.0").camera_x_rays()
+    mat6 = factory6.filter_window.material
+    mat6.name = "test_name"
+    mat6.index = 20
+    mat6.description = "Uranium 235 isotope"
+    mat6.alias = "235U"
+    assert mat6 == target
+
+    # Test equality when both have matching aliases
+    factory7 = IDSFactory("4.0.0").camera_x_rays()
+    mat7 = factory7.filter_window.material
+    mat7.name = "sample_name"
+    mat7.index = 20
+    mat7.description = "Uranium 235 isotope"
+    mat7.alias = "U_235"
+    assert mat7 == target
+
+    # Test inequality when index doesn't match
+    factory8 = IDSFactory("4.0.0").camera_x_rays()
+    mat8 = factory8.filter_window.material
+    mat8.name = "235U"
+    mat8.index = 999
+    mat8.description = "Uranium 235 isotope"
+    assert mat8 != target
+
+    # Test inequality when neither name nor alias matches
+    factory9 = IDSFactory("4.0.0").camera_x_rays()
+    mat9 = factory9.filter_window.material
+    mat9.name = "wrong_name"
+    mat9.index = 20
+    mat9.description = "Uranium 235 isotope"
+    mat9.alias = "wrong_alias"
+    assert mat9 != target
+
+    # Test equality when material has list of multiple aliases
+    factory10 = IDSFactory("4.0.0").camera_x_rays()
+    mat10 = factory10.filter_window.material
+    mat10.name = "test_name"
+    mat10.index = 20
+    mat10.description = "Uranium 235 isotope"
+    mat10.alias = "235U,U_235,Uranium_235"
+    assert mat10 == target
+    assert mat10.alias[0] == target[0]
+    assert mat10.alias[1] == target[0]
+    assert mat10.alias[2] == target[0]
+    assert mat10.alias[1] == target[2]
+    assert mat10.alias[2] == target[1]
+
+    # Test equality when material has multiple aliases
+    factory11 = IDSFactory("4.0.0").camera_x_rays()
+    mat0 = factory11.filter_window.material
+    mat0.name = "test_name"
+    mat0.index = 20
+    mat0.description = "Uranium 235 isotope"
+    mat0.alias = "U_235"
+
+    mat1 = factory11.filter_window.material
+    mat1.name = "test_name"
+    mat1.index = 20
+    mat1.description = "Uranium 235 isotope"
+    mat1.alias = "Uranium_235"
+    assert mat0 == mat1 == target

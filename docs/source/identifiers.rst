@@ -20,7 +20,7 @@ representations:
 1. An index (integer)
 2. A name (short string)
 3. A description (long string)
-4. An alias (optional short string)
+4. An alias (optional short string or list of short strings)
 
 
 Identifiers in IMAS-Python
@@ -51,7 +51,6 @@ the available identifiers is stored as ``imas.identifiers.identifiers``.
     mid = imas.identifiers.materials_identifier
     print(mid["235U"])        # Access by canonical name
     print(mid["U_235"])       # Access by alias
-    print(mid["235U"].alias)  # Print the alias
     
     # Both return the same object
     assert mid["235U"] is mid["U_235"]
@@ -98,7 +97,7 @@ below example:
     # 3. Assign an integer. This looks up the index in the identifier enum:
     core_sources.source[0].identifier = 1
 
-    # For identifiers with aliases, you can also assign using the alias:
+    # Identifiers can still be assigned with the old alias name for backward compatibility:
     materials = imas.IDSFactory().materials()
     materials.material.resize(1)
     mid = imas.identifiers.materials_identifier
@@ -125,20 +124,18 @@ below example:
 Identifier aliases
 ------------------
 
-Some identifiers may have aliases defined in the Data Dictionary. An alias provides
-an alternative name for accessing the same identifier value. This is particularly
-useful where multiple naming conventions exist.
+Some identifiers may have multiple aliases defined in the Data Dictionary. Aliases are
+former names kept as an option to ensure better backward compatibility after a change
+and support multiple naming conventions. An identifier can have any number of
+comma-separated aliases.
 
-Aliases can be accessed in the same ways as canonical names.
-
-Aliases starting with a number can be accessible using ["235U"] but not 
-material_identifier.235U because of Python construct limitation.
+Aliases can be accessed in the same ways as canonical names, and all aliases for an
+identifier point to the same object.
 
 Aliases that begin with a number (e.g., 235U) cannot be accessed using dot notation 
-(e.g., material_identifier.235U) due to Python’s syntax restrictions. Instead, such 
-aliases must be accessed using dictionary-style indexing, 
-for example: material_identifier["235U"].
-
+(e.g., material_identifier.235U) due to Python's syntax restrictions. Instead, such
+aliases must be accessed using dictionary-style indexing, for example:
+material_identifier["235U"].
 
 .. code-block:: python
     :caption: Working with identifier aliases
@@ -151,27 +148,30 @@ for example: material_identifier["235U"].
     # Access by canonical name
     uranium235_by_name = mid["235U"]
     print(f"Name: {uranium235_by_name.name}")
-    print(f"Alias: {uranium235_by_name.alias}")
+    print(f"Aliases: {uranium235_by_name.aliases}")  # List of all aliases
+    print(f"First alias: {uranium235_by_name.alias}")  # First alias for compatibility
     print(f"Index: {uranium235_by_name.index}")
     print(f"Description: {uranium235_by_name.description}")
     
-    # Access by alias - returns the same object
-    uranium235_by_alias = mid["U_235"]
-    print(f"Same object: {uranium235_by_name is uranium235_by_alias}")
+    # Access by any alias - all return the same object
+    uranium235_by_alias1 = mid["U_235"]
+    uranium235_by_alias2 = mid["Uranium_235"]
+    print(f"Same objects: {uranium235_by_name is uranium235_by_alias1 is uranium235_by_alias2}")
     
     # You can also use attribute access for aliases (when valid Python identifiers)
     uranium235_by_attr = mid.U_235
     print(f"Same object: {uranium235_by_name is uranium235_by_attr}")
     
-    # When assigning to IDS structures, aliases work the same way
+    # When assigning to IDS structures, any alias works the same way
     materials = imas.IDSFactory().materials()
     materials.material.resize(1)
     
-    # These assignments are equivalent:
-    materials.material[0].identifier = "235U"    # canonical name
-    materials.material[0].identifier = "U_235"   # alias
-    materials.material[0].identifier = mid["235U"]  # enum value
-    materials.material[0].identifier = mid.U_235    # enum value via alias
+    # These assignments are all equivalent:
+    materials.material[0].identifier = "235U"          # canonical name
+    materials.material[0].identifier = "U_235"         # first alias
+    materials.material[0].identifier = "Uranium_235"   # another alias
+    materials.material[0].identifier = mid["235U"]     # enum value
+    materials.material[0].identifier = mid.U_235       # enum value via alias
 
 
 Compare identifiers
