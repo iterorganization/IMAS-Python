@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""IMAS-Python module to support Data Dictionary identifiers.
-"""
+"""IMAS-Python module to support Data Dictionary identifiers."""
 
 import logging
 from enum import Enum, EnumMeta
@@ -30,20 +29,34 @@ class IDSIdentifierMeta(EnumMeta):
 
 
 class IDSIdentifier(Enum, metaclass=IDSIdentifierMeta):
+    # class IDSIdentifier(Enum):
     """Base class for all identifier enums."""
 
-    def __new__(self, value: int, description: str, alias: str = None):
-        obj = object.__new__(self)
+    def __new__(cls, value: int, description: str, aliases=None):
+        obj = object.__new__(cls)
         obj._value_ = value
         return obj
 
-    def __init__(self, value: int, description: str, alias: str = None) -> None:
+    def __init__(self, value: int, description: str, aliases=None) -> None:
         self.index = value
         """Unique index for this identifier value."""
         self.description = description
         """Description for this identifier value."""
-        self.alias = alias
-        """Alias for this identifier value (if any)."""
+
+        # Store aliases as a list for multi-alias support; keep a single 'alias'
+        # attribute pointing to the first alias for backwards compatibility.
+        if aliases is None:
+            self.aliases = []
+        else:
+            # Accept either a single string or list of strings
+            if isinstance(aliases, str):
+                # comma-separated string -> list
+                parsed = [a.strip() for a in aliases.split(",") if a.strip()]
+            else:
+                parsed = list(aliases)
+            self.aliases = parsed
+        if self.aliases:
+            self.alias = self.aliases[0]
 
     def __eq__(self, other):
         if self is other:
@@ -52,37 +65,33 @@ class IDSIdentifier(Enum, metaclass=IDSIdentifierMeta):
             other_name = str(other.name)
             other_index = int(other.index)
             other_description = str(other.description)
-            other_alias = getattr(other, "alias", None)
         except (AttributeError, TypeError, ValueError):
             # Attribute doesn't exist, or failed to convert
             return NotImplemented
+
         # Index must match
         if other_index == self.index:
             # Name may be left empty, or match name or alias
-            name_matches = (
+            if (
                 other_name == self.name
                 or other_name == ""
-                or (self.alias and other_name == self.alias)
-                or (other_alias and other_alias == self.name)
-                or (self.alias and other_alias and self.alias == other_alias)
-            )
-            if name_matches:
+                or other_name in getattr(self, "aliases", [])
+            ):
                 # Description doesn't have to match, though we will warn when it doesn't
-                if other_description != self.description and other_description != "":
+                if other_description not in (self.description, ""):
                     logger.warning(
                         "Description of %r does not match identifier description %r",
                         other.description,
                         self.description,
                     )
                 return True
-            else:
-                logger.warning(
-                    "Name %r does not match identifier name %r or "
-                    "alias %r, but indexes are equal.",
-                    other.name,
-                    self.name,
-                    self.alias,
-                )
+
+            # If we get here with matching indexes but no name/alias match, warn
+            logger.warning(
+                "Name %r does not match identifier name %r, but indexes are equal.",
+                other.name,
+                self.name,
+            )
         return False
 
     @classmethod
@@ -92,16 +101,21 @@ class IDSIdentifier(Enum, metaclass=IDSIdentifierMeta):
         aliases = {}
         for int_element in element.iterfind("int"):
             name = int_element.get("name")
-            alias = (
-                int_element.get("alias")
-                if int_element.get("alias") is not None
-                else None
-            )
             value = int_element.text
             description = int_element.get("description")
-            enum_values[name] = (int(value), description, alias)
-            if alias:
-                aliases[alias] = name
+            # alias attribute may contain multiple comma-separated aliases
+            alias_attr = int_element.get("alias")
+            if alias_attr:
+                aliases = [a.strip() for a in alias_attr.split(",") if a.strip()]
+            else:
+                aliases = []
+            # Canonical entry: use the canonical 'name' as key
+            enum_values[name] = (int(value), description, aliases)
+            # Also add alias names as enum *aliases* (they become enum attributes)
+            # only if they are valid Python identifiers and not already present.
+            for match in aliases:
+                if match and match not in enum_values:
+                    enum_values[match] = (int(value), description, aliases)
         # Create the enumeration
         enum = cls(
             identifier_name,
@@ -110,9 +124,6 @@ class IDSIdentifier(Enum, metaclass=IDSIdentifierMeta):
             qualname=f"{__name__}.{identifier_name}",
         )
         enum.__doc__ = element.find("header").text
-        enum._aliases = aliases
-        for alias, canonical_name in aliases.items():
-            setattr(enum, alias, getattr(enum, canonical_name))
         return enum
 
 
