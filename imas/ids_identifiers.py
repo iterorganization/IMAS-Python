@@ -3,7 +3,7 @@
 """IMAS-Python module to support Data Dictionary identifiers."""
 
 import logging
-from enum import Enum, EnumMeta
+from enum import Enum
 from typing import Iterable, List, Type
 from xml.etree.ElementTree import fromstring
 
