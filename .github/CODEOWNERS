@@ -1,0 +1,10 @@
+# This file allows setting automatically reviewers for pull requests.
+# Each line is a file pattern followed by one or more owners.
+# The last match takes precedence over previous ones.
+# Do not edit unless specifically mandated to do so.
+
+# Global/fallback and technical modifications.
+*         @maarten-ic @prasad-sawantdesai @olivhoenen
+
+# Modifications to CODEOWNERS and action workflows 
+.github/  @SimonPinches @olivhoenen

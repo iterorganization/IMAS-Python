@@ -7,16 +7,19 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock
 
 import numpy
+from numpy import array_equal
 import pytest
 
 from imas import identifiers
 from imas.ids_convert import (
+    _3to4_sign_flip_paths,
     _get_ctxpath,
     _get_tbp,
     convert_ids,
     dd_version_map_from_factories,
     iter_parents,
 )
+from imas.ids_data_type import IDSDataType
 from imas.ids_defs import (
     ASCII_BACKEND,
     IDS_TIME_MODE_HETEROGENEOUS,
@@ -27,7 +30,7 @@ from imas.ids_defs import (
 from imas.ids_factory import IDSFactory
 from imas.ids_struct_array import IDSStructArray
 from imas.ids_structure import IDSStructure
-from imas.test.test_helpers import compare_children, open_dbentry
+from imas.test.test_helpers import compare_children, fill_consistent, open_dbentry
 
 UTC = timezone.utc
 
@@ -287,22 +290,22 @@ def test_3to4_repeat_children_first_point_conditional(dd4factory):
     for i in range(2):
         outline_inner = wall4.description_2d[0].vessel.unit[i].annular.outline_inner
         if i == 0:  # open outline, first point not repeated:
-            assert numpy.array_equal(outline_inner.r, [1.0, 2.0, 3.0])
-            assert numpy.array_equal(outline_inner.z, [-1.0, -2.0, -3.0])
+            assert array_equal(outline_inner.r, [1.0, 2.0, 3.0])
+            assert array_equal(outline_inner.z, [-1.0, -2.0, -3.0])
         else:  # closed outline, first point repeated:
-            assert numpy.array_equal(outline_inner.r, [1.0, 2.0, 3.0, 1.0])
-            assert numpy.array_equal(outline_inner.z, [-1.0, -2.0, -3.0, -1.0])
+            assert array_equal(outline_inner.r, [1.0, 2.0, 3.0, 1.0])
+            assert array_equal(outline_inner.z, [-1.0, -2.0, -3.0, -1.0])
 
     # Test conversion for case 2:
     assert len(wall4.description_2d[0].limiter.unit) == 2
     for i in range(2):
         unit = wall4.description_2d[0].limiter.unit[i]
         if i == 0:  # open outline, first point not repeated:
-            assert numpy.array_equal(unit.outline.r, [1.0, 2.0, 3.0])
-            assert numpy.array_equal(unit.outline.z, [-1.0, -2.0, -3.0])
+            assert array_equal(unit.outline.r, [1.0, 2.0, 3.0])
+            assert array_equal(unit.outline.z, [-1.0, -2.0, -3.0])
         else:  # closed outline, first point repeated:
-            assert numpy.array_equal(unit.outline.r, [1.0, 2.0, 3.0, 1.0])
-            assert numpy.array_equal(unit.outline.z, [-1.0, -2.0, -3.0, -1.0])
+            assert array_equal(unit.outline.r, [1.0, 2.0, 3.0, 1.0])
+            assert array_equal(unit.outline.z, [-1.0, -2.0, -3.0, -1.0])
 
     # Test conversion for case 3:
     assert len(wall4.description_2d[0].mobile.unit) == 2
@@ -310,11 +313,11 @@ def test_3to4_repeat_children_first_point_conditional(dd4factory):
         unit = wall4.description_2d[0].mobile.unit[i]
         for j in range(3):
             if i == 0:  # open outline, first point not repeated:
-                assert numpy.array_equal(unit.outline[j].r, [1.0, 2.0, 3.0])
-                assert numpy.array_equal(unit.outline[j].z, [-1.0, -2.0, -3.0])
+                assert array_equal(unit.outline[j].r, [1.0, 2.0, 3.0])
+                assert array_equal(unit.outline[j].z, [-1.0, -2.0, -3.0])
             else:  # closed outline, first point repeated:
-                assert numpy.array_equal(unit.outline[j].r, [1.0, 2.0, 3.0, 1.0])
-                assert numpy.array_equal(unit.outline[j].z, [-1.0, -2.0, -3.0, -1.0])
+                assert array_equal(unit.outline[j].r, [1.0, 2.0, 3.0, 1.0])
+                assert array_equal(unit.outline[j].z, [-1.0, -2.0, -3.0, -1.0])
             assert unit.outline[j].time == pytest.approx(j / 5)
 
     # Test conversion for case 4:
@@ -322,9 +325,9 @@ def test_3to4_repeat_children_first_point_conditional(dd4factory):
     for i in range(2):
         thickness = wall4.description_2d[1].vessel.unit[i].annular.thickness
         if i == 0:  # open outline, there was one value too many, drop the last one
-            assert numpy.array_equal(thickness, [1, 0.9])
+            assert array_equal(thickness, [1, 0.9])
         else:  # closed outline, thickness values kept
-            assert numpy.array_equal(thickness, [1, 0.9, 0.9])
+            assert array_equal(thickness, [1, 0.9, 0.9])
 
     # Test conversion back
     wall3 = convert_ids(wall4, "3.39.0")
@@ -340,8 +343,8 @@ def test_3to4_repeat_children_first_point(dd4factory):
 
     iron_core4 = convert_ids(iron_core, None, factory=dd4factory)
     geometry = iron_core4.segment[0].geometry
-    assert numpy.array_equal(geometry.outline.r, [1.0, 2.0, 3.0, 1.0])
-    assert numpy.array_equal(geometry.outline.z, [-1.0, -2.0, -3.0, -1.0])
+    assert array_equal(geometry.outline.r, [1.0, 2.0, 3.0, 1.0])
+    assert array_equal(geometry.outline.z, [-1.0, -2.0, -3.0, -1.0])
 
     iron_core3 = convert_ids(iron_core4, "3.39.0")
     compare_children(iron_core, iron_core3)
@@ -356,17 +359,37 @@ def test_3to4_cocos_change(dd4factory):
     cp.profiles_1d[0].grid.psi = numpy.linspace(10, 20, 11)
 
     cp4 = convert_ids(cp, None, factory=dd4factory)
-    assert numpy.array_equal(
+    assert array_equal(
         cp4.profiles_1d[0].grid.rho_tor_norm,
         cp.profiles_1d[0].grid.rho_tor_norm,
     )
-    assert numpy.array_equal(
+    assert array_equal(
         cp4.profiles_1d[0].grid.psi,
         -cp.profiles_1d[0].grid.psi,
     )
 
     cp3 = convert_ids(cp4, "3.39.0")
     compare_children(cp, cp3)
+
+    eq = IDSFactory("3.39.0").equilibrium()
+    eq.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    eq.time = [1.0]
+    eq.time_slice.resize(1)
+    eq.time_slice[0].profiles_1d.psi = numpy.linspace(0, 1, 11)
+    eq.time_slice[0].profiles_1d.dpressure_dpsi = numpy.linspace(1, 2, 11)
+
+    eq4 = convert_ids(eq, None, factory=dd4factory)
+    assert array_equal(
+        eq4.time_slice[0].profiles_1d.psi,
+        -eq.time_slice[0].profiles_1d.psi,
+    )
+    assert array_equal(
+        eq4.time_slice[0].profiles_1d.dpressure_dpsi,
+        -eq.time_slice[0].profiles_1d.dpressure_dpsi,
+    )
+
+    eq3 = convert_ids(eq4, "3.39.0")
+    compare_children(eq, eq3)
 
 
 def test_3to4_circuit_connections(dd4factory, caplog):
@@ -380,7 +403,7 @@ def test_3to4_circuit_connections(dd4factory, caplog):
     ]
 
     pfa4 = convert_ids(pfa, None, factory=dd4factory)
-    assert numpy.array_equal(
+    assert array_equal(
         pfa4.circuit[0].connections, [[-1, 0, 1], [0, 1, -1], [1, -1, 0]]
     )
 
@@ -397,7 +420,7 @@ def test_3to4_circuit_connections(dd4factory, caplog):
     with caplog.at_level(logging.ERROR):
         pfa4 = convert_ids(pfa, None, factory=dd4factory)
     # Incorrect shape, data is not converted:
-    assert numpy.array_equal(pfa.circuit[0].connections, pfa4.circuit[0].connections)
+    assert array_equal(pfa.circuit[0].connections, pfa4.circuit[0].connections)
     # Check that a message with ERROR severity was logged
     assert len(caplog.record_tuples) == 1
     assert caplog.record_tuples[0][1] == logging.ERROR
@@ -410,7 +433,266 @@ def test_3to4_cocos_magnetics_workaround(dd4factory):
     mag.flux_loop[0].flux.data = [1.0, 2.0]
 
     mag4 = convert_ids(mag, None, factory=dd4factory)
-    assert numpy.array_equal(mag4.flux_loop[0].flux.data, [-1.0, -2.0])
+    assert array_equal(mag4.flux_loop[0].flux.data, [-1.0, -2.0])
 
     mag3 = convert_ids(mag4, "3.39.0")
     compare_children(mag, mag3)
+
+
+def test_3to4_pulse_schedule():
+    ps = IDSFactory("3.39.0").pulse_schedule()
+    ps.ids_properties.homogeneous_time = IDS_TIME_MODE_HETEROGENEOUS
+
+    ps.ec.launcher.resize(3)
+    ps.ec.launcher[0].power.reference.data = [1.0, 2.0, 3.0]
+    ps.ec.launcher[0].power.reference.time = [1.0, 2.0, 3.0]
+    ps.ec.launcher[1].power.reference.data = [0.0, 2.0, 5.0]
+    ps.ec.launcher[1].power.reference.time = [0.0, 2.0, 5.0]
+    ps.ec.launcher[2].power.reference.data = [1.0, 1.5]
+    ps.ec.launcher[2].power.reference.time = [1.0, 1.5]
+
+    ps.ec.mode.data = [1, 2, 5]
+    ps.ec.mode.time = [1.0, 2.0, 5.0]
+
+    ps4 = convert_ids(ps, "4.0.0")
+    assert array_equal(ps4.ec.time, [0.0, 1.0, 1.5, 2.0, 3.0, 5.0])
+    item = "power_launched/reference"
+    assert array_equal(ps4.ec.beam[0][item], [1.0, 1.0, 1.5, 2.0, 3.0, 3.0])
+    assert array_equal(ps4.ec.beam[1][item], [0.0, 1.0, 1.5, 2.0, 3.0, 5.0])
+    assert array_equal(ps4.ec.beam[2][item], [1.0, 1.0, 1.5, 1.5, 1.5, 1.5])
+    assert array_equal(ps4.ec.mode, [1, 1, 1, 2, 2, 5])
+
+
+def test_3to4_pulse_schedule_exceptions():
+    ps = IDSFactory("3.39.0").pulse_schedule()
+    ps.ids_properties.homogeneous_time = IDS_TIME_MODE_HETEROGENEOUS
+
+    ps.ec.launcher.resize(3)
+    ps.ec.launcher[0].power.reference.data = [1.0, 2.0, 3.0]
+    with pytest.raises(ValueError):  # missing time base
+        convert_ids(ps, "4.0.0")
+
+    ps.ec.launcher[0].power.reference.time = [1.0, 2.0]
+    with pytest.raises(ValueError):  # incorrect size of time base
+        convert_ids(ps, "4.0.0")
+
+
+def test_3to4_pulse_schedule_fuzz():
+    ps = IDSFactory("3.39.0").pulse_schedule()
+    ps.ids_properties.homogeneous_time = IDS_TIME_MODE_HETEROGENEOUS
+
+    fill_consistent(ps)
+    convert_ids(ps, "4.0.0")
+
+
+def test_3to4_migrate_deprecated_fields():  # GH#55
+    # Test j_phi -> j_tor rename
+    eq342 = IDSFactory("3.42.0").equilibrium()
+    eq342.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    eq342.time = [0.0]
+    eq342.time_slice.resize(1)
+    eq342.time_slice[0].profiles_1d.j_tor = [0.3, 0.2, 0.1]
+    eq342.time_slice[0].profiles_1d.j_tor_error_upper = [1.0]
+    eq342.time_slice[0].profiles_1d.j_tor_error_lower = [2.0]
+    eq342.time_slice[0].profiles_1d.psi = [1.0, 0.5, 0.0]
+
+    # Basic case, check that j_tor (although deprecated) is migrated to j_phi:
+    eq4 = convert_ids(eq342, "4.0.0")
+    assert array_equal(eq4.time_slice[0].profiles_1d.j_phi.value, [0.3, 0.2, 0.1])
+    assert array_equal(eq4.time_slice[0].profiles_1d.j_phi_error_upper.value, [1.0])
+    assert array_equal(eq4.time_slice[0].profiles_1d.j_phi_error_lower.value, [2.0])
+
+    # When both j_tor and j_phi are present in the source IDS, we expect that j_phi
+    # takes precedence. This is a happy accident with how the DD defines both attributes
+    eq342.time_slice[0].profiles_1d.j_phi = [0.6, 0.4, 0.2]
+    eq4 = convert_ids(eq342, "4.0.0")
+    assert array_equal(eq4.time_slice[0].profiles_1d.j_phi.value, [0.6, 0.4, 0.2])
+
+    # Just to be sure, when j_tor has no value, it should also still work
+    del eq342.time_slice[0].profiles_1d.j_tor
+    eq4 = convert_ids(eq342, "4.0.0")
+    assert array_equal(eq4.time_slice[0].profiles_1d.j_phi.value, [0.6, 0.4, 0.2])
+
+    # Same applies to label -> name renames
+    cp342 = IDSFactory("3.42.0").core_profiles()
+    cp342.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    cp342.time = [0.0]
+    cp342.profiles_1d.resize(1)
+    cp342.profiles_1d[0].ion.resize(1)
+    cp342.profiles_1d[0].ion[0].label = "x"
+
+    cp4 = convert_ids(cp342, "4.0.0")
+    assert cp4.profiles_1d[0].ion[0].name == "x"
+
+    cp342.profiles_1d[0].ion[0].name = "y"
+    cp4 = convert_ids(cp342, "4.0.0")
+    assert cp4.profiles_1d[0].ion[0].name == "y"
+
+    del cp342.profiles_1d[0].ion[0].label
+    cp4 = convert_ids(cp342, "4.0.0")
+    assert cp4.profiles_1d[0].ion[0].name == "y"
+
+
+def test_3to4_name_identifier_mapping_magnetics():
+    # Create source IDS using DD 3.40.1
+    factory = IDSFactory("3.40.1")
+
+    src = factory.magnetics()
+    src.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    # Populate a parent that has name + identifier (no 'index' sibling)
+    src.b_field_pol_probe.resize(1)
+    src.b_field_pol_probe[0].name = "TEST_NAME"
+    src.b_field_pol_probe[0].identifier = "TEST_IDENTIFIER"
+
+    # Convert to DD 4.0.0
+    dst = convert_ids(src, "4.0.0")
+
+    # DD3 name -> DD4 description
+    assert dst.b_field_pol_probe[0].description == "TEST_NAME"
+
+    # DD3 identifier -> DD4 name
+    assert dst.b_field_pol_probe[0].name == "TEST_IDENTIFIER"
+
+
+def test_4to3_name_identifier_mapping_magnetics():
+    # Create source IDS using DD 4.0.0
+    factory = IDSFactory("4.0.0")
+
+    src = factory.magnetics()
+    src.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    # Populate a parent that has description + name (no 'index' sibling)
+    src.b_field_pol_probe.resize(1)
+    src.b_field_pol_probe[0].description = "TEST_DESCRIPTION"
+    src.b_field_pol_probe[0].name = "TEST_NAME"
+
+    # Convert to DD 3.40.1
+    dst = convert_ids(src, "3.40.1")
+
+    # DD4 description -> DD3 name
+    assert dst.b_field_pol_probe[0].name == "TEST_DESCRIPTION"
+
+    # DD4 name -> DD3 identifier
+    assert dst.b_field_pol_probe[0].identifier == "TEST_NAME"
+
+
+def test_3to4_cocos_hardcoded_paths():
+    # Check for existence in 3.42.0
+    factory = IDSFactory("3.42.0")
+    for ids_name, paths in _3to4_sign_flip_paths.items():
+        ids = factory.new(ids_name)
+        for path in paths:
+            # Check path exists and is not a FLT
+            metadata = ids.metadata[path]
+            assert metadata.data_type is IDSDataType.FLT
+
+    # Test a conversion
+    eq = factory.equilibrium()
+    eq.time_slice.resize(1)
+    eq.time_slice[0].boundary.psi = 3.141
+
+    eq4 = convert_ids(eq, "4.0.0")
+    assert eq4.time_slice[0].boundary.psi == -3.141
+
+
+def test_3to4_equilibrium_boundary():
+    eq342 = IDSFactory("3.42.0").equilibrium()
+    eq342.time_slice.resize(5)
+
+    for i, ts in enumerate(eq342.time_slice):
+        # Always fill boundary and magnetic axis
+        ts.boundary.psi = 1
+        ts.boundary.outline.r = [1.0, 3.0, 2.0, 1.0]
+        ts.boundary.outline.z = [1.0, 2.0, 3.0, 1.0]
+        ts.global_quantities.psi_axis = 1.0
+        ts.global_quantities.magnetic_axis.r = 2.0
+        ts.global_quantities.magnetic_axis.z = 2.0
+
+        if i > 0:
+            # Fill separatrix
+            ts.boundary_separatrix.psi = -1.0
+            # Use limiter for time_slice[1], otherwise divertor:
+            if i == 1:
+                ts.boundary_separatrix.type = 0
+                ts.boundary_separatrix.active_limiter_point.r = 3.0
+                ts.boundary_separatrix.active_limiter_point.z = 2.0
+            else:
+                ts.boundary_separatrix.type = 1
+            ts.boundary_separatrix.outline.r = [1.0, 3.0, 2.0, 1.0]
+            ts.boundary_separatrix.outline.z = [1.0, 2.0, 3.0, 1.0]
+            ts.boundary_separatrix.x_point.resize(1)
+            ts.boundary_separatrix.x_point[0].r = 1.0
+            ts.boundary_separatrix.x_point[0].z = 1.0
+            # These are not part of the conversion:
+            ts.boundary_separatrix.strike_point.resize(2)
+            ts.boundary_separatrix.closest_wall_point.r = 1.0
+            ts.boundary_separatrix.closest_wall_point.z = 1.0
+            ts.boundary_separatrix.closest_wall_point.distance = 0.2
+            ts.boundary_separatrix.dr_dz_zero_point.r = 3.0
+            ts.boundary_separatrix.dr_dz_zero_point.z = 2.0
+            ts.boundary_separatrix.gap.resize(1)
+        if i == 3:
+            # Fill second_separatrix
+            ts.boundary_secondary_separatrix.psi = -1.1
+            # Use limiter for time_slice[1], otherwise divertor:
+            ts.boundary_secondary_separatrix.outline.r = [0.9, 3.1, 2.1, 0.9]
+            ts.boundary_secondary_separatrix.outline.z = [0.9, 2.1, 3.1, 0.9]
+            ts.boundary_secondary_separatrix.x_point.resize(1)
+            ts.boundary_secondary_separatrix.x_point[0].r = 2.1
+            ts.boundary_secondary_separatrix.x_point[0].z = 3.1
+            # These are not part of the conversion:
+            ts.boundary_secondary_separatrix.distance_inner_outer = 0.1
+            ts.boundary_secondary_separatrix.strike_point.resize(2)
+        if i == 4:
+            ts.boundary_separatrix.x_point.resize(2, keep=True)
+            ts.boundary_separatrix.x_point[1].r = 2.0
+            ts.boundary_separatrix.x_point[1].z = 3.0
+
+    eq4 = convert_ids(eq342, "4.0.0")
+    assert len(eq4.time_slice) == 5
+    for i, ts in enumerate(eq4.time_slice):
+        node = ts.contour_tree.node
+        assert len(node) == [1, 2, 2, 3, 3][i]
+        # Test magnetic axis
+        assert node[0].critical_type == 0
+        assert node[0].r == node[0].z == 2.0
+        assert node[0].psi == -1.0
+        assert len(node[0].levelset.r) == len(node[0].levelset.z) == 0
+        # boundary_separatrix
+        if i == 1:  # node[1] is boundary for limiter plasma
+            assert node[1].critical_type == 2
+            assert node[1].r == 3.0
+            assert node[1].z == 2.0
+        elif i > 1:  # node[1] is boundary for divertor plasma
+            assert node[1].critical_type == 1
+            assert node[1].r == node[1].z == 1.0
+        if i > 0:
+            assert node[1].psi == 1.0
+            assert numpy.array_equal(node[1].levelset.r, [1.0, 3.0, 2.0, 1.0])
+            assert numpy.array_equal(node[1].levelset.z, [1.0, 2.0, 3.0, 1.0])
+        # boundary_secondary_separatrix
+        if i == 3:
+            assert node[2].critical_type == 1
+            assert node[2].r == 2.1
+            assert node[2].z == 3.1
+            assert node[2].psi == 1.1
+            assert numpy.array_equal(node[2].levelset.r, [0.9, 3.1, 2.1, 0.9])
+            assert numpy.array_equal(node[2].levelset.z, [0.9, 2.1, 3.1, 0.9])
+        # Second x-point from boundary_separatrix
+        if i == 4:
+            assert node[2].critical_type == 1
+            assert node[2].r == 2.0
+            assert node[2].z == 3.0
+            assert node[2].psi == node[1].psi == 1.0
+            # Levelset is only filled for the main x-point (node[1])
+            assert not node[2].levelset.r.has_value
+            assert not node[2].levelset.z.has_value
+
+    # not deepcopied, should share numpy arrays
+    slice1_outline_r = eq342.time_slice[1].boundary_separatrix.outline.r.value
+    assert slice1_outline_r is eq4.time_slice[1].contour_tree.node[1].levelset.r.value
+
+    # deepcopy should create a copy of the numpy arrays
+    eq4_cp = convert_ids(eq342, "4.0.0", deepcopy=True)
+    assert not numpy.may_share_memory(
+        slice1_outline_r, eq4_cp.time_slice[1].contour_tree.node[1].levelset.r.value
+    )

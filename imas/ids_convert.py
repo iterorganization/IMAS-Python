@@ -1,36 +1,35 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Functionality for converting IDSToplevels between DD versions.
-"""
+"""Functionality for converting IDSToplevels between DD versions."""
 
 import copy
 import datetime
 import logging
-from functools import lru_cache
+from functools import lru_cache, partial
 from pathlib import Path
-from typing import Callable, Dict, Iterator, Optional, Set, Tuple
+from typing import Callable, Dict, Iterator, List, Optional, Set, Tuple
 from xml.etree.ElementTree import Element, ElementTree
 
 import numpy
 from packaging.version import InvalidVersion, Version
+from scipy.interpolate import interp1d
 
 import imas
-from imas.dd_zip import parse_dd_version
+from imas.dd_zip import parse_dd_version, dd_etree
 from imas.ids_base import IDSBase
 from imas.ids_data_type import IDSDataType
+from imas.ids_defs import IDS_TIME_MODE_HETEROGENEOUS
 from imas.ids_factory import IDSFactory
 from imas.ids_path import IDSPath
-from imas.ids_primitive import (
-    IDSNumeric0D,
-    IDSNumericArray,
-    IDSPrimitive,
-    IDSString0D,
-)
+from imas.ids_primitive import IDSNumeric0D, IDSNumericArray, IDSPrimitive, IDSString0D
 from imas.ids_struct_array import IDSStructArray
 from imas.ids_structure import IDSStructure
 from imas.ids_toplevel import IDSToplevel
 
 logger = logging.getLogger(__name__)
+# Store for which paths we already emitted a warning that the target could not be found
+# to prevent polluting the output with lots of repeated items.
+_missing_paths_warning = set()
 
 
 def iter_parents(path: str) -> Iterator[str]:
@@ -86,6 +85,15 @@ class NBCPathMap:
 
         The postprocess function should be applied to the nodes after all the data is
         converted.
+        """
+
+        self.post_process_ids: List[
+            Callable[[IDSToplevel, IDSToplevel, bool], None]
+        ] = []
+        """Postprocess functions to be applied to the whole IDS.
+
+        These postprocess functions should be applied to the whole IDS after all data is
+        converted. The arguments supplied are: source IDS, target IDS, deepcopy boolean.
         """
 
         self.ignore_missing_paths: Set[str] = set()
@@ -202,6 +210,10 @@ class DDVersionMap:
         old_path_set = set(old_paths)
         new_path_set = set(new_paths)
 
+        # expose the path->Element maps as members so other methods can reuse them
+        self.old_paths = old_paths
+        self.new_paths = new_paths
+
         def process_parent_renames(path: str) -> str:
             # Apply any parent AoS/structure rename
             # Loop in reverse order to find the closest parent which was renamed:
@@ -222,20 +234,6 @@ class DDVersionMap:
             else:
                 old_path = previous_name
             return process_parent_renames(old_path)
-
-        def add_rename(old_path: str, new_path: str):
-            old_item = old_paths[old_path]
-            new_item = new_paths[new_path]
-            self.new_to_old[new_path] = (
-                old_path,
-                _get_tbp(old_item, old_paths),
-                _get_ctxpath(old_path, old_paths),
-            )
-            self.old_to_new[old_path] = (
-                new_path,
-                _get_tbp(new_item, new_paths),
-                _get_ctxpath(new_path, new_paths),
-            )
 
         # Iterate through all NBC metadata and add entries
         for new_item in new.iterfind(".//field[@change_nbc_description]"):
@@ -276,14 +274,16 @@ class DDVersionMap:
                         self.version_old,
                     )
                 elif self._check_data_type(old_item, new_item):
-                    add_rename(old_path, new_path)
+                    # use class helper to register simple renames and
+                    # reciprocal mappings
+                    self._add_rename(old_path, new_path)
                     if old_item.get("data_type") in DDVersionMap.STRUCTURE_TYPES:
                         # Add entries for common sub-elements
                         for path in old_paths:
                             if path.startswith(old_path):
                                 npath = path.replace(old_path, new_path, 1)
                                 if npath in new_path_set:
-                                    add_rename(path, npath)
+                                    self._add_rename(path, npath)
             elif nbc_description == "type_changed":
                 pass  # We will handle this (if possible) in self._check_data_type
             elif nbc_description == "repeat_children_first_point":
@@ -333,26 +333,133 @@ class DDVersionMap:
             new_version = parse_dd_version(new_version_node.text)
         # Additional conversion rules for DDv3 to DDv4
         if self.version_old.major == 3 and new_version and new_version.major == 4:
-            # Postprocessing for COCOS definition change:
-            xpath_query = ".//field[@cocos_label_transformation='psi_like']"
+            self._apply_3to4_conversion(old, new)
+
+    def _add_rename(self, old_path: str, new_path: str) -> None:
+        """Register a simple rename from old_path -> new_path using the
+        path->Element maps stored on the instance (self.old_paths/self.new_paths).
+        This will also add the reciprocal mapping when possible.
+        """
+        old_item = self.old_paths[old_path]
+        new_item = self.new_paths[new_path]
+
+        # forward mapping
+        self.old_to_new[old_path] = (
+            new_path,
+            _get_tbp(new_item, self.new_paths),
+            _get_ctxpath(new_path, self.new_paths),
+        )
+
+        # reciprocal mapping
+        self.new_to_old[new_path] = (
+            old_path,
+            _get_tbp(old_item, self.old_paths),
+            _get_ctxpath(old_path, self.old_paths),
+        )
+
+    def _apply_3to4_conversion(self, old: Element, new: Element) -> None:
+        # Postprocessing for COCOS definition change:
+        cocos_paths = []
+        for psi_like in ["psi_like", "dodpsi_like"]:
+            xpath_query = f".//field[@cocos_label_transformation='{psi_like}']"
             for old_item in old.iterfind(xpath_query):
-                old_path = old_item.get("path")
-                new_path = self.old_to_new.path.get(old_path, old_path)
-                self.new_to_old.post_process[new_path] = _cocos_change
-                self.old_to_new.post_process[old_path] = _cocos_change
-            # Definition change for pf_active circuit/connections
-            if self.ids_name == "pf_active":
-                path = "circuit/connections"
-                self.new_to_old.post_process[path] = _circuit_connections_4to3
-                self.old_to_new.post_process[path] = _circuit_connections_3to4
-            # Migrate ids_properties/source to ids_properties/provenance
-            # Only implement forward conversion (DD3 -> 4):
-            # - Pretend that this is a rename from ids_properties/source -> provenance
-            # - And register type_change handler which will be called with the source
-            #   element and the new provenance structure
-            path = "ids_properties/source"
-            self.old_to_new.path[path] = "ids_properties/provenance"
-            self.old_to_new.type_change[path] = _ids_properties_source
+                cocos_paths.append(old_item.get("path"))
+        # Sign flips not covered by the generic rule:
+        cocos_paths.extend(_3to4_sign_flip_paths.get(self.ids_name, []))
+        for old_path in cocos_paths:
+            new_path = self.old_to_new.path.get(old_path, old_path)
+            self.new_to_old.post_process[new_path] = _cocos_change
+            self.old_to_new.post_process[old_path] = _cocos_change
+
+        # Convert equilibrium boundary_separatrix and populate contour_tree
+        if self.ids_name == "equilibrium":
+            self.old_to_new.post_process_ids.append(_equilibrium_boundary_3to4)
+            self.old_to_new.ignore_missing_paths |= {
+                "time_slice/boundary_separatrix",
+                "time_slice/boundary_secondary_separatrix",
+            }
+        # Definition change for pf_active circuit/connections
+        if self.ids_name == "pf_active":
+            path = "circuit/connections"
+            self.new_to_old.post_process[path] = _circuit_connections_4to3
+            self.old_to_new.post_process[path] = _circuit_connections_3to4
+
+        # Migrate ids_properties/source to ids_properties/provenance
+        # Only implement forward conversion (DD3 -> 4):
+        # - Pretend that this is a rename from ids_properties/source -> provenance
+        # - And register type_change handler which will be called with the source
+        #   element and the new provenance structure
+        path = "ids_properties/source"
+        self.old_to_new.path[path] = "ids_properties/provenance"
+        self.old_to_new.type_change[path] = _ids_properties_source
+
+        # GH#55: add logic to migrate some obsolete nodes in DD3.42.0 -> 4.0
+        # These nodes (e.g. equilibrium profiles_1d/j_tor) have an NBC rename rule
+        # (to e.g. equilibrium profiles_1d/j_phi) applying to DD 3.41 and older.
+        # In DD 3.42, both the old AND new node names are present.
+        if self.version_old.minor >= 42:  # Only apply for DD 3.42+ -> DD 4
+            # Get a rename map for 3.41 -> new version
+            factory341 = imas.IDSFactory("3.41.0")
+            if self.ids_name in factory341.ids_names():  # Ensure the IDS exists in 3.41
+                dd341_map = _DDVersionMap(
+                    self.ids_name,
+                    dd_etree("3.41.0"),
+                    self.new_version,
+                    Version("3.41.0"),
+                )
+                to_update = {}
+                for path, newpath in self.old_to_new.path.items():
+                    # Find all nodes that have disappeared in DD 4.x, and apply the
+                    # rename rule from DD3.41 -> DD 4.x
+                    if newpath is None and path in dd341_map.old_to_new:
+                        self.old_to_new.path[path] = dd341_map.old_to_new.path[path]
+                        # Note: path could be a structure or AoS, so we also put all
+                        # child paths in our map:
+                        path = path + "/"  # All child nodes will start with this
+                        for p, v in dd341_map.old_to_new.path.items():
+                            if p.startswith(path):
+                                to_update[p] = v
+                self.old_to_new.path.update(to_update)
+
+        # GH#59: To improve further the conversion of DD3 to DD4, especially the
+        # Machine Description part of the IDSs, we would like to add a 3to4 specific
+        #  rule to convert any siblings name + identifier (that are not part of an
+        # identifier structure, meaning that there is no index sibling) into
+        # description + name. Meaning:
+        #        parent/name (DD3) -> parent/description (DD4)
+        #        parent/identifier (DD3) -> parent/name (DD4)
+        # Only perform the mapping if the corresponding target fields exist in the
+        # new DD and if we don't already have a mapping for the involved paths.
+        # use self.old_paths and self.new_paths set in _build_map
+        for p in self.old_paths:
+            # look for name children
+            if not p.endswith("/name"):
+                continue
+            parent = p.rsplit("/", 1)[0]
+            name_path = f"{parent}/name"
+            id_path = f"{parent}/identifier"
+            index_path = f"{parent}/index"
+            desc_path = f"{parent}/description"
+            new_name_path = name_path
+
+            # If neither 'name' nor 'identifier' existed in the old DD, skip this parent
+            if name_path not in self.old_paths or id_path not in self.old_paths:
+                continue
+            # exclude identifier-structure (has index sibling)
+            if index_path in self.old_paths:
+                continue
+
+            # Ensure the candidate target fields exist in the new DD
+            if desc_path not in self.new_paths or new_name_path not in self.new_paths:
+                continue
+
+            # Map DD3 name -> DD4 description
+            if name_path not in self.old_to_new.path:
+                self._add_rename(name_path, desc_path)
+
+            # Map DD3 identifier -> DD4 name
+            if id_path in self.old_to_new.path:
+                self._add_rename(id_path, new_name_path)
 
     def _map_missing(self, is_new: bool, missing_paths: Set[str]):
         rename_map = self.new_to_old if is_new else self.old_to_new
@@ -474,32 +581,52 @@ def convert_ids(
             raise RuntimeError(
                 f"There is no IDS with name {ids_name} in DD version {version}."
             )
-        target_ids = factory.new(ids_name)
-    else:
-        target_ids = target
+        target = factory.new(ids_name)
 
     source_version = parse_dd_version(toplevel._version)
-    target_version = parse_dd_version(target_ids._version)
+    target_version = parse_dd_version(target._version)
     logger.info(
         "Starting conversion of IDS %s from version %s to version %s.",
         ids_name,
         source_version,
         target_version,
     )
+    global _missing_paths_warning
+    _missing_paths_warning = set()  # clear for which paths we emitted a warning
 
-    source_is_new = source_version > target_version
     source_tree = toplevel._parent._etree
-    target_tree = target_ids._parent._etree
-    if source_is_new:
+    target_tree = target._parent._etree
+    if source_version > target_version:
         version_map = _DDVersionMap(ids_name, target_tree, source_tree, target_version)
+        rename_map = version_map.new_to_old
     else:
         version_map = _DDVersionMap(ids_name, source_tree, target_tree, source_version)
+        rename_map = version_map.old_to_new
 
-    _copy_structure(toplevel, target_ids, deepcopy, source_is_new, version_map)
+    # Special case for DD3to4 pulse_schedule conversion
+    if (
+        toplevel.metadata.name == "pulse_schedule"
+        and toplevel.ids_properties.homogeneous_time == IDS_TIME_MODE_HETEROGENEOUS
+        and source_version < Version("3.40.0")
+        and target_version >= Version("3.40.0")
+    ):
+        try:
+            # Suppress "'.../time' does not exist in the target IDS." log messages.
+            logger.addFilter(_pulse_schedule_3to4_logfilter)
+            _pulse_schedule_3to4(toplevel, target, deepcopy, rename_map)
+        finally:
+            logger.removeFilter(_pulse_schedule_3to4_logfilter)
+    else:
+        _copy_structure(toplevel, target, deepcopy, rename_map)
+
+    # Global post-processing functions
+    for callback in rename_map.post_process_ids:
+        callback(toplevel, target, deepcopy)
+
     logger.info("Conversion of IDS %s finished.", ids_name)
     if provenance_origin_uri:
-        _add_provenance_entry(target_ids, toplevel._version, provenance_origin_uri)
-    return target_ids
+        _add_provenance_entry(target, toplevel._version, provenance_origin_uri)
+    return target
 
 
 def _add_provenance_entry(
@@ -541,12 +668,50 @@ def _add_provenance_entry(
         node.sources.append(source_txt)  # sources is a STR_1D (=list of strings)
 
 
+def _get_target_item(
+    item: IDSBase, target: IDSStructure, rename_map: NBCPathMap
+) -> Optional[IDSBase]:
+    """Find and return the corresponding target item if it exists.
+
+    This method follows NBC renames (as stored in the rename map). It returns None if
+    there is no corresponding target item in the target structure.
+    """
+    path = item.metadata.path_string
+
+    # Follow NBC renames:
+    if path in rename_map:
+        if rename_map.path[path] is None:
+            if path not in rename_map.ignore_missing_paths:
+                # Only warn the first time that we encounter this path:
+                if path not in _missing_paths_warning:
+                    if path in rename_map.type_change:
+                        msg = "Element %r changed type in the target IDS."
+                    else:
+                        msg = "Element %r does not exist in the target IDS."
+                    logger.warning(msg + " Data is not copied.", path)
+                    _missing_paths_warning.add(path)
+            return None
+        else:
+            return IDSPath(rename_map.path[path]).goto(target)
+
+    # No NBC renames:
+    try:
+        return target[item.metadata.name]
+    except AttributeError:
+        # In exceptional cases the item does not exist in the target. Example:
+        # neutron_diagnostic IDS between DD 3.40.1 and 3.41.0. has renamed
+        # synthetic_signals/fusion_power -> fusion_power. The synthetic_signals
+        # structure no longer exists but we need to descend into it to get the
+        # total_neutron_flux.
+        return target
+
+
 def _copy_structure(
     source: IDSStructure,
     target: IDSStructure,
     deepcopy: bool,
-    source_is_new: bool,
-    version_map: DDVersionMap,
+    rename_map: NBCPathMap,
+    callback: Optional[Callable] = None,
 ):
     """Recursively copy data, following NBC renames.
 
@@ -557,31 +722,14 @@ def _copy_structure(
         source_is_new: True iff the DD version of the source is newer than that of the
             target.
         version_map: Version map containing NBC renames.
+        callback: Optional callback that is called for every copied node.
     """
-    rename_map = version_map.new_to_old if source_is_new else version_map.old_to_new
     for item in source.iter_nonempty_():
         path = item.metadata.path_string
-        if path in rename_map:
-            if rename_map.path[path] is None:
-                if path not in rename_map.ignore_missing_paths:
-                    if path in rename_map.type_change:
-                        msg = "Element %r changed type in the target IDS."
-                    else:
-                        msg = "Element %r does not exist in the target IDS."
-                    logger.warning(msg + " Data is not copied.", path)
-                continue
-            else:
-                target_item = IDSPath(rename_map.path[path]).goto(target)
-        else:
-            try:
-                target_item = target[item.metadata.name]
-            except AttributeError:
-                # In exceptional cases the item does not exist in the target. Example:
-                # neutron_diagnostic IDS between DD 3.40.1 and 3.41.0. has renamed
-                # synthetic_signals/fusion_power -> fusion_power. The synthetic_signals
-                # structure no longer exists but we need to descend into it to get the
-                # total_neutron_flux.
-                target_item = target
+        target_item = _get_target_item(item, target, rename_map)
+        if target_item is None:
+            continue
+
         if path in rename_map.type_change:
             # Handle type change
             new_items = rename_map.type_change[path](item, target_item)
@@ -594,21 +742,124 @@ def _copy_structure(
             size = len(item)
             target_item.resize(size)
             for i in range(size):
-                _copy_structure(
-                    item[i], target_item[i], deepcopy, source_is_new, version_map
-                )
+                _copy_structure(item[i], target_item[i], deepcopy, rename_map, callback)
         elif isinstance(item, IDSStructure):
-            _copy_structure(item, target_item, deepcopy, source_is_new, version_map)
+            _copy_structure(item, target_item, deepcopy, rename_map, callback)
         else:
-            if deepcopy:
-                # No nested types are used as data, so a shallow copy is sufficient
-                target_item.value = copy.copy(item.value)
-            else:
-                target_item.value = item.value
+            target_item.value = copy.copy(item.value) if deepcopy else item.value
 
         # Post-process the node:
         if path in rename_map.post_process:
             rename_map.post_process[path](target_item)
+        if callback is not None:
+            callback(item, target_item)
+
+
+_3to4_sign_flip_paths = {
+    "core_instant_changes": [
+        "change/profiles_1d/grid/psi_magnetic_axis",
+        "change/profiles_1d/grid/psi_boundary",
+    ],
+    "core_profiles": [
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "core_sources": [
+        "source/profiles_1d/grid/psi_magnetic_axis",
+        "source/profiles_1d/grid/psi_boundary",
+    ],
+    "core_transport": [
+        "model/profiles_1d/grid_d/psi_magnetic_axis",
+        "model/profiles_1d/grid_d/psi_boundary",
+        "model/profiles_1d/grid_v/psi_magnetic_axis",
+        "model/profiles_1d/grid_v/psi_boundary",
+        "model/profiles_1d/grid_flux/psi_magnetic_axis",
+        "model/profiles_1d/grid_flux/psi_boundary",
+    ],
+    "disruption": [
+        "global_quantities/psi_halo_boundary",
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "ece": [
+        "channel/beam_tracing/beam/position/psi",
+        "psi_normalization/psi_magnetic_axis",
+        "psi_normalization/psi_boundary",
+    ],
+    "edge_profiles": [
+        "profiles_1d/grid/psi",
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "equilibrium": [
+        "time_slice/boundary/psi",
+        "time_slice/global_quantities/q_min/psi",
+        "time_slice/ggd/psi/values",
+    ],
+    "mhd": ["ggd/psi/values"],
+    "pellets": ["time_slice/pellet/path_profiles/psi"],
+    "plasma_profiles": [
+        "profiles_1d/grid/psi",
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+        "ggd/psi/values",
+    ],
+    "plasma_sources": [
+        "source/profiles_1d/grid/psi",
+        "source/profiles_1d/grid/psi_magnetic_axis",
+        "source/profiles_1d/grid/psi_boundary",
+    ],
+    "plasma_transport": [
+        "model/profiles_1d/grid_d/psi",
+        "model/profiles_1d/grid_d/psi_magnetic_axis",
+        "model/profiles_1d/grid_d/psi_boundary",
+        "model/profiles_1d/grid_v/psi",
+        "model/profiles_1d/grid_v/psi_magnetic_axis",
+        "model/profiles_1d/grid_v/psi_boundary",
+        "model/profiles_1d/grid_flux/psi",
+        "model/profiles_1d/grid_flux/psi_magnetic_axis",
+        "model/profiles_1d/grid_flux/psi_boundary",
+    ],
+    "radiation": [
+        "process/profiles_1d/grid/psi_magnetic_axis",
+        "process/profiles_1d/grid/psi_boundary",
+    ],
+    "reflectometer_profile": [
+        "psi_normalization/psi_magnetic_axis",
+        "psi_normalization/psi_boundary",
+    ],
+    "reflectometer_fluctuation": [
+        "psi_normalization/psi_magnetic_axis",
+        "psi_normalization/psi_boundary",
+    ],
+    "runaway_electrons": [
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "sawteeth": [
+        "profiles_1d/grid/psi_magnetic_axis",
+        "profiles_1d/grid/psi_boundary",
+    ],
+    "summary": [
+        "global_quantities/psi_external_average/value",
+        "local/magnetic_axis/position/psi",
+    ],
+    "transport_solver_numerics": [
+        "solver_1d/grid/psi_magnetic_axis",
+        "solver_1d/grid/psi_boundary",
+        "derivatives_1d/grid/psi_magnetic_axis",
+        "derivatives_1d/grid/psi_boundary",
+    ],
+    "wall": ["description_ggd/ggd/psi/values"],
+    "waves": [
+        "coherent_wave/profiles_1d/grid/psi_magnetic_axis",
+        "coherent_wave/profiles_1d/grid/psi_boundary",
+        "coherent_wave/profiles_2d/grid/psi",
+        "coherent_wave/beam_tracing/beam/position/psi",
+    ],
+}
+"""List of paths per IDS that require a COCOS sign change, but aren't covered by the
+generic rule."""
 
 
 ########################################################################################
@@ -919,3 +1170,149 @@ def _ids_properties_source(source: IDSString0D, provenance: IDSStructure) -> Non
     provenance.node.resize(1)
     provenance.node[0].reference.resize(1)
     provenance.node[0].reference[0].name = source.value
+
+
+def _pulse_schedule_3to4(
+    source: IDSStructure,
+    target: IDSStructure,
+    deepcopy: bool,
+    rename_map: NBCPathMap,
+):
+    """Recursively copy data, following NBC renames, and converting time bases for the
+    pulse_schedule IDS.
+
+    Args:
+        source: Source structure.
+        target: Target structure.
+        deepcopy: See :func:`convert_ids`.
+        rename_map: Map containing NBC renames.
+    """
+    # All prerequisites are checked before calling this function:
+    # - source and target are pulse_schedule IDSs
+    # - source has DD version < 3.40.0
+    # - target has DD version >= 4.0.0, < 5.0
+    # - IDS is using heterogeneous time
+
+    for item in source.iter_nonempty_():
+        name = item.metadata.name
+        target_item = _get_target_item(item, target, rename_map)
+        if target_item is None:
+            continue
+
+        # Special cases for non-dynamic stuff
+        if name in ["ids_properties", "code"]:
+            _copy_structure(item, target_item, deepcopy, rename_map)
+        elif name == "time":
+            target_item.value = item.value if not deepcopy else copy.copy(item.value)
+        elif name == "event":
+            size = len(item)
+            target_item.resize(size)
+            for i in range(size):
+                _copy_structure(item[i], target_item[i], deepcopy, rename_map)
+        else:
+            # Find all time bases
+            time_bases = [
+                node.value
+                for node in imas.util.tree_iter(item)
+                if node.metadata.name == "time"
+            ]
+            # Construct the common time base
+            timebase = numpy.unique(numpy.concatenate(time_bases)) if time_bases else []
+            target_item.time = timebase
+            # Do the conversion
+            callback = partial(_pulse_schedule_resample_callback, timebase)
+            _copy_structure(item, target_item, deepcopy, rename_map, callback)
+
+
+def _pulse_schedule_3to4_logfilter(logrecord: logging.LogRecord) -> bool:
+    """Suppress "'.../time' does not exist in the target IDS." log messages."""
+    return not (logrecord.args and str(logrecord.args[0]).endswith("/time"))
+
+
+def _pulse_schedule_resample_callback(timebase, item: IDSBase, target_item: IDSBase):
+    """Callback from _copy_structure to resample dynamic data on the new timebase"""
+    if item.metadata.ndim == 1 and item.metadata.coordinates[0].is_time_coordinate:
+        # Interpolate 1D dynamic quantities to the common time base
+        time = item.coordinates[0]
+        if len(item) != len(time):
+            raise ValueError(
+                f"Array {item} has a different size than its time base {time}."
+            )
+        is_integer = item.metadata.data_type is IDSDataType.INT
+        value = interp1d(
+            time.value,
+            item.value,
+            "previous" if is_integer else "linear",
+            copy=False,
+            bounds_error=False,
+            fill_value=(item[0], item[-1]),
+            assume_sorted=True,
+        )(timebase)
+        target_item.value = value.astype(numpy.int32) if is_integer else value
+
+
+def _equilibrium_boundary_3to4(eq3: IDSToplevel, eq4: IDSToplevel, deepcopy: bool):
+    """Convert DD3 boundary[[_secondary]_separatrix] to DD4 contour_tree"""
+    # Implement https://github.com/iterorganization/IMAS-Python/issues/60
+    copy = numpy.copy if deepcopy else lambda x: x
+    for ts3, ts4 in zip(eq3.time_slice, eq4.time_slice):
+        if not ts3.global_quantities.psi_axis.has_value:
+            # No magnetic axis, assume no boundary either:
+            continue
+        n_nodes = 1  # magnetic axis
+        if ts3.boundary_separatrix.psi.has_value:
+            n_nodes = 2
+            if (  # boundary_secondary_separatrix is introduced in DD 3.32.0
+                hasattr(ts3, "boundary_secondary_separatrix")
+                and ts3.boundary_secondary_separatrix.psi.has_value
+            ):
+                n_nodes = 3
+        node = ts4.contour_tree.node
+        node.resize(n_nodes)
+        # Magnetic axis (primary O-point)
+        gq = ts3.global_quantities
+        # Note the sign flip for psi due to the COCOS change between DD3 and DD4!
+        axis_is_psi_minimum = -gq.psi_axis < -gq.psi_boundary
+
+        node[0].critical_type = 0 if axis_is_psi_minimum else 2
+        node[0].r = gq.magnetic_axis.r
+        node[0].z = gq.magnetic_axis.z
+        node[0].psi = -gq.psi_axis  # COCOS change
+
+        # X-points
+        if n_nodes >= 2:
+            if ts3.boundary_separatrix.type == 0:  # limiter plasma
+                node[1].critical_type = 2 if axis_is_psi_minimum else 0
+                node[1].r = ts3.boundary_separatrix.active_limiter_point.r
+                node[1].z = ts3.boundary_separatrix.active_limiter_point.z
+            else:
+                node[1].critical_type = 1  # saddle-point (x-point)
+                if len(ts3.boundary_separatrix.x_point):
+                    node[1].r = ts3.boundary_separatrix.x_point[0].r
+                    node[1].z = ts3.boundary_separatrix.x_point[0].z
+                # Additional x-points. N.B. levelset is only stored on the first node
+                for i in range(1, len(ts3.boundary_separatrix.x_point)):
+                    node.resize(len(node) + 1, keep=True)
+                    node[-1].critical_type = 1
+                    node[-1].r = ts3.boundary_separatrix.x_point[i].r
+                    node[-1].z = ts3.boundary_separatrix.x_point[i].z
+                    node[-1].psi = -ts3.boundary_separatrix.psi
+            node[1].psi = -ts3.boundary_separatrix.psi  # COCOS change
+            node[1].levelset.r = copy(ts3.boundary_separatrix.outline.r)
+            node[1].levelset.z = copy(ts3.boundary_separatrix.outline.z)
+
+        if n_nodes >= 3:
+            node[2].critical_type = 1  # saddle-point (x-point)
+            if len(ts3.boundary_secondary_separatrix.x_point):
+                node[2].r = ts3.boundary_secondary_separatrix.x_point[0].r
+                node[2].z = ts3.boundary_secondary_separatrix.x_point[0].z
+                # Additional x-points. N.B. levelset is only stored on the first node
+                for i in range(1, len(ts3.boundary_secondary_separatrix.x_point)):
+                    node.resize(len(node) + 1, keep=True)
+                    node[-1].critical_type = 1
+                    node[-1].r = ts3.boundary_secondary_separatrix.x_point[i].r
+                    node[-1].z = ts3.boundary_secondary_separatrix.x_point[i].z
+                    node[-1].psi = -ts3.boundary_secondary_separatrix.psi
+            node[2].psi = -ts3.boundary_secondary_separatrix.psi  # COCOS change
+            node[2].levelset.r = copy(ts3.boundary_secondary_separatrix.outline.r)
+            node[2].levelset.z = copy(ts3.boundary_secondary_separatrix.outline.z)

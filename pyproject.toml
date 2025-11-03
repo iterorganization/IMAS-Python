@@ -1,7 +1,7 @@
 [build-system]
 # Minimum requirements for the build system to execute.
 # Keep this on a single line for the grep magic of build scripts to work
-requires = ["setuptools>=61", "wheel", "numpy", "gitpython", "saxonche","packaging", "tomli;python_version<'3.11'", "setuptools_scm>8"]
+requires = ["setuptools>=61", "wheel", "numpy", "packaging", "tomli;python_version<'3.11'", "setuptools_scm>8"]
 
 build-backend = "setuptools.build_meta"
 
@@ -56,23 +56,20 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    # FIXME: numpy 2.0 compatibility
-    "numpy>=1.15.4,<2",
+    "numpy>=1.15.4",
     "rich",
     "scipy",
     "click",
     "importlib_resources;python_version<'3.9'",
     "packaging",
     "xxhash >= 2",
-    "saxonche",
-    "gitpython"
+    "imas_data_dictionaries",
 ]
 
 [project.optional-dependencies]
 # these self-dependencies are available since pip 21.2
 all = [
-    "imas-python[test,docs,netcdf,h5py]" 
-    # "imas-python[test,docs,imas-core,netcdf,h5py]" TODO enable when imas-core is available on pypi
+    "imas-python[test,docs]" 
 ]
 docs = [
     "sphinx>=6.0.0,<7.0.0",
@@ -90,6 +87,12 @@ netcdf = [
 h5py = [
     "h5py",
 ]
+xarray = [
+    "xarray",
+]
+saxonche = [
+    "saxonche",
+]
 test = [
     "pytest>=5.4.1",
     "pytest-cov>=0.6",
@@ -99,13 +102,14 @@ test = [
     "asv == 0.6.1",
     # virtualenv is a dependency of asv
     "virtualenv",
-    # Pint and xarray are used in training snippets
+    # Pint is used in training snippets
     "pint",
-    "xarray",
+    # Optional dependencies
+    # TODO add imas-core when it is available on pypi
+    "imas-python[netcdf,h5py,xarray,saxonche]",
 ]
 
 [project.scripts]
-build_DD = "imas.dd_helpers:prepare_data_dictionaries"
 imas = "imas.command.cli:cli"
 
 [project.urls]

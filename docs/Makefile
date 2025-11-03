@@ -31,7 +31,7 @@ clean: Makefile
 # Seems to overwrite autosummary documentation though! So not using this rn
 MODULE_EXCLUDE="../imas/examples/**" "../imas/**"
 apidocs: Makefile
-	sphinx-apidoc --implicit-namespaces -o "$(GENERATEDDIR)" "$(PROJECT_ROOT)/imaspy/" $(MODULE_EXCLUDE)
+	sphinx-apidoc --implicit-namespaces -o "$(GENERATEDDIR)" "$(PROJECT_ROOT)/imas/" $(MODULE_EXCLUDE)
 
 # Sphinx will run this automatically
 autogen: Makefile

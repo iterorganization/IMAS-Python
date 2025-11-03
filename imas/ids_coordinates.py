@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Logic for interpreting coordinates in an IDS.
-"""
+"""Logic for interpreting coordinates in an IDS."""
 
 import logging
 from contextlib import contextmanager
@@ -235,7 +234,9 @@ class IDSCoordinates:
                     f"matching sizes:\n{sizes}"
                 )
             if len(nonzero_alternatives) > 1:
-                logger.info("Multiple alternative coordinates are set, using the first")
+                logger.debug(
+                    "Multiple alternative coordinates are set, using the first"
+                )
             return nonzero_alternatives[0]
 
         # Handle alternative coordinates, currently (DD 3.38.1) the `coordinate in

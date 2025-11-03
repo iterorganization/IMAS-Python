@@ -60,7 +60,7 @@ Bundled Data Dictionary definitions
 
 IMAS-Python comes bundled [#DDdefs]_ with many versions of the Data Dictionary definitions.
 You can find out which versions are available by calling
-:py:meth:`imas.dd_zip.dd_xml_versions`.
+``imas.dd_zip.dd_xml_versions``.
 
 
 Converting an IDS between Data Dictionary versions
@@ -290,6 +290,6 @@ build, you can use them like you normally would.
 
 .. rubric:: Footnotes
 
-.. [#DDdefs] To be more precise, the Data Dictionary definitions are generated when the
-    IMAS-Python package is created. See :ref:`this reference <DD background>` for more
-    details.
+.. [#DDdefs] To be more precise, the Data Dictionary definitions are provided by the
+    `IMAS Data Dictionaries <http://pypi.org/project/imas-data-dictionaries/>`__
+    package.

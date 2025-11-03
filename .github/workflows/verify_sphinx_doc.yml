@@ -1,0 +1,53 @@
+name: verify-sphinx-doc-generation
+
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout IMAS-Python sources
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          with:
+          # until saxonche is available in 3.13
+          # https://saxonica.plan.io/issues/6561
+          python-version: "<3.13"
+
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+
+
+      - name: Set up Python virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+
+      - name: Install build dependencies
+        run: |
+          pip install --upgrade pip setuptools wheel build
+
+      - name: Build package
+        run: |
+          rm -rf dist
+          python -m build .
+
+      - name: Install package and dependencies
+        run: |
+          pip install "$(readlink -f dist/*.whl)[docs,netcdf]"
+
+      - name: Debug dependencies
+        run: |
+          pip freeze
+
+      - name: Build Sphinx documentation
+        run: |
+          export SPHINXOPTS='-W -n --keep-going'
+          make -C docs clean html

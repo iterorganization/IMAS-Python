@@ -13,6 +13,29 @@ To get started, you can install it from `pypi.org <https://pypi.org/project/imas
 
     pip install imas-python
 
+You can also install optional dependencies (e.g. netCDF and xarray):
+
+.. code-block:: bash
+
+    pip install imas-python[netcdf,xarray]
+
+
+List of optional dependencies
+-----------------------------
+
+- ``netcdf``: enables storing/loading of IDS to/from netCDF files
+- ``xarray``: enables loading IDS (entire IDS or part of it) into an xarray ``dataset``
+- ``h5py``: enables ``analyze-db`` CLI option 
+- ``docs``: installs required packages to build the Sphinx documentation
+- ``test``: installs required packages to run the tests with ``pytest`` and ``asv``
+- ``saxonche``: installs saxonche to enable creation of MDSplus models for the selected versions of the IMAS Data Dictionary (only relevant when working with ``imas_core``)
+
+.. note::
+
+    Some tests will be skipped unless you also have ``imas_core`` installed
+    (it is not yet available on PyPI, so you will need to install it from sources
+    if you have access to them at https://git.iter.org/projects/IMAS/repos/al-core) 
+
 
 Local installation from sources
 -------------------------------
@@ -56,7 +79,7 @@ This is how to run the IMAS-Python test suite:
     # inside the IMAS-Python git repository
     pytest imas --mini
 
-    # run with a specific backend
+    # run with a specific backend, requires IMAS-Core installed
     pytest imas --ascii --mini
 
 And to build the IMAS-Python documentation, execute:

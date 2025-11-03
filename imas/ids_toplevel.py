@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Represents a Top-level IDS (like ``core_profiles``, ``equilibrium``, etc)
-"""
+"""Represents a Top-level IDS (like ``core_profiles``, ``equilibrium``, etc)"""
 
 import logging
 import os
@@ -12,11 +11,10 @@ from typing import TYPE_CHECKING, Optional
 import numpy
 
 import imas
-from imas.backends.imas_core.imas_interface import ll_interface, lowlevel
+from imas.backends.imas_core.imas_interface import lowlevel
 from imas.exception import ValidationError
 from imas.ids_base import IDSDoc
 from imas.ids_defs import (
-    ASCII_BACKEND,
     ASCII_SERIALIZER_PROTOCOL,
     CHAR_DATA,
     DEFAULT_SERIALIZER_PROTOCOL,
@@ -47,19 +45,12 @@ def _serializer_tmpdir() -> str:
 
 def _create_serialization_dbentry(filepath: str, dd_version: str) -> "DBEntry":
     """Create a temporary DBEntry for use in the ASCII serialization protocol."""
-    if ll_interface._al_version.major == 4:  # AL4 compatibility
-        dbentry = imas.DBEntry(
-            ASCII_BACKEND, "serialize", 1, 1, "serialize", dd_version=dd_version
-        )
-        dbentry.create(options=f"-fullpath {filepath}")
-        return dbentry
-    else:  # AL5
-        path = Path(filepath)
-        return imas.DBEntry(
-            f"imas:ascii?path={path.parent};filename={path.name}",
-            "w",
-            dd_version=dd_version,
-        )
+    path = Path(filepath)
+    return imas.DBEntry(
+        f"imas:ascii?path={path.parent};filename={path.name}",
+        "w",
+        dd_version=dd_version,
+    )
 
 
 class IDSToplevel(IDSStructure):

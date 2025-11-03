@@ -1,13 +1,16 @@
 name: Test using pytest
 
-on: push
+on: 
+    push:
+    pull_request:
+      types: [opened, synchronize, reopened]
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]  # Test on multiple Python versions
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]  # Test on multiple Python versions
     
     steps:
       - name: Checkout repository
@@ -17,8 +20,6 @@ jobs:
 
         uses: actions/setup-python@v4
         with:
-          # until saxonche is available in 3.13
-          # https://saxonica.plan.io/issues/6561
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
@@ -28,7 +29,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip setuptools wheel
-          pip install .[h5py,netcdf,test]
+          pip install .[test]
 
       - name: Run tests
         run: |

@@ -11,6 +11,11 @@ data structures. IMAS-Python is designed for, but not necessarily bound to,
 interacting with Interface Data Structures (IDSs) as defined by the
 Integrated Modelling & Analysis Suite (IMAS) Data Model.
 
+.. note::
+
+    IMAS-Python was formerly known as IMASPy, and was renamed with the release
+    of the major version 2. 
+
 It provides:
 
 - An easy-to-install and easy-to-get started package by
@@ -46,6 +51,7 @@ Manual
    cli
    netcdf
    changelog
+   examples
 
 .. toctree::
    :caption: IMAS-Python training courses

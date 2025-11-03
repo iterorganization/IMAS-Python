@@ -12,7 +12,6 @@ import tempfile
 import time
 import uuid
 from pathlib import Path
-from saxonche import PySaxonProcessor
 from subprocess import CalledProcessError, check_output
 from zlib import crc32
 
@@ -245,10 +244,19 @@ def transform_with_xslt(xslt_processor, source, xslfile, output_file):
 def create_model_ids_xml(cache_dir_path, fname, version):
     """Use Saxon/C to compile an ids.xml suitable for creating an MDSplus model."""
     try:
+        import saxonche
+    except ImportError:
+        raise RuntimeError(
+            "Building mdsplus models requires the 'saxonche' python package. "
+            "Please install this package (for example with 'pip install saxonche') "
+            "and try again."
+        )
+
+    try:
         with as_file(files("imas") / "assets" / "IDSDef2MDSpreTree.xsl") as xslfile:
             output_file = Path(cache_dir_path) / "ids.xml"
 
-            with PySaxonProcessor(license=False) as proc:
+            with saxonche.PySaxonProcessor(license=False) as proc:
                 xslt_processor = proc.new_xslt30_processor()
                 xdm_ddgit = proc.make_string_value(str(version) or fname)
                 xslt_processor.set_parameter("DD_GIT_DESCRIBE", xdm_ddgit)
@@ -356,25 +364,3 @@ def jTraverser_jar() -> Path:
         return jar_path
     else:
         raise MDSPlusModelError("jTraverser.jar not found. Is MDSplus-Java available?")
-
-
-def ensure_data_dir(user: str, tokamak: str, version: str, run: int) -> None:
-    """Ensure that a data dir exists with a similar algorithm that
-    the MDSplus backend uses to set the data path.
-    See also mdsplus_backend.cpp:751 (setDataEnv)"""
-    if user == "public":
-        if "IMAS_HOME" not in os.environ:
-            raise RuntimeError(
-                "Environment variable IMAS_HOME must be set to access "
-                "the public database."
-            )
-        dbdir = Path(os.environ["IMAS_HOME"]) / "shared" / "imasdb" / tokamak / version
-    elif user[0] == "/":
-        dbdir = Path(user) / tokamak / version
-    else:
-        dbdir = Path.home() / "public" / "imasdb" / tokamak / version
-
-    # Check subfolder based on run
-    assert 0 <= run <= 99_999
-    index = run // 10_000
-    (dbdir / str(index)).mkdir(parents=True, exist_ok=True)

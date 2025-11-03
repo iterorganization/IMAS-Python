@@ -72,11 +72,7 @@ Data Dictionary building and loading
 The following submodules are responsible for building the Data Dictionary and loading DD
 definitions at runtime.
 
--   :py:mod:`imas.dd_helpers` handles building the ``IDSDef.zip`` file, containing all
-    versions of the Data Dictionary since ``3.22.0``.
-
 -   :py:mod:`imas.dd_zip` handles loading the Data Dictionary definitions at run time.
-    These definitions can be loaded from an ``IDSDef.zip`` or from a custom XML file.
 
 
 .. _imas_architecture/IDS_nodes:

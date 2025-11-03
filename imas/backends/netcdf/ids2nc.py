@@ -1,21 +1,13 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""NetCDF IO support for IMAS-Python. Requires [netcdf] extra dependencies.
-"""
-
-from typing import Iterator, Tuple
+"""NetCDF IO support for IMAS-Python. Requires [netcdf] extra dependencies."""
 
 import netCDF4
-import numpy
 from packaging import version
 
-from imas.backends.netcdf.nc_metadata import NCMetadata
+from imas.backends.netcdf.ids_tensorizer import SHAPE_DTYPE, IDSTensorizer, dtypes
 from imas.exception import InvalidNetCDFEntry
-from imas.ids_base import IDSBase
 from imas.ids_data_type import IDSDataType
-from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
-from imas.ids_struct_array import IDSStructArray
-from imas.ids_structure import IDSStructure
 from imas.ids_toplevel import IDSToplevel
 
 default_fillvals = {
@@ -24,36 +16,9 @@ default_fillvals = {
     IDSDataType.FLT: netCDF4.default_fillvals["f8"],
     IDSDataType.CPX: netCDF4.default_fillvals["f8"] * (1 + 1j),
 }
-dtypes = {
-    IDSDataType.INT: numpy.dtype(numpy.int32),
-    IDSDataType.STR: str,
-    IDSDataType.FLT: numpy.dtype(numpy.float64),
-    IDSDataType.CPX: numpy.dtype(numpy.complex128),
-}
-SHAPE_DTYPE = numpy.int32
 
 
-def nc_tree_iter(
-    node: IDSStructure, aos_index: Tuple[int, ...] = ()
-) -> Iterator[Tuple[Tuple[int, ...], IDSBase]]:
-    """Tree iterator that tracks indices of all ancestor array of structures.
-
-    Args:
-        node: IDS node to iterate over
-
-    Yields:
-        (aos_index, node) for all filled nodes.
-    """
-    for child in node.iter_nonempty_():
-        yield (aos_index, child)
-        if isinstance(child, IDSStructArray):
-            for i in range(len(child)):
-                yield from nc_tree_iter(child[i], aos_index + (i,))
-        elif isinstance(child, IDSStructure):
-            yield from nc_tree_iter(child, aos_index)
-
-
-class IDS2NC:
+class IDS2NC(IDSTensorizer):
     """Class responsible for storing an IDS to a NetCDF file."""
 
     def __init__(self, ids: IDSToplevel, group: netCDF4.Group) -> None:
@@ -63,25 +28,9 @@ class IDS2NC:
             ids: IDSToplevel to store in the netCDF group
             group: Empty netCDF group to store the IDS in.
         """
-        self.ids = ids
-        """IDS to store."""
+        super().__init__(ids, [])  # pass empty list: tensorize full IDS
         self.group = group
         """NetCDF Group to store the IDS in."""
-
-        self.ncmeta = NCMetadata(ids.metadata)
-        """NetCDF related metadata."""
-        self.dimension_size = {}
-        """Map dimension name to its size."""
-        self.filled_data = {}
-        """Map of IDS paths to filled data nodes."""
-        self.filled_variables = set()
-        """Set of filled IDS variables"""
-        self.homogeneous_time = (
-            ids.ids_properties.homogeneous_time == IDS_TIME_MODE_HOMOGENEOUS
-        )
-        """True iff the IDS time mode is homogeneous."""
-        self.shapes = {}
-        """Map of IDS paths to data shape arrays."""
 
     def run(self) -> None:
         """Store the IDS in the NetCDF group."""
@@ -89,85 +38,7 @@ class IDS2NC:
         self.determine_data_shapes()
         self.create_dimensions()
         self.create_variables()
-        # Synchronize variables to disk
-        # This is not strictly required (automatically done by netCDF4 when needed), but
-        # by separating it we get more meaningful profiling statistics
-        self.group.sync()
         self.store_data()
-
-    def collect_filled_data(self) -> None:
-        """Collect all filled data in the IDS and determine dimension sizes.
-
-        Results are stored in :attr:`filled_data` and :attr:`dimension_size`.
-        """
-        # Initialize dictionary with all paths that could exist in this IDS
-        filled_data = {path: {} for path in self.ncmeta.paths}
-        dimension_size = {}
-        get_dimensions = self.ncmeta.get_dimensions
-
-        for aos_index, node in nc_tree_iter(self.ids):
-            path = node.metadata.path_string
-            filled_data[path][aos_index] = node
-            ndim = node.metadata.ndim
-            if not ndim:
-                continue
-            dimensions = get_dimensions(path, self.homogeneous_time)
-            # We're only interested in the non-tensorized dimensions: [-ndim:]
-            for dim_name, size in zip(dimensions[-ndim:], node.shape):
-                dimension_size[dim_name] = max(dimension_size.get(dim_name, 0), size)
-
-        # Remove paths without data
-        self.filled_data = {path: data for path, data in filled_data.items() if data}
-        self.filled_variables = {path.replace("/", ".") for path in self.filled_data}
-        # Store dimension sizes
-        self.dimension_size = dimension_size
-
-    def determine_data_shapes(self) -> None:
-        """Determine tensorized data shapes and sparsity, save in :attr:`shapes`."""
-        get_dimensions = self.ncmeta.get_dimensions
-
-        for path, nodes_dict in self.filled_data.items():
-            metadata = self.ids.metadata[path]
-            # Structures don't have a size
-            if metadata.data_type is IDSDataType.STRUCTURE:
-                continue
-            ndim = metadata.ndim
-            dimensions = get_dimensions(path, self.homogeneous_time)
-
-            # node shape if it is completely filled
-            full_shape = tuple(self.dimension_size[dim] for dim in dimensions[-ndim:])
-
-            if len(dimensions) == ndim:
-                # Data at this path is not tensorized
-                node = nodes_dict[()]
-                sparse = node.shape != full_shape
-                if sparse:
-                    shapes = numpy.array(node.shape, dtype=SHAPE_DTYPE)
-
-            else:
-                # Data is tensorized, determine if it is homogeneously shaped
-                aos_dims = get_dimensions(self.ncmeta.aos[path], self.homogeneous_time)
-                shapes_shape = [self.dimension_size[dim] for dim in aos_dims]
-                if ndim:
-                    shapes_shape.append(ndim)
-                shapes = numpy.zeros(shapes_shape, dtype=SHAPE_DTYPE)
-
-                if ndim:  # ND types have a shape
-                    for aos_coords, node in nodes_dict.items():
-                        shapes[aos_coords] = node.shape
-                    sparse = not numpy.array_equiv(shapes, full_shape)
-
-                else:  # 0D types don't have a shape
-                    for aos_coords in nodes_dict.keys():
-                        shapes[aos_coords] = 1
-                    sparse = not shapes.all()
-                    shapes = None
-
-            if sparse:
-                self.shapes[path] = shapes
-                if ndim:
-                    # Ensure there is a pseudo-dimension f"{ndim}D" for shapes variable
-                    self.dimension_size[f"{ndim}D"] = ndim
 
     def create_dimensions(self) -> None:
         """Create netCDF dimensions."""
@@ -253,14 +124,6 @@ class IDS2NC:
                         "shape is unset (i.e. filled with _Fillvalue)."
                     )
 
-    def filter_coordinates(self, path: str) -> str:
-        """Filter the coordinates list from NCMetadata to filled variables only."""
-        return " ".join(
-            coordinate
-            for coordinate in self.ncmeta.get_coordinates(path, self.homogeneous_time)
-            if coordinate in self.filled_variables
-        )
-
     def store_data(self) -> None:
         """Store data in the netCDF variables"""
         for path, nodes_dict in self.filled_data.items():
@@ -298,22 +161,4 @@ class IDS2NC:
 
             else:
                 # Data is tensorized: tensorize in-memory
-                # TODO: depending on the data, tmp_var may be HUGE, we may need a more
-                # efficient assignment algorithm for large and/or irregular data
-                tmp_var = numpy.full(var.shape, default_fillvals[metadata.data_type])
-                if metadata.data_type is IDSDataType.STR:
-                    tmp_var = numpy.asarray(tmp_var, dtype=object)
-
-                # Fill tmp_var
-                if shapes is None:
-                    # Data is not sparse, so we can assign to the aos_coords
-                    for aos_coords, node in nodes_dict.items():
-                        tmp_var[aos_coords] = node.value
-                else:
-                    # Data is sparse, so we must select a slice
-                    for aos_coords, node in nodes_dict.items():
-                        tmp_var[aos_coords + tuple(map(slice, node.shape))] = node.value
-
-                # Assign data to variable
-                var[()] = tmp_var
-                del tmp_var
+                var[()] = self.tensorize(path, default_fillvals[metadata.data_type])

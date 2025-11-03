@@ -1,19 +1,18 @@
 import logging
 import os
-from typing import Iterator, List, Optional, Tuple
+from typing import Optional
 
 import netCDF4
 import numpy as np
 
 from imas.backends.netcdf import ids2nc
 from imas.backends.netcdf.nc_metadata import NCMetadata
+from imas.backends.netcdf.iterators import indexed_tree_iter
 from imas.exception import InvalidNetCDFEntry
-from imas.ids_base import IDSBase
 from imas.ids_convert import NBCPathMap
 from imas.ids_data_type import IDSDataType
 from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
 from imas.ids_metadata import IDSMetadata
-from imas.ids_structure import IDSStructure
 from imas.ids_toplevel import IDSToplevel
 
 logger = logging.getLogger(__name__)
@@ -24,49 +23,6 @@ def variable_error(var, issue, value, expected=None) -> InvalidNetCDFEntry:
         f"Variable `{var.name}` has incorrect {issue}: `{value}`."
         + (f" Was expecting `{expected}`." if expected is not None else "")
     )
-
-
-def split_on_aos(metadata: IDSMetadata):
-    paths = []
-    curpath = metadata.name
-
-    item = metadata
-    while item._parent.data_type is not None:
-        item = item._parent
-        if item.data_type is IDSDataType.STRUCT_ARRAY:
-            paths.append(curpath)
-            curpath = item.name
-        else:
-            curpath = f"{item.name}/{curpath}"
-    paths.append(curpath)
-    return paths[::-1]
-
-
-IndexedNode = Tuple[Tuple[int, ...], IDSBase]
-
-
-def tree_iter(structure: IDSStructure, metadata: IDSMetadata) -> Iterator[IndexedNode]:
-    paths = split_on_aos(metadata)
-    if len(paths) == 1:
-        yield (), structure[paths[0]]
-    else:
-        yield from _tree_iter(structure, paths, ())
-
-
-def _tree_iter(
-    structure: IDSStructure, paths: List[str], curindex: Tuple[int, ...]
-) -> Iterator[IndexedNode]:
-    aos_path, *paths = paths
-    aos = structure[aos_path]
-
-    if len(paths) == 1:
-        path = paths[0]
-        for i, node in enumerate(aos):
-            yield curindex + (i,), node[path]
-
-    else:
-        for i, node in enumerate(aos):
-            yield from _tree_iter(node, paths, curindex + (i,))
 
 
 class NC2IDS:
@@ -169,7 +125,7 @@ class NC2IDS:
             if metadata.data_type is IDSDataType.STRUCT_ARRAY:
                 if "sparse" in var.ncattrs():
                     shapes = self.group[var_name + ":shape"][()]
-                    for index, node in tree_iter(self.ids, target_metadata):
+                    for index, node in indexed_tree_iter(self.ids, target_metadata):
                         node.resize(shapes[index][0])
 
                 else:
@@ -178,7 +134,7 @@ class NC2IDS:
                         metadata.path_string, self.homogeneous_time
                     )[-1]
                     size = self.group.dimensions[dim].size
-                    for _, node in tree_iter(self.ids, target_metadata):
+                    for _, node in indexed_tree_iter(self.ids, target_metadata):
                         node.resize(size)
 
                 continue
@@ -190,7 +146,7 @@ class NC2IDS:
             if "sparse" in var.ncattrs():
                 if metadata.ndim:
                     shapes = self.group[var_name + ":shape"][()]
-                    for index, node in tree_iter(self.ids, target_metadata):
+                    for index, node in indexed_tree_iter(self.ids, target_metadata):
                         shape = shapes[index]
                         if shape.all():
                             # NOTE: bypassing IDSPrimitive.value.setter logic
@@ -198,7 +154,7 @@ class NC2IDS:
                                 index + tuple(map(slice, shape))
                             ]
                 else:
-                    for index, node in tree_iter(self.ids, target_metadata):
+                    for index, node in indexed_tree_iter(self.ids, target_metadata):
                         value = data[index]
                         if value != getattr(var, "_FillValue", None):
                             # NOTE: bypassing IDSPrimitive.value.setter logic
@@ -211,7 +167,7 @@ class NC2IDS:
                 self.ids[target_metadata.path].value = data
 
             else:
-                for index, node in tree_iter(self.ids, target_metadata):
+                for index, node in indexed_tree_iter(self.ids, target_metadata):
                     # NOTE: bypassing IDSPrimitive.value.setter logic
                     node._IDSPrimitive__value = data[index]
 
@@ -361,6 +317,14 @@ class LazyContext:
         self.index = index
 
     def get_child(self, child):
+        """
+        Retrieves and sets the appropriate context or value for a given
+        child node based on its metadata.
+
+        Args:
+            child: The child IDS node which should be lazy loaded.
+
+        """
         metadata = child.metadata
         path = metadata.path_string
         data_type = metadata.data_type
@@ -402,20 +366,55 @@ class LazyContext:
 
             if value is not None:
                 if isinstance(value, np.ndarray):
-                    # Convert the numpy array to a read-only view
-                    value = value.view()
-                    value.flags.writeable = False
+                    if value.ndim == 0:  # Unpack 0D numpy arrays:
+                        value = value.item()
+                    else:
+                        # Convert the numpy array to a read-only view
+                        value = value.view()
+                        value.flags.writeable = False
                 # NOTE: bypassing IDSPrimitive.value.setter logic
                 child._IDSPrimitive__value = value
 
 
 class LazyArrayStructContext(LazyContext):
+    """
+    LazyArrayStructContext is a subclass of LazyContext that provides a context for
+    handling structured arrays in a lazy manner. It is initialized with a NetCDF to
+    IDS mapping object, an index, and a size.
+    """
+
     def __init__(self, nc2ids, index, size):
+        """
+        Initialize the instance with nc2ids, index, and size.
+
+        Args:
+            nc2ids: The NetCDF to IDS mapping object.
+            index: The index within the NetCDF file.
+            size: The size of the data to be processed.
+        """
         super().__init__(nc2ids, index)
         self.size = size
 
     def get_context(self):
+        """
+        Returns the current context.
+
+        This method returns the current instance of the class, which is expected
+        to have a 'size' attribute as required by IDSStructArray.
+
+        Returns:
+            The current instance of the class.
+        """
         return self  # IDSStructArray expects to get something with a size attribute
 
     def iterate_to_index(self, index: int) -> LazyContext:
+        """
+        Iterates to a specified index and returns a LazyContext object.
+
+        Args:
+            index (int): The index to iterate to.
+
+        Returns:
+            LazyContext: A LazyContext object initialized with the updated index.
+        """
         return LazyContext(self.nc2ids, self.index + (index,))

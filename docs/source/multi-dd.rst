@@ -117,6 +117,25 @@ Explicit conversion
     versions, the corresponding data is not copied. IMAS-Python provides logging to indicate
     when this happens.
 
+.. rubric:: DD3 -> DD4 special rule: name + identifier -> description + name (GH#59)
+
+IMAS‑Python implements an additional explicit conversion rule (see GH#59) to improve 
+migration of Machine Description parts of IDSs when moving from major version 3 to 4. 
+The rule targets simple sibling pairs on the same parent that provide both a "name" 
+and an "identifier" field and that are NOT part of an "identifier structure" (the 
+parent must not also have an "index" sibling). When applicable the rule performs the 
+following renames during explicit DD3->DD4 conversion:
+
+- DD3: parent/name       -> DD4: parent/description
+- DD3: parent/identifier -> DD4: parent/name
+
+The conversion is applied only when the corresponding target fields exist in the
+DD4 definition and when no earlier mapping already covers the same paths. This
+is performed by the explicit conversion machinery (for example via
+imas.convert_ids or DBEntry explicit conversion) and is not guaranteed to be
+applied by automatic conversion when reading/writing from a backend.
+
+In some cases like the one above, reverse conversion is also allowed(DD 4.0.0 -> 3.41.1)
 
 .. _`Supported conversions`:
 
@@ -146,6 +165,9 @@ explicit conversion mechanisms.
   Changed definition of open/closed contours, Yes, No
   Changed definition of ``space/coordinates_type`` in GGD grids, Yes, No
   Migrate obsolescent ``ids_properties/source`` to ``ids_properties/provenance``, Yes, No
+  Convert the multiple time-bases in the ``pulse_schedule`` IDS [#ps3to4]_, Yes, No
+  Convert name + identifier -> description + name, Yes, Yes
+  Convert equilibrium ``boundary\_[secondary\_]separatrix`` to ``contour_tree`` [#contourtree]_, Yes, No
 
 .. [#rename] Quantities which have been renamed between the two DD versions. For
   example, the ``ec/beam`` Array of Structures in the ``pulse_schedule`` IDS,
@@ -175,6 +197,21 @@ explicit conversion mechanisms.
 .. [#ignore_type_change] These type changes are not supported. Quantities in the
     destination IDS will remain empty.
 
+.. [#ps3to4] In Data Dictionary 3.39.0 and older, all dynamic quantities in the
+    ``pulse_schedule`` IDS had their own time array. In DD 4.0.0 this was
+    restructured to one time array per component (for example `ec/time
+    <https://imas-data-dictionary.readthedocs.io/en/latest/generated/ids/pulse_schedule.html#pulse_schedule-ec-time>`__).
+    This migration constructs a common time base per subgroup, and interpolates
+    the dynamic quantities within the group to the new time base. Resampling
+    uses `previous neighbour` interpolation for integer quantities, and linear
+    interpolation otherwise. See also:
+    https://github.com/iterorganization/IMAS-Python/issues/21.
+
+.. [#contourtree] Fills the `contour_tree
+    <https://imas-data-dictionary.readthedocs.io/en/latest/generated/ids/equilibrium.html#equilibrium-time_slice-contour_tree>`__
+    in the ``equilibrium`` IDS based on data in the ``boundary_separatrix`` and
+    ``boundary_secondary_separatrix`` structures from DD3. See also:
+    https://github.com/iterorganization/IMAS-Python/issues/60. 
 
 .. _`DD background`:
 
@@ -197,21 +234,14 @@ Automated tests have been provided that check the loading of all of the DD
 versions tagged in the data-dictionary git repository.
 
 
-Extending the DD set
-''''''''''''''''''''
+Data Dictionary definitions
+'''''''''''''''''''''''''''
 
-Use the command ``python setup.py build_DD`` to build a new ``IDSDef.zip``. This
-fetches all tags from the data dictionary git repository and builds the ``IDSDef.zip``.
+The Data Dictionary definitions used by IMAS-Python are provided by the `IMAS Data
+Dictionaries <http://pypi.org/project/imas-data-dictionaries/>`__ package.
+Please update this package if you need a more recent version of the data dictionary. For
+example, using ``pip``:
 
-IMAS-Python searches for an ``IDSDef.zip`` in the following locations:
+.. code-block:: bash
 
-1.  The environment variable ``$IMAS_DDZIP`` (path to a zip file)
-2.  The file ``./IDSDef.zip`` in the current working directory
-3.  In the local configuration folder: ``~/.config/imas/IDSDef.zip``, or
-    ``$XDG_CONFIG_DIR/imas/IDSDef.zip`` (if the environment variable
-    ``$XDG_CONFIG_DIR`` is set)
-4.  The zipfile bundled with the IMAS-Python installation: ``assets/IDSDef.zip``
-
-All paths are searched in order when loading the definitions of a specific data
-dictionary version: the first zip file that contains the definitions of the requested
-version is used.
+  pip install --upgrade imas-data-dictionaries

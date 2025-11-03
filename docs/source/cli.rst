@@ -121,8 +121,8 @@ process these files with ``imas process-db-analysis``. This will:
     variable).
 2.  These results are summarized in a table, showing per IDS:
 
-    - The number of data fields [#data_fields]_ that were filled in *any* of the
-      analyzed data entries.
+    - The number of data fields [#data_fields]_ that were filled in *any* occurrence of
+      the IDS in *any* of the analyzed data entries.
     - The total number of data fields [#data_fields]_ that the Data Dictionary
       defines for this IDS.
     - The percentage of fields filled.
