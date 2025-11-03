@@ -102,7 +102,6 @@ def print_ids(uri, ids, occurrence, print_all):
     ids         Name of the IDS to print (e.g. "core_profiles").
     occurrence  Which occurrence to print (defaults to 0).
     """
-    min_version_guard(Version("5.0"))
     setup_rich_log_handler(False)
 
     with DBEntry(uri, "r") as dbentry:
