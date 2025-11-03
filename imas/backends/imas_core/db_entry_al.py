@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 
 from packaging.version import Version
 
+import imas
 from imas.backends.db_entry_impl import GetSampleParameters, GetSliceParameters
 from imas.db_entry import DBEntryImpl
 from imas.exception import DataEntryException, LowlevelError
@@ -280,6 +281,16 @@ class ALDBEntryImpl(DBEntryImpl):
         # Create a version conversion map, if needed
         nbc_map = None
         if ids._version != self._ids_factory._version:
+            if ids._version.split(".")[0] != self._ids_factory._version.split(".")[0]:
+                logger.warning(
+                    "Provided IDS uses DD %s which has a different major version than "
+                    "the Data Entry (%s). IMAS-Python will convert the data "
+                    "automatically, but this does not cover all changes. "
+                    "See %s/multi-dd.html#conversion-of-idss-between-dd-versions",
+                    ids._version,
+                    self._ids_factory._version,
+                    imas.PUBLISHED_DOCUMENTATION_ROOT,
+                )
             ddmap, source_is_older = dd_version_map_from_factories(
                 ids_name, ids._parent, self._ids_factory
             )

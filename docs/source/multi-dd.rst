@@ -23,7 +23,7 @@ example:
     factory_3_32_0 = imas.IDSFactory("3.32.0")  # Use DD version 3.32.0
 
     # Will write IDSs to the backend in DD version 3.32.0
-    dbentry = imas.DBEntry(imas.ids_defs.HDF5_BACKEND, "TEST", 10, 2, version="3.32.0")
+    dbentry = imas.DBEntry("imas:hdf5?path=dd3.32.0-output/", "w", dd_version="3.32.0")
     dbentry.create()
 
 .. seealso:: :ref:`multi-dd training`
