@@ -4,7 +4,6 @@
 """
 
 import logging
-import sys
 from copy import deepcopy
 from typing import Optional, Tuple
 
