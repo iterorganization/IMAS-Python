@@ -120,13 +120,58 @@ class IDSStructArray(IDSBase):
         struct = IDSStructure(self, self.metadata)
         return struct
 
+    @staticmethod
+    def _format_slice(slice_obj: slice) -> str:
+        """Format a slice object as a string.
+
+        Args:
+            slice_obj: The slice object to format
+
+        Returns:
+            String representation like "[1:5]", "[::2]", etc.
+        """
+        start = slice_obj.start if slice_obj.start is not None else ""
+        stop = slice_obj.stop if slice_obj.stop is not None else ""
+        step = slice_obj.step if slice_obj.step is not None else ""
+
+        if step:
+            return f"[{start}:{stop}:{step}]"
+        else:
+            return f"[{start}:{stop}]"
+
     def __getitem__(self, item):
-        # value is a list, so the given item should be convertable to integer
-        # TODO: perhaps we should allow slices as well?
-        list_idx = int(item)
-        if self._lazy:
-            self._load(item)
-        return self.value[list_idx]
+        """Get element(s) from the struct array.
+
+        Args:
+            item: Integer index or slice object
+
+        Returns:
+            A single IDSStructure if item is an int, or an IDSSlice if item is a slice
+        """
+        if isinstance(item, slice):
+            # Handle slice by returning an IDSSlice
+            from imas.ids_slice import IDSSlice
+
+            # Get the matched elements
+            matched_elements = self.value[item]
+            if not isinstance(matched_elements, list):
+                matched_elements = [matched_elements]
+
+            # Build the slice path representation
+            slice_str = self._format_slice(item)
+
+            return IDSSlice(
+                self,
+                self.metadata,
+                matched_elements,
+                slice_str,
+            )
+        else:
+            # Handle integer index
+            list_idx = int(item)
+            if self._lazy:
+                self._load(item)
+            return self.value[list_idx]
 
     def __setitem__(self, item, value):
         # value is a list, so the given item should be convertable to integer

@@ -1,0 +1,281 @@
+# This file is part of IMAS-Python.
+# You should have received the IMAS-Python LICENSE file with this project.
+"""IDSSlice represents a collection of IDS nodes matching a slice expression.
+
+This module provides the IDSSlice class, which enables slicing of arrays of
+structures while maintaining the hierarchy and allowing further operations on
+the resulting collection.
+"""
+
+import logging
+from typing import Any, Iterator, List, Union
+
+
+from imas.ids_base import IDSBase
+
+logger = logging.getLogger(__name__)
+
+
+class IDSSlice(IDSBase):
+    """Represents a slice of IDS struct array elements.
+
+    When slicing an IDSStructArray, instead of returning a regular Python list,
+    an IDSSlice is returned. This allows for:
+    - Tracking the slice operation in the path
+    - Further slicing of child elements
+    - Attribute access on all matched elements
+    - Iteration over matched elements
+    """
+
+    __slots__ = ["_parent", "metadata", "_matched_elements", "_slice_path", "_lazy"]
+
+    def __init__(
+        self,
+        parent: IDSBase,
+        metadata: Any,
+        matched_elements: List[IDSBase],
+        slice_path: str,
+    ):
+        """Initialize IDSSlice.
+
+        Args:
+            parent: The parent IDSStructArray that was sliced
+            metadata: Metadata from the parent array
+            matched_elements: List of elements that matched the slice
+            slice_path: String representation of the slice operation (e.g., "[8:]")
+        """
+        self._parent = parent
+        self.metadata = metadata
+        self._matched_elements = matched_elements
+        self._slice_path = slice_path
+        self._lazy = parent._lazy
+
+    @property
+    def _toplevel(self):
+        """Return the toplevel instance this node belongs to"""
+        return self._parent._toplevel
+
+    @property
+    def _path(self) -> str:
+        """Build the path to this slice.
+
+        The path includes the parent's path plus the slice operation.
+        """
+        return self._parent._path + self._slice_path
+
+    def __len__(self) -> int:
+        """Return the number of elements matched by this slice."""
+        return len(self._matched_elements)
+
+    def __iter__(self) -> Iterator[IDSBase]:
+        """Iterate over all matched elements."""
+        return iter(self._matched_elements)
+
+    def __getitem__(self, item: Union[int, slice]) -> Union[IDSBase, "IDSSlice"]:
+        """Get element(s) from the slice.
+
+        Args:
+            item: Index or slice to apply to the matched elements
+
+        Returns:
+            A single element if item is an int, or an IDSSlice if item is a slice
+
+        Raises:
+            IndexError: If the index is out of range
+            AttributeError: If trying to index into elements that aren't indexable
+        """
+        if isinstance(item, slice):
+            # Further slice the matched elements
+            sliced_elements = self._matched_elements[item]
+            if not isinstance(sliced_elements, list):
+                sliced_elements = [sliced_elements]
+
+            # Build the slice path representation
+            slice_str = self._format_slice(item)
+            new_path = self._slice_path + slice_str
+
+            return IDSSlice(
+                self._parent,
+                self.metadata,
+                sliced_elements,
+                new_path,
+            )
+        else:
+            # Return a single element by index
+            return self._matched_elements[int(item)]
+
+    def __getattr__(self, name: str) -> "IDSSlice":
+        """Access a child attribute on all matched elements.
+
+        This returns a new IDSSlice containing the child attribute from
+        each matched element.
+
+        Args:
+            name: Name of the attribute to access
+
+        Returns:
+            A new IDSSlice containing the child attribute from each matched element
+
+        Raises:
+            AttributeError: If the attribute doesn't exist
+        """
+        # Avoid issues with special attributes
+        if name.startswith("_"):
+            raise AttributeError(f"IDSSlice has no attribute '{name}'")
+
+        # Access the attribute on each element
+        child_elements = []
+
+        for element in self._matched_elements:
+            child = getattr(element, name)
+            child_elements.append(child)
+
+        # Build the new path including the attribute access
+        new_path = self._slice_path + "." + name
+
+        return IDSSlice(
+            self._parent,
+            None,  # metadata is not directly applicable to the child
+            child_elements,
+            new_path,
+        )
+
+    def __repr__(self) -> str:
+        """Build a string representation of this slice."""
+        toplevel_name = self._toplevel.metadata.name
+        matches_count = len(self._matched_elements)
+        match_word = "match" if matches_count == 1 else "matches"
+        return (
+            f"<IDSSlice (IDS:{toplevel_name}, "
+            f"{self._path}, "
+            f"{matches_count} {match_word})>"
+        )
+
+    def _build_repr_start(self) -> str:
+        """Build the start of the string representation.
+
+        This is used for consistency with other IDS node types.
+        """
+        return (
+            f"<{type(self).__name__} (IDS:{self._toplevel.metadata.name}, {self._path}"
+        )
+
+    def values(self) -> List[Any]:
+        """Extract raw values from elements in this slice.
+
+        For IDSPrimitive elements, this extracts the wrapped value.
+        For other element types, returns them as-is.
+
+        This is useful for getting the actual data without the IDS wrapper
+        when accessing scalar fields through a slice, without requiring
+        explicit looping through the original collection.
+
+        Returns:
+            List of raw Python/numpy values or other unwrapped elements
+
+        Examples:
+            >>> # Get names from identifiers without looping
+            >>> n = edge_profiles.grid_ggd[0].grid_subset[:].identifier.name.values()
+            >>> # Result: ["nodes", "edges", "cells"]
+            >>>
+            >>> # Works with any scalar or array type
+            >>> i = edge_profiles.grid_ggd[0].grid_subset[:].identifier.index.values()
+            >>> # Result: [1, 2, 5]
+            >>>
+            >>> # Still works with structures (returns unwrapped)
+            >>> ions = profiles[:].ion.values()
+            >>> # Result: [IDSStructure(...), IDSStructure(...), ...]
+        """
+        from imas.ids_primitive import IDSPrimitive
+
+        result = []
+        for element in self._matched_elements:
+            if isinstance(element, IDSPrimitive):
+                # Extract the wrapped value from IDSPrimitive
+                result.append(element.value)
+            else:
+                # Return other types as-is (structures, arrays, etc.)
+                result.append(element)
+        return result
+
+    def flatten(self, recursive: bool = False) -> "IDSSlice":
+        """Flatten nested arrays into a single IDSSlice.
+
+        This method is useful for MATLAB-style matrix-like access.
+        It flattens matched elements that are themselves iterable
+        (such as IDSStructArray) into a single flat IDSSlice.
+
+        Args:
+            recursive: If True, recursively flatten nested IDSSlices.
+                      If False (default), only flatten one level.
+
+        Returns:
+            New IDSSlice with flattened elements
+
+        Examples:
+            >>> # Get all ions from 2 profiles as a flat list
+            >>> all_ions = cp.profiles_1d[:2].ion.flatten()
+            >>> len(all_ions)  # Number of total ions
+            10
+            >>> # Iterate over all ions
+            >>> for ion in all_ions:
+            ...     print(ion.label)
+
+            >>> # Flatten recursively for deeply nested structures
+            >>> deeply_nested = obj.level1[:].level2[:].flatten(recursive=True)
+        """
+        from imas.ids_struct_array import IDSStructArray
+
+        flattened = []
+
+        for element in self._matched_elements:
+            if isinstance(element, IDSStructArray):
+                # Flatten IDSStructArray elements
+                flattened.extend(list(element))
+            elif recursive and isinstance(element, IDSSlice):
+                # Recursively flatten nested IDSSlices
+                flattened.extend(list(element.flatten(recursive=True)))
+            else:
+                # Keep non-array elements as-is
+                flattened.append(element)
+
+        new_path = self._slice_path + ".flatten()"
+        return IDSSlice(
+            self._parent,
+            None,
+            flattened,
+            new_path,
+        )
+
+    @staticmethod
+    def _format_slice(slice_obj: slice) -> str:
+        """Format a slice object as a string.
+
+        Args:
+            slice_obj: The slice object to format
+
+        Returns:
+            String representation like "[1:5]", "[::2]", etc.
+        """
+        start = slice_obj.start if slice_obj.start is not None else ""
+        stop = slice_obj.stop if slice_obj.stop is not None else ""
+        step = slice_obj.step if slice_obj.step is not None else ""
+
+        if step:
+            return f"[{start}:{stop}:{step}]"
+        else:
+            return f"[{start}:{stop}]"
+
+    def _validate(self) -> None:
+        """Validate all matched elements."""
+        for element in self._matched_elements:
+            element._validate()
+
+    def _xxhash(self) -> bytes:
+        """Compute hash of all matched elements."""
+        from xxhash import xxh3_64
+
+        hsh = xxh3_64(len(self._matched_elements).to_bytes(8, "little"))
+        for element in self._matched_elements:
+            hsh.update(element._xxhash())
+        return hsh.digest()
