@@ -149,6 +149,10 @@ class IDSStructArray(IDSBase):
             A single IDSStructure if item is an int, or an IDSSlice if item is a slice
         """
         if isinstance(item, slice):
+            # Slicing is not supported on lazy-loaded arrays
+            if self._lazy:
+                raise ValueError("Lazy-loaded IDSs do not support slicing. Use integer indexing instead.")
+            
             # Handle slice by returning an IDSSlice
             from imas.ids_slice import IDSSlice
 

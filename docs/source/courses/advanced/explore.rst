@@ -72,6 +72,32 @@ structures (modeled by :py:class:`~imas.ids_struct_array.IDSStructArray`) are (a
 name applies) arrays containing :py:class:`~imas.ids_structure.IDSStructure`\ s. Data
 nodes can contain scalar or array data of various types.
 
+**Slicing Arrays of Structures**
+
+Arrays of structures support Python slice notation, which returns an
+:py:class:`~imas.ids_slice.IDSSlice` object containing matched elements:
+
+.. code-block:: python
+
+    import imas
+    
+    core_profiles = imas.IDSFactory().core_profiles()
+    core_profiles.profiles_1d.resize(10)  # Create 10 profiles
+    
+    # Integer indexing returns a single structure
+    first = core_profiles.profiles_1d[0]
+    
+    # Slice notation returns an IDSSlice
+    subset = core_profiles.profiles_1d[2:5]      # Elements 2, 3, 4
+    every_other = core_profiles.profiles_1d[::2] # Every second element
+    
+    # IDSSlice supports flatten() and values() for convenient data access
+    all_ions = core_profiles.profiles_1d[:].ion[:].flatten()
+    for ion in all_ions:
+        print(ion.label.value)
+
+For detailed information on slicing operations, see :doc:`../../array_slicing`.
+
 Some methods and properties are defined for all data nodes and arrays of structures:
 
 ``len(<node>)``

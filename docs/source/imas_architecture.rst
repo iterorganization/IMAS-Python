@@ -168,6 +168,12 @@ The following submodules and classes represent IDS nodes.
     :py:class:`~imas.ids_struct_array.IDSStructArray` class, which models Arrays of
     Structures. It also contains some :ref:`dev lazy loading` logic.
 
+-   :py:mod:`imas.ids_slice` contains the
+    :py:class:`~imas.ids_slice.IDSSlice` class, which represents a collection of IDS
+    nodes matching a slice expression. It provides slicing operations on
+    :py:class:`~imas.ids_struct_array.IDSStructArray` elements and supports operations
+    like ``flatten()`` and ``values()`` for accessing matched elements.
+
 -   :py:mod:`imas.ids_structure` contains the
     :py:class:`~imas.ids_structure.IDSStructure` class, which models Structures. It
     contains the :ref:`lazy instantiation` logic and some of the :ref:`dev lazy loading`
