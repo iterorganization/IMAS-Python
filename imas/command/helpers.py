@@ -36,7 +36,7 @@ def min_version_guard(al_version: Version):
         al_version: Minimum imas_core version required for this command.
     """
     used_version = ll_interface._al_version
-    if used_version >= al_version:
+    if used_version and used_version >= al_version:
         return
     click.echo(
         f"This command requires at least version {al_version} of the Access Layer."
