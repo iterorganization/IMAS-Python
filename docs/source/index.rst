@@ -50,6 +50,7 @@ Manual
    configuring
    cli
    netcdf
+   array_slicing
    changelog
    examples
 
