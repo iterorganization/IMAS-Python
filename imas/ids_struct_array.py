@@ -152,7 +152,8 @@ class IDSStructArray(IDSBase):
             # Slicing is not supported on lazy-loaded arrays
             if self._lazy:
                 raise ValueError(
-                    "Lazy-loaded IDSs do not support slicing. Use integer indexing instead."
+                    "Lazy-loaded IDSs do not support slicing. "
+                    "Use integer indexing instead."
                 )
 
             # Handle slice by returning an IDSSlice
