@@ -282,14 +282,13 @@ class ALDBEntryImpl(DBEntryImpl):
         nbc_map = None
         if ids._version != self._ids_factory._version:
             if ids._version.split(".")[0] != self._ids_factory._version.split(".")[0]:
-                logger.warning(
-                    "Provided IDS uses DD %s which has a different major version than "
-                    "the Data Entry (%s). IMAS-Python will convert the data "
-                    "automatically, but this does not cover all changes. "
-                    "See %s/multi-dd.html#conversion-of-idss-between-dd-versions",
-                    ids._version,
-                    self._ids_factory._version,
-                    imas.PUBLISHED_DOCUMENTATION_ROOT,
+                raise RuntimeError(
+                    f"Provided IDS uses DD {ids._version} which has a different major "
+                    f"version than the Data Entry ({self._ids_factory._version}). "
+                    "IMAS-Python will not automatically convert this data for you."
+                    "See the documentation for more details and fixes: "
+                    f"{imas.PUBLISHED_DOCUMENTATION_ROOT}"
+                    "/multi-dd.html#storing-idss-with-a-different-major-version"
                 )
             ddmap, source_is_older = dd_version_map_from_factories(
                 ids_name, ids._parent, self._ids_factory

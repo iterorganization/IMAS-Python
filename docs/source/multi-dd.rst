@@ -213,6 +213,70 @@ explicit conversion mechanisms.
     ``boundary_secondary_separatrix`` structures from DD3. See also:
     https://github.com/iterorganization/IMAS-Python/issues/60. 
 
+
+.. _`Loading IDSs from a different major version`:
+
+Loading IDSs from a different major version
+-------------------------------------------
+
+If you try to load an IDS that was stored in a different major version of the DD than
+you are using, IMAS-Python will raise a runtime error, for example:
+
+.. code-block:: text
+
+  On-disk data is stored in DD 3.39.1 which has a different major version than the
+  requested DD version (4.0.0). IMAS-Python will not automatically convert this
+  data for you.
+
+You need to explicitly convert the data, which you can do as follows:
+
+.. code-block:: python
+
+  # Opened data entry
+  entry = imas.DBEntry(...)
+
+  # A plain get, or get_slice will raise a RuntimeError when the data is stored in
+  # a different major version of the DD:
+  # entry.get("equilibrium")
+
+  # So instead, we'll load the IDS in the DD version it is stored on disk
+  tmp_eq = entry.get("equilibrium", autoconvert=False)
+  # And explicitly convert it to the target version
+  equilibrium = imas.convert_ids(tmp_eq, entry.dd_version)
+
+
+.. _`Storing IDSs with a different major version`:
+
+Storing IDSs with a different major version
+-------------------------------------------
+
+If you try to put an IDS that was created for a different major version of the DD than
+the Data Entry you want to store it in, IMAS-Python raise a runtime error, for example:
+
+.. code-block:: text
+
+  Provided IDS uses DD 3.42.2 which has a different major version than the Data
+  Entry (4.0.0). IMAS-Python will not automatically convert this data for you.
+
+You need to explicitly convert the data, which you can do as follows:
+
+.. code-block:: python
+
+  # IDS with data, in DD 3.42.2
+  equilibrium = imas.IDSFactory("3.42.2").equilibrium()
+  ...
+
+  # Data Entry uses DD 4.0.0
+  with imas.DBEntry(uri, "w", dd_version="4.0.0") as entry:
+      # This put would raise a runtime error, because the major version of the IDS
+      # and the DBEntry don't match:
+      # entry.put(equilibrium)
+
+      # So instead, we'll explicitly convert the IDS and put that one
+      entry.put(imas.convert_ids(equilibrium, entry.dd_version))
+
+
+
 .. _`DD background`:
 
 Background information
