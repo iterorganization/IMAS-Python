@@ -605,15 +605,13 @@ class DBEntry:
         nbc_map = None
         if dd_version and dd_version != destination._dd_version:
             if dd_version.split(".")[0] != destination._dd_version.split(".")[0]:
-                logger.warning(
-                    "On-disk data is stored in DD %s which has a different major "
-                    "version than the requested DD version (%s). IMAS-Python will "
-                    "convert the data automatically, but this does not cover all "
-                    "changes. "
-                    "See %s/multi-dd.html#conversion-of-idss-between-dd-versions",
-                    dd_version,
-                    destination._dd_version,
-                    imas.PUBLISHED_DOCUMENTATION_ROOT,
+                raise RuntimeError(
+                    f"On-disk data is stored in DD {dd_version} which has a different "
+                    "major version than the requested DD version "
+                    f"({destination._dd_version}). IMAS-Python will not automatically "
+                    "convert this data for you. See the documentation for more "
+                    f"details and fixes: {imas.PUBLISHED_DOCUMENTATION_ROOT}"
+                    "/multi-dd.html#loading-idss-from-a-different-major-version"
                 )
             ddmap, source_is_older = dd_version_map_from_factories(
                 ids_name, IDSFactory(version=dd_version), self._ids_factory
