@@ -19,8 +19,8 @@ def get_training_db_entry() -> imas.DBEntry:
 
     output_entry = imas.DBEntry("imas:memory?path=/", "w")
     for ids_name in ["core_profiles", "equilibrium"]:
-        ids = entry.get(ids_name)
+        ids = entry.get(ids_name, autoconvert=False)
         with patch.dict("os.environ", {"IMAS_AL_DISABLE_VALIDATE": "1"}):
-            output_entry.put(ids)
+            output_entry.put(imas.convert_ids(ids, output_entry.dd_version))
     entry.close()
     return output_entry
