@@ -328,21 +328,23 @@ def fill_consistent(
                 error_skip = False
                 if child.metadata.name.endswith("_error_upper"):
                     name = child.metadata.name[: -len("_error_upper")]
-                    data = child._parent[name]
-                    if (
-                        not data.has_value
-                        or len(data.shape) == 0
-                        or any(s == 0 for s in data.shape)
-                    ):
+                    try:
+                        data = child._parent[name]
+                        if not data.has_value:
+                            maybe_set_random_value(data, 0.0, skip_complex)
+                        if not data.has_value or len(data.shape) == 0 or any(s == 0 for s in data.shape):
+                            error_skip = True
+                    except (KeyError, AttributeError, RuntimeError, ValueError):
                         error_skip = True
                 elif child.metadata.name.endswith("_error_lower"):
                     name = child.metadata.name[: -len("_error_lower")] + "_error_upper"
-                    data = child._parent[name]
-                    if (
-                        not data.has_value
-                        or len(data.shape) == 0
-                        or any(s == 0 for s in data.shape)
-                    ):
+                    try:
+                        data = child._parent[name]
+                        if not data.has_value:
+                            maybe_set_random_value(data, 0.0, skip_complex)
+                        if not data.has_value or len(data.shape) == 0 or any(s == 0 for s in data.shape):
+                            error_skip = True
+                    except (KeyError, AttributeError, RuntimeError, ValueError):
                         error_skip = True
 
                 if not same_as_skip and not error_skip:
