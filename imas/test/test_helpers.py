@@ -117,27 +117,71 @@ def maybe_set_random_value(
         primitive.value = random_data(primitive.metadata.data_type, ndim)
         return
 
+    for dim, same_as in enumerate(primitive.metadata.coordinates_same_as):
+        if same_as.references:
+            try:
+                ref_elem = same_as.references[0].goto(primitive)
+                if len(ref_elem.shape) <= dim or ref_elem.shape[dim] == 0:
+                    return
+            except (ValueError, AttributeError, IndexError, RuntimeError):
+                return
+
+    if primitive.metadata.name.endswith("_error_upper"):
+        name = primitive.metadata.name[: -len("_error_upper")]
+        try:
+            data = primitive._parent[name]
+        except (KeyError, AttributeError):
+            return
+        if (
+            not data.has_value
+            or len(data.shape) == 0
+            or any(s == 0 for s in data.shape)
+        ):
+            return
+        if any(
+            same_as.references for same_as in primitive.metadata.coordinates_same_as
+        ):
+            return
+    elif primitive.metadata.name.endswith("_error_lower"):
+        name = primitive.metadata.name[: -len("_error_lower")] + "_error_upper"
+        try:
+            data = primitive._parent[name]
+        except (KeyError, AttributeError):
+            return
+        if (
+            not data.has_value
+            or len(data.shape) == 0
+            or any(s == 0 for s in data.shape)
+        ):
+            return
+        if any(
+            same_as.references for same_as in primitive.metadata.coordinates_same_as
+        ):
+            return
+
     shape = []
     for dim, coordinate in enumerate(primitive.metadata.coordinates):
         same_as = primitive.metadata.coordinates_same_as[dim]
-        if not coordinate.has_validation and not same_as.has_validation:
-            if primitive.metadata.name.endswith("_error_upper"):
-                # <name>_error_upper should only be filled when <name> is
-                name = primitive.metadata.name[: -len("_error_upper")]
-                data = primitive._parent[name]
-                if not data.has_value:
-                    return
-                size = data.shape[dim]
-            elif primitive.metadata.name.endswith("_error_lower"):
-                # <name>_error_lower should only be filled when <name>_error_upper is
-                name = primitive.metadata.name[: -len("_error_lower")] + "_error_upper"
-                data = primitive._parent[name]
-                if not data.has_value:
-                    return
-                size = data.shape[dim]
-            else:
-                # we can independently choose a size for this dimension:
-                size = random.randint(1, 6)
+
+        if primitive.metadata.name.endswith("_error_upper"):
+            name = primitive.metadata.name[: -len("_error_upper")]
+            data = primitive._parent[name]
+            if dim >= len(data.shape):
+                return
+            size = data.shape[dim]
+            if size == 0:
+                return
+        elif primitive.metadata.name.endswith("_error_lower"):
+            name = primitive.metadata.name[: -len("_error_lower")] + "_error_upper"
+            data = primitive._parent[name]
+            if dim >= len(data.shape):
+                return
+            size = data.shape[dim]
+            if size == 0:
+                return
+        elif not coordinate.has_validation and not same_as.has_validation:
+            # we can independently choose a size for this dimension:
+            size = random.randint(1, 6)
         elif coordinate.references or same_as.references:
             try:
                 if coordinate.references:
@@ -147,8 +191,8 @@ def maybe_set_random_value(
                     coordinate_element = filled_refs[0] if filled_refs else refs[0]
                 else:
                     coordinate_element = same_as.references[0].goto(primitive)
-            except (ValueError, AttributeError):
-                # Ignore invalid coordinate specs
+            except (ValueError, AttributeError, IndexError):
+                # Ignore invalid coordinate specs or empty array references
                 coordinate_element = np.ones((1,) * 6)
 
             if len(coordinate_element) == 0:
@@ -269,10 +313,43 @@ def fill_consistent(
             elif any(len(coordinate.references) > 1 for coordinate in coordinates):
                 exclusive_coordinates.append(child)
             else:
-                try:
-                    maybe_set_random_value(child, leave_empty, skip_complex)
-                except (RuntimeError, ValueError):
-                    pass
+                same_as_skip = False
+                for dim, same_as in enumerate(child.metadata.coordinates_same_as):
+                    if same_as.references:
+                        try:
+                            ref_elem = same_as.references[0].goto(child)
+                            if len(ref_elem.shape) <= dim or ref_elem.shape[dim] == 0:
+                                same_as_skip = True
+                                break
+                        except (ValueError, AttributeError, IndexError, RuntimeError):
+                            same_as_skip = True
+                            break
+
+                error_skip = False
+                if child.metadata.name.endswith("_error_upper"):
+                    name = child.metadata.name[: -len("_error_upper")]
+                    data = child._parent[name]
+                    if (
+                        not data.has_value
+                        or len(data.shape) == 0
+                        or any(s == 0 for s in data.shape)
+                    ):
+                        error_skip = True
+                elif child.metadata.name.endswith("_error_lower"):
+                    name = child.metadata.name[: -len("_error_lower")] + "_error_upper"
+                    data = child._parent[name]
+                    if (
+                        not data.has_value
+                        or len(data.shape) == 0
+                        or any(s == 0 for s in data.shape)
+                    ):
+                        error_skip = True
+
+                if not same_as_skip and not error_skip:
+                    try:
+                        maybe_set_random_value(child, leave_empty, skip_complex)
+                    except (RuntimeError, ValueError):
+                        pass
 
     if isinstance(structure, IDSToplevel):
         # handle exclusive_coordinates
