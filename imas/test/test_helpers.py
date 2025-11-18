@@ -332,7 +332,11 @@ def fill_consistent(
                         data = child._parent[name]
                         if not data.has_value:
                             maybe_set_random_value(data, 0.0, skip_complex)
-                        if not data.has_value or len(data.shape) == 0 or any(s == 0 for s in data.shape):
+                        if (
+                            not data.has_value
+                            or len(data.shape) == 0
+                            or any(s == 0 for s in data.shape)
+                        ):
                             error_skip = True
                     except (KeyError, AttributeError, RuntimeError, ValueError):
                         error_skip = True
@@ -342,7 +346,11 @@ def fill_consistent(
                         data = child._parent[name]
                         if not data.has_value:
                             maybe_set_random_value(data, 0.0, skip_complex)
-                        if not data.has_value or len(data.shape) == 0 or any(s == 0 for s in data.shape):
+                        if (
+                            not data.has_value
+                            or len(data.shape) == 0
+                            or any(s == 0 for s in data.shape)
+                        ):
                             error_skip = True
                     except (KeyError, AttributeError, RuntimeError, ValueError):
                         error_skip = True
