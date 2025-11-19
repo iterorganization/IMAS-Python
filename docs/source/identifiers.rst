@@ -49,11 +49,12 @@ the available identifiers is stored as ``imas.identifiers.identifiers``.
 
     # Access identifiers with aliases (when available)
     mid = imas.identifiers.materials_identifier
-    print(mid["235U"])        # Access by canonical name
-    print(mid["U_235"])       # Access by alias
+    print(mid["235U"].name)        # Access by canonical name
+    print(mid["U_235"].name)       # Access by alias
     
     # Both return the same object
-    assert mid["235U"] is mid["U_235"]
+    assert mid["235U"].name is mid["U_235"].name
+    assert mid["235U"].name is mid.U_235.name
 
     # Item access is also possible
     print(identifiers["edge_source_identifier"])
@@ -98,13 +99,18 @@ below example:
     core_sources.source[0].identifier = 1
 
     # Identifiers can still be assigned with the old alias name for backward compatibility:
-    materials = imas.IDSFactory().materials()
-    materials.material.resize(1)
+    wallids = imas.IDSFactory().wall()
+    wallids.description_ggd.resize(1)
+    wallids.description_ggd[0].material.resize(1)
+    wallids.description_ggd[0].material[0].grid_subset.resize(1)
+    mat = wallids.description_ggd[0].material[0].grid_subset[0].identifiers
+    mat.names.extend([""] * 1)
     mid = imas.identifiers.materials_identifier
     # Assign using canonical name
-    materials.material[0].identifier = "235U"
+    mat.names[0] = "235U"
     # Or assign using alias (equivalent to above)
-    materials.material[0].identifier = "U_235"
+    mat.names[0] = mid["U_235"].name
+    mat.names[0] = mid.U_235.name
 
     # Inspect the contents of the structure
     imas.util.inspect(core_sources.source[0].identifier)
@@ -146,7 +152,7 @@ material_identifier["235U"].
     mid = imas.identifiers.materials_identifier
     
     # Access by canonical name
-    uranium235_by_name = mid["235U"]
+    uranium235_by_name = mid["235U"].name
     print(f"Name: {uranium235_by_name.name}")
     print(f"Aliases: {uranium235_by_name.aliases}")  # List of all aliases
     print(f"First alias: {uranium235_by_name.alias}")  # First alias for compatibility
@@ -154,25 +160,31 @@ material_identifier["235U"].
     print(f"Description: {uranium235_by_name.description}")
     
     # Access by any alias - all return the same object
-    uranium235_by_alias1 = mid["U_235"]
-    uranium235_by_alias2 = mid["Uranium_235"]
+    uranium235_by_alias1 = mid["U_235"].name
+    uranium235_by_alias2 = mid["Uranium_235"].name
     print(f"Same objects: {uranium235_by_name is uranium235_by_alias1 is uranium235_by_alias2}")
     
     # You can also use attribute access for aliases (when valid Python identifiers)
-    uranium235_by_attr = mid.U_235
+    uranium235_by_attr = mid.U_235.name
     print(f"Same object: {uranium235_by_name is uranium235_by_attr}")
     
-    # When assigning to IDS structures, any alias works the same way
-    materials = imas.IDSFactory().materials()
-    materials.material.resize(1)
+    # When assigning to IDS structures, alias works the following way
+    wallids = imas.IDSFactory().wall()
+    wallids.description_ggd.resize(1)
+    wallids.description_ggd[0].material.resize(1)
+    wallids.description_ggd[0].material[0].grid_subset.resize(1)
+    mat = wallids.description_ggd[0].material[0].grid_subset[0].identifiers
+    mat.names.extend([""] * 1)
+    mat.indices.resize(1)
+    mat.descriptions.extend([""] * 1)
+    mat.indices[0] = 20
+    mat.descriptions[0] = "Uranium 235 isotope"
     
     # These assignments are all equivalent:
-    materials.material[0].identifier = "235U"          # canonical name
-    materials.material[0].identifier = "U_235"         # first alias
-    materials.material[0].identifier = "Uranium_235"   # another alias
-    materials.material[0].identifier = mid["235U"]     # enum value
-    materials.material[0].identifier = mid.U_235       # enum value via alias
-
+    mat.names[0] = "235U"          # canonical name
+    mat.names[0] = mid["235U"].name  # enum value
+    mat.names[0] = mid.U_235.name  # enum value via alias
+    mat.names[0] = mid["U_235"].name  # enum value via alias
 
 Compare identifiers
 -------------------
@@ -215,12 +227,12 @@ so an identifier will match both its canonical name and any defined alias:
     False
     >>> # Alias comparison example with materials identifier
     >>> mid = imas.identifiers.materials_identifier
-    >>> materials = imas.IDSFactory().materials()
-    >>> materials.material.resize(1)
-    >>> materials.material[0].identifier.index = 20
-    >>> materials.material[0].identifier.name = "U_235"  # Using alias
+    >>> cxr = imas.IDSFactory().camera_x_rays()
+    >>> mat = cxr.filter_window.material
+    >>> mat.index = 20
+    >>> mat.name = "U_235"  # Using alias
     >>> # Compares equal to the canonical identifier even though name is alias
-    >>> materials.material[0].identifier == mid["235U"]
+    >>> mat == mid["235U"].name
     True
 
 

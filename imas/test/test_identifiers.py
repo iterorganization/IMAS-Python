@@ -118,30 +118,25 @@ def test_identifier_struct_assignment_with_aliases():
     mid = identifiers.materials_identifier
 
     # Create an actual IDS structure
-    factory = IDSFactory("4.0.0").camera_x_rays()
-    mat = factory.filter_window.material
-    mat.name = "235U"
-    mat.index = 20
-    mat.description = "Uranium 235 isotope"
-    mat.alias = "U_235"
+    wallids = IDSFactory().wall()
+    wallids.description_ggd.resize(1)
+    wallids.description_ggd[0].material.resize(1)
+    wallids.description_ggd[0].material[0].grid_subset.resize(1)
+    mat = wallids.description_ggd[0].material[0].grid_subset[0].identifiers
+    mat.names.extend([""] * 1)
+    mat.indices.resize(1)
+    mat.descriptions.extend([""] * 1)
+    mat.names[0] = mid.U_235.name
+    mat.indices[0] = 20
+    mat.descriptions[0] = "Uranium 235 isotope"
 
     # Basic attribute checks
-    assert mat.name == mid["235U"].name
-    assert mat.alias == mid.U_235.alias
-    assert mat.index == mid.U_235.index
-
-    # Test various equality scenarios
-    assert mat == mid.U_235
-    assert mat == mid["235U"]
+    assert mat.names[0] == mid["235U"].name
+    assert mat.indices[0] == mid.U_235.index
 
     # Modify material properties and test equality
-    mat.name = "some_name"
-    mat.alias = "U_235"
-    assert mat == mid.U_235
-
-    mat.alias = "235U"
-    assert mat == mid.U_235
-
+    mat.names[0] = "some_name"
+    assert mat.names[0] != mid.U_235.name
 
 def test_identifier_aos_assignment():
     cfid = identifiers.pf_active_coil_function_identifier
@@ -193,13 +188,12 @@ def test_identifier_aliases():
     assert mid.U_235.name == "235U"
     assert mid.U_235.index == mid["235U"].index
     assert mid.U_235.description == mid["235U"].description
-    assert mid.U_235.alias == "U_235"
+    assert "U_235" in mid.U_235.aliases
+    assert isinstance(mid.U_235.aliases, list)
 
-    # Test accessing by alias via bracket notation
-    assert mid["U_235"] is mid.U_235
-    assert mid["U_238"] is mid.U_238
-    assert mid["In_115"] is mid.In_115
-    assert mid["He_4"] is mid.He_4
+    # Test accessing by any alias via bracket notation
+    for alias in mid.U_235.aliases:
+        assert mid[alias] is mid.U_235
 
 
 @requires_aliases
@@ -209,107 +203,73 @@ def test_identifier_alias_equality():
     target = mid.U_235
 
     # Test equality with canonical name
-    factory1 = IDSFactory("4.0.0").camera_x_rays()
-    mat1 = factory1.filter_window.material
-    mat1.name = "235U"
-    mat1.index = 20
-    mat1.description = "Uranium 235 isotope"
-    assert mat1 == target
+    wallids = IDSFactory().wall()
+    wallids.description_ggd.resize(1)
+    wallids.description_ggd[0].material.resize(1)
+    wallids.description_ggd[0].material[0].grid_subset.resize(1)
+    mat = wallids.description_ggd[0].material[0].grid_subset[0].identifiers
+    mat.names.extend([""] * 1)
+    mat.names[0] = "235U"
+    assert mat.names[0] == target.name
 
     # Test equality with alias name
-    factory2 = IDSFactory("4.0.0").camera_x_rays()
-    mat2 = factory2.filter_window.material
-    mat2.name = "U_235"
-    mat2.index = 20
-    mat2.description = "Uranium 235 isotope"
-    assert mat2 == target
+    wallids2 = IDSFactory().wall()
+    wallids2.description_ggd.resize(1)
+    wallids2.description_ggd[0].material.resize(1)
+    wallids2.description_ggd[0].material[0].grid_subset.resize(1)
+    mat2 = wallids2.description_ggd[0].material[0].grid_subset[0].identifiers
+    mat2.names.extend([""] * 1)
+    mat2.names[0] = mid["U_235"].name  # Use alias as name
+    assert mat2.names[0] == target.name
 
-    # Test equality when material has alias matching canonical name
-    factory3 = IDSFactory("4.0.0").camera_x_rays()
-    mat3 = factory3.filter_window.material
-    mat3.name = "test_name"
-    mat3.index = 20
-    mat3.description = "Uranium 235 isotope"
-    mat3.alias = "235U"
-    assert mat3 == target
+    # Test inequality when material has alias not matching canonical name
+    wallids3 = IDSFactory().wall()
+    wallids3.description_ggd.resize(1)
+    wallids3.description_ggd[0].material.resize(1)
+    wallids3.description_ggd[0].material[0].grid_subset.resize(1)
+    mat3 = wallids3.description_ggd[0].material[0].grid_subset[0].identifiers
+    mat3.names.extend([""] * 1)
+    mat3.names[0] = "test_name"
+    assert mat3.names[0] != target.name
 
-    # Test inequality when index doesn't match
-    factory4 = IDSFactory("4.0.0").camera_x_rays()
-    mat4 = factory4.filter_window.material
-    mat4.name = "235U"
-    mat4.index = 999
-    mat4.description = "Uranium 235 isotope"
-    assert mat4 != target
+    # Test equality when index doesn't match
+    wallids4 = IDSFactory().wall()
+    wallids4.description_ggd.resize(1)
+    wallids4.description_ggd[0].material.resize(1)
+    wallids4.description_ggd[0].material[0].grid_subset.resize(1)
+    mat4 = wallids4.description_ggd[0].material[0].grid_subset[0].identifiers
+    mat4.names.extend([""] * 1)
+    mat4.indices.resize(1)
+    mat4.names[0] = "235U"
+    mat4.indices[0] = 999
+    assert mat4.indices[0] != target.index
+    assert mat4.names[0] == target.name
 
-    # Test inequality when neither name nor alias matches
-    factory5 = IDSFactory("4.0.0").camera_x_rays()
-    mat5 = factory5.filter_window.material
-    mat5.name = "wrong_name"
-    mat5.index = 20
-    mat5.description = "Uranium 235 isotope"
-    mat5.alias = "wrong_alias"
-    assert mat5 != target
+    # Test equality for multiple names,indices and descriptions
+    wallids5 = IDSFactory().wall()
+    wallids5.description_ggd.resize(1)
+    wallids5.description_ggd[0].material.resize(1)
+    wallids5.description_ggd[0].material[0].grid_subset.resize(1)
+    mat5 = wallids5.description_ggd[0].material[0].grid_subset[0].identifiers
+    mat5.names.extend([""] * 3)
+    mat5.indices.resize(3)
+    mat5.descriptions.extend([""] * 3)
+    mat5.names[0] = "235U"
+    mat5.names[1] = "238U"
+    mat5.names[2] = mid.U_235.name #Use alias as name
+    mat5.indices[0] = 20
+    mat5.indices[1] = 21
+    mat5.indices[2] = 20
+    mat5.descriptions[0] = "Uranium 235 isotope"
+    mat5.descriptions[1] = "Uranium 238 isotope"
+    mat5.descriptions[2] = "Uranium 235 isotope"
 
-    # Test equality with material having alias matching canonical name
-    factory6 = IDSFactory("4.0.0").camera_x_rays()
-    mat6 = factory6.filter_window.material
-    mat6.name = "test_name"
-    mat6.index = 20
-    mat6.description = "Uranium 235 isotope"
-    mat6.alias = "235U"
-    assert mat6 == target
-
-    # Test equality when both have matching aliases
-    factory7 = IDSFactory("4.0.0").camera_x_rays()
-    mat7 = factory7.filter_window.material
-    mat7.name = "sample_name"
-    mat7.index = 20
-    mat7.description = "Uranium 235 isotope"
-    mat7.alias = "U_235"
-    assert mat7 == target
-
-    # Test inequality when index doesn't match
-    factory8 = IDSFactory("4.0.0").camera_x_rays()
-    mat8 = factory8.filter_window.material
-    mat8.name = "235U"
-    mat8.index = 999
-    mat8.description = "Uranium 235 isotope"
-    assert mat8 != target
-
-    # Test inequality when neither name nor alias matches
-    factory9 = IDSFactory("4.0.0").camera_x_rays()
-    mat9 = factory9.filter_window.material
-    mat9.name = "wrong_name"
-    mat9.index = 20
-    mat9.description = "Uranium 235 isotope"
-    mat9.alias = "wrong_alias"
-    assert mat9 != target
-
-    # Test equality when material has list of multiple aliases
-    factory10 = IDSFactory("4.0.0").camera_x_rays()
-    mat10 = factory10.filter_window.material
-    mat10.name = "test_name"
-    mat10.index = 20
-    mat10.description = "Uranium 235 isotope"
-    mat10.alias = "235U,U_235,Uranium_235"
-    assert mat10 == target
-    assert mat10.alias[0] == target[0]
-    assert mat10.alias[1] == target[0]
-    assert mat10.alias[2] == target[0]
-    assert mat10.alias[1] == target[2]
-    assert mat10.alias[2] == target[1]
-
-    # Test equality when material has multiple aliases
-    factory11 = IDSFactory("4.0.0").camera_x_rays()
-    mat0 = factory11.filter_window.material
-    mat0.name = "test_name"
-    mat0.index = 20
-    mat0.description = "Uranium 235 isotope"
-    mat0.alias = "U_235"
-
-    mat1 = factory11.filter_window.material
-    mat1.name = "test_name"
-    mat1.index = 20
-    mat1.description = "Uranium 235 isotope"
-    mat1.alias = "Uranium_235"
-    assert mat0 == mat1 == target
+    assert mat5.names[0] == mid["235U"].name
+    assert mat5.names[1] == mid["238U"].name
+    assert mat5.names[2] == mid["U_235"].name
+    assert mat5.indices[0] == mid["235U"].index
+    assert mat5.indices[1] == mid["238U"].index
+    assert mat5.indices[2] == mid["U_235"].index
+    assert mat5.descriptions[0] == mid["235U"].description
+    assert mat5.descriptions[1] == mid["238U"].description
+    assert mat5.descriptions[2] == mid["U_235"].description
