@@ -138,6 +138,7 @@ def test_identifier_struct_assignment_with_aliases():
     mat.names[0] = "some_name"
     assert mat.names[0] != mid.U_235.name
 
+
 def test_identifier_aos_assignment():
     cfid = identifiers.pf_active_coil_function_identifier
     pfa = IDSFactory("3.39.0").pf_active()
@@ -256,7 +257,7 @@ def test_identifier_alias_equality():
     mat5.descriptions.extend([""] * 3)
     mat5.names[0] = "235U"
     mat5.names[1] = "238U"
-    mat5.names[2] = mid.U_235.name #Use alias as name
+    mat5.names[2] = mid.U_235.name  # Use alias as name
     mat5.indices[0] = 20
     mat5.indices[1] = 21
     mat5.indices[2] = 20

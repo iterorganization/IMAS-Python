@@ -152,7 +152,7 @@ material_identifier["235U"].
     mid = imas.identifiers.materials_identifier
     
     # Access by canonical name
-    uranium235_by_name = mid["235U"].name
+    uranium235_by_name = mid["235U"]
     print(f"Name: {uranium235_by_name.name}")
     print(f"Aliases: {uranium235_by_name.aliases}")  # List of all aliases
     print(f"First alias: {uranium235_by_name.alias}")  # First alias for compatibility
