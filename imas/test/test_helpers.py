@@ -19,7 +19,7 @@ from imas.ids_primitive import IDSPrimitive, IDSString1D
 from imas.ids_struct_array import IDSStructArray
 from imas.ids_structure import IDSStructure
 from imas.ids_toplevel import IDSToplevel
-from imas.util import idsdiffgen, visit_children
+from imas.util import idsdiffgen, tree_iter
 
 logger = logging.getLogger(__name__)
 
@@ -130,29 +130,13 @@ def maybe_set_random_value(
     if primitive.metadata.name.endswith("_error_upper"):
         name = primitive.metadata.name[: -len("_error_upper")]
         data = primitive._parent[name]
-        if (
-            not data.has_value
-            or len(data.shape) == 0
-            or any(s == 0 for s in data.shape)
-        ):
-            return
-        if any(
-            same_as.references for same_as in primitive.metadata.coordinates_same_as
-        ):
+        if not data.has_value:
             return
         shape = list(data.shape)
     elif primitive.metadata.name.endswith("_error_lower"):
         name = primitive.metadata.name[: -len("_error_lower")] + "_error_upper"
         data = primitive._parent[name]
-        if (
-            not data.has_value
-            or len(data.shape) == 0
-            or any(s == 0 for s in data.shape)
-        ):
-            return
-        if any(
-            same_as.references for same_as in primitive.metadata.coordinates_same_as
-        ):
+        if not data.has_value:
             return
         shape = list(data.shape)
     else:
@@ -317,21 +301,29 @@ def fill_consistent(
 
 
 def unset_coordinate(coordinate):
+    def unset(element):
+        # Unset element value
+        element.value = []
+        # But also its errorbars (if they exist)
+        try:
+            element._parent[element.metadata.name + "_error_upper"].value = []
+            element._parent[element.metadata.name + "_error_lower"].value = []
+        except AttributeError:
+            pass  # Ignore when element has no errorbars
+
     # Unset the coordinate quantity
-    coordinate.value = []
+    unset(coordinate)
     # Find all elements that also have this as a coordinate and unset...
     parent = coordinate._dd_parent
     while parent.metadata.data_type is not IDSDataType.STRUCT_ARRAY:
         parent = parent._dd_parent
 
-    def callback(element):
+    for element in tree_iter(parent):
         if hasattr(element, "coordinates") and element.has_value:
             for ele_coor in element.coordinates:
                 if ele_coor is coordinate:
-                    element.value = []
-                    return
-
-    visit_children(callback, parent)
+                    unset(element)
+                    break
 
 
 def compare_children(st1, st2, deleted_paths=set(), accept_lazy=False):
