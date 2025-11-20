@@ -126,12 +126,10 @@ def maybe_set_random_value(
             except (ValueError, AttributeError, IndexError, RuntimeError):
                 return
 
+    shape = []
     if primitive.metadata.name.endswith("_error_upper"):
         name = primitive.metadata.name[: -len("_error_upper")]
-        try:
-            data = primitive._parent[name]
-        except (KeyError, AttributeError):
-            return
+        data = primitive._parent[name]
         if (
             not data.has_value
             or len(data.shape) == 0
@@ -142,12 +140,10 @@ def maybe_set_random_value(
             same_as.references for same_as in primitive.metadata.coordinates_same_as
         ):
             return
+        shape = list(data.shape)
     elif primitive.metadata.name.endswith("_error_lower"):
         name = primitive.metadata.name[: -len("_error_lower")] + "_error_upper"
-        try:
-            data = primitive._parent[name]
-        except (KeyError, AttributeError):
-            return
+        data = primitive._parent[name]
         if (
             not data.has_value
             or len(data.shape) == 0
@@ -158,60 +154,39 @@ def maybe_set_random_value(
             same_as.references for same_as in primitive.metadata.coordinates_same_as
         ):
             return
+        shape = list(data.shape)
+    else:
+        for dim, coordinate in enumerate(primitive.metadata.coordinates):
+            same_as = primitive.metadata.coordinates_same_as[dim]
 
-    shape = []
-    for dim, coordinate in enumerate(primitive.metadata.coordinates):
-        same_as = primitive.metadata.coordinates_same_as[dim]
+            if not coordinate.has_validation and not same_as.has_validation:
+                # we can independently choose a size for this dimension:
+                size = random.randint(1, 6)
+            elif coordinate.references or same_as.references:
+                try:
+                    if coordinate.references:
+                        refs = [ref.goto(primitive) for ref in coordinate.references]
+                        filled_refs = [ref for ref in refs if len(ref) > 0]
+                        assert len(filled_refs) in (0, 1)
+                        coordinate_element = filled_refs[0] if filled_refs else refs[0]
+                    else:
+                        coordinate_element = same_as.references[0].goto(primitive)
+                except (ValueError, AttributeError, IndexError):
+                    # Ignore invalid coordinate specs or empty array references
+                    coordinate_element = np.ones((1,) * 6)
 
-        if primitive.metadata.name.endswith("_error_upper"):
-            name = primitive.metadata.name[: -len("_error_upper")]
-            data = primitive._parent[name]
-            if dim >= len(data.shape):
-                return
-            size = data.shape[dim]
+                if len(coordinate_element) == 0:
+                    maybe_set_random_value(coordinate_element, 0.5**ndim, skip_complex)
+                size = coordinate_element.shape[0 if coordinate.references else dim]
+
+                if coordinate.size:  # coordinateX = <path> OR 1...1
+                    if random.random() < 0.5:
+                        size = coordinate.size
+            else:
+                size = coordinate.size
             if size == 0:
-                return
-        elif primitive.metadata.name.endswith("_error_lower"):
-            name = primitive.metadata.name[: -len("_error_lower")] + "_error_upper"
-            data = primitive._parent[name]
-            if dim >= len(data.shape):
-                return
-            size = data.shape[dim]
-            if size == 0:
-                return
-        elif not coordinate.has_validation and not same_as.has_validation:
-            # we can independently choose a size for this dimension:
-            size = random.randint(1, 6)
-        elif coordinate.references or same_as.references:
-            try:
-                if coordinate.references:
-                    refs = [ref.goto(primitive) for ref in coordinate.references]
-                    filled_refs = [ref for ref in refs if len(ref) > 0]
-                    assert len(filled_refs) in (0, 1)
-                    coordinate_element = filled_refs[0] if filled_refs else refs[0]
-                else:
-                    coordinate_element = same_as.references[0].goto(primitive)
-            except (ValueError, AttributeError, IndexError):
-                # Ignore invalid coordinate specs or empty array references
-                coordinate_element = np.ones((1,) * 6)
-
-            if len(coordinate_element) == 0:
-                # Scale chance of not setting a coordinate by our number of dimensions,
-                # such that overall there is roughly a 50% chance that any coordinate
-                # remains empty
-                maybe_set_random_value(coordinate_element, 0.5**ndim, skip_complex)
-            size = coordinate_element.shape[0 if coordinate.references else dim]
-
-            if coordinate.size:  # coordinateX = <path> OR 1...1
-                # Coin flip whether to use the size as determined by
-                # coordinate.references, or the size from coordinate.size
-                if random.random() < 0.5:
-                    size = coordinate.size
-        else:
-            size = coordinate.size
-        if size == 0:
-            return  # Leave empty
-        shape.append(size)
+                return  # Leave empty
+            shape.append(size)
 
     if primitive.metadata.data_type is IDSDataType.STR:
         primitive.value = [random_string() for i in range(shape[0])]
@@ -313,53 +288,10 @@ def fill_consistent(
             elif any(len(coordinate.references) > 1 for coordinate in coordinates):
                 exclusive_coordinates.append(child)
             else:
-                same_as_skip = False
-                for dim, same_as in enumerate(child.metadata.coordinates_same_as):
-                    if same_as.references:
-                        try:
-                            ref_elem = same_as.references[0].goto(child)
-                            if len(ref_elem.shape) <= dim or ref_elem.shape[dim] == 0:
-                                same_as_skip = True
-                                break
-                        except (ValueError, AttributeError, IndexError, RuntimeError):
-                            same_as_skip = True
-                            break
-
-                error_skip = False
-                if child.metadata.name.endswith("_error_upper"):
-                    name = child.metadata.name[: -len("_error_upper")]
-                    try:
-                        data = child._parent[name]
-                        if not data.has_value:
-                            maybe_set_random_value(data, 0.0, skip_complex)
-                        if (
-                            not data.has_value
-                            or len(data.shape) == 0
-                            or any(s == 0 for s in data.shape)
-                        ):
-                            error_skip = True
-                    except (KeyError, AttributeError, RuntimeError, ValueError):
-                        error_skip = True
-                elif child.metadata.name.endswith("_error_lower"):
-                    name = child.metadata.name[: -len("_error_lower")] + "_error_upper"
-                    try:
-                        data = child._parent[name]
-                        if not data.has_value:
-                            maybe_set_random_value(data, 0.0, skip_complex)
-                        if (
-                            not data.has_value
-                            or len(data.shape) == 0
-                            or any(s == 0 for s in data.shape)
-                        ):
-                            error_skip = True
-                    except (KeyError, AttributeError, RuntimeError, ValueError):
-                        error_skip = True
-
-                if not same_as_skip and not error_skip:
-                    try:
-                        maybe_set_random_value(child, leave_empty, skip_complex)
-                    except (RuntimeError, ValueError):
-                        pass
+                try:
+                    maybe_set_random_value(child, leave_empty, skip_complex)
+                except (RuntimeError, ValueError):
+                    pass
 
     if isinstance(structure, IDSToplevel):
         # handle exclusive_coordinates
