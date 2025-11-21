@@ -24,6 +24,9 @@ class IDSSlice:
     - Further slicing of child elements
     - Attribute access on all matched elements
     - Iteration over matched elements
+
+    Attributes:
+        metadata: Metadata from the parent array, or None if not available
     """
 
     __slots__ = ["metadata", "_matched_elements", "_slice_path"]
