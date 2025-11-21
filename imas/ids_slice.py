@@ -10,13 +10,10 @@ the resulting collection.
 import logging
 from typing import Any, Iterator, List, Union
 
-
-from imas.ids_base import IDSBase
-
 logger = logging.getLogger(__name__)
 
 
-class IDSSlice(IDSBase):
+class IDSSlice:
     """Represents a slice of IDS struct array elements.
 
     When slicing an IDSStructArray, instead of returning a regular Python list,
@@ -27,51 +24,39 @@ class IDSSlice(IDSBase):
     - Iteration over matched elements
     """
 
-    __slots__ = ["_parent", "metadata", "_matched_elements", "_slice_path", "_lazy"]
+    __slots__ = ["metadata", "_matched_elements", "_slice_path"]
 
     def __init__(
         self,
-        parent: IDSBase,
         metadata: Any,
-        matched_elements: List[IDSBase],
+        matched_elements: List[Any],
         slice_path: str,
     ):
         """Initialize IDSSlice.
 
         Args:
-            parent: The parent IDSStructArray that was sliced
             metadata: Metadata from the parent array
             matched_elements: List of elements that matched the slice
             slice_path: String representation of the slice operation (e.g., "[8:]")
         """
-        self._parent = parent
         self.metadata = metadata
         self._matched_elements = matched_elements
         self._slice_path = slice_path
-        self._lazy = parent._lazy
-
-    @property
-    def _toplevel(self):
-        """Return the toplevel instance this node belongs to"""
-        return self._parent._toplevel
 
     @property
     def _path(self) -> str:
-        """Build the path to this slice.
-
-        The path includes the parent's path plus the slice operation.
-        """
-        return self._parent._path + self._slice_path
+        """Return the path representation of this slice."""
+        return self._slice_path
 
     def __len__(self) -> int:
         """Return the number of elements matched by this slice."""
         return len(self._matched_elements)
 
-    def __iter__(self) -> Iterator[IDSBase]:
+    def __iter__(self) -> Iterator[Any]:
         """Iterate over all matched elements."""
         return iter(self._matched_elements)
 
-    def __getitem__(self, item: Union[int, slice]) -> Union[IDSBase, "IDSSlice"]:
+    def __getitem__(self, item: Union[int, slice]) -> Union[Any, "IDSSlice"]:
         """Get element(s) from the slice.
 
         Args:
@@ -95,7 +80,6 @@ class IDSSlice(IDSBase):
             new_path = self._slice_path + slice_str
 
             return IDSSlice(
-                self._parent,
                 self.metadata,
                 sliced_elements,
                 new_path,
@@ -134,7 +118,6 @@ class IDSSlice(IDSBase):
         new_path = self._slice_path + "." + name
 
         return IDSSlice(
-            self._parent,
             None,  # metadata is not directly applicable to the child
             child_elements,
             new_path,
@@ -142,23 +125,9 @@ class IDSSlice(IDSBase):
 
     def __repr__(self) -> str:
         """Build a string representation of this slice."""
-        toplevel_name = self._toplevel.metadata.name
         matches_count = len(self._matched_elements)
         match_word = "match" if matches_count == 1 else "matches"
-        return (
-            f"<IDSSlice (IDS:{toplevel_name}, "
-            f"{self._path}, "
-            f"{matches_count} {match_word})>"
-        )
-
-    def _build_repr_start(self) -> str:
-        """Build the start of the string representation.
-
-        This is used for consistency with other IDS node types.
-        """
-        return (
-            f"<{type(self).__name__} (IDS:{self._toplevel.metadata.name}, {self._path}"
-        )
+        return f"<IDSSlice ({self._slice_path}, " f"{matches_count} {match_word})>"
 
     def values(self) -> List[Any]:
         """Extract raw values from elements in this slice.
@@ -241,7 +210,6 @@ class IDSSlice(IDSBase):
 
         new_path = self._slice_path + ".flatten()"
         return IDSSlice(
-            self._parent,
             None,
             flattened,
             new_path,
@@ -265,17 +233,3 @@ class IDSSlice(IDSBase):
             return f"[{start}:{stop}:{step}]"
         else:
             return f"[{start}:{stop}]"
-
-    def _validate(self) -> None:
-        """Validate all matched elements."""
-        for element in self._matched_elements:
-            element._validate()
-
-    def _xxhash(self) -> bytes:
-        """Compute hash of all matched elements."""
-        from xxhash import xxh3_64
-
-        hsh = xxh3_64(len(self._matched_elements).to_bytes(8, "little"))
-        for element in self._matched_elements:
-            hsh.update(element._xxhash())
-        return hsh.digest()

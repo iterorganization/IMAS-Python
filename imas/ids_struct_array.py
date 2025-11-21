@@ -168,7 +168,6 @@ class IDSStructArray(IDSBase):
             slice_str = self._format_slice(item)
 
             return IDSSlice(
-                self,
                 self.metadata,
                 matched_elements,
                 slice_str,
