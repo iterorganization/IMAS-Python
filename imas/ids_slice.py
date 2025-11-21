@@ -61,26 +61,29 @@ class IDSSlice:
     def __getitem__(self, item: Union[int, slice]) -> Union[Any, "IDSSlice"]:
         """Get element(s) from the slice.
 
+        When the matched elements are IDSStructArray objects, the indexing
+        operation is applied to each array element (array-wise indexing).
+        Otherwise, the operation is applied to the matched elements list itself.
+
         Args:
-            item: Index or slice to apply to the matched elements
+            item: Index or slice to apply
 
         Returns:
-            A single element if item is an int, or an IDSSlice if item is a slice
+            - IDSSlice: If item is a slice, or if applying integer index to
+              IDSStructArray elements
+            - Single element: If item is an int and elements are not IDSStructArray
         """
         from imas.ids_struct_array import IDSStructArray
 
-        # Check if matched elements are IDSStructArray
-        # If so, apply indexing to each array
+        # Array-wise indexing: apply operation to each IDSStructArray element
         if self._matched_elements and isinstance(
             self._matched_elements[0], IDSStructArray
         ):
             if isinstance(item, slice):
-                # Apply the slice to each array and collect all results
                 sliced_elements = []
                 for array in self._matched_elements:
                     sliced_elements.extend(list(array[item]))
 
-                # Build the slice path representation
                 slice_str = self._format_slice(item)
                 new_path = self._slice_path + slice_str
 
@@ -90,12 +93,10 @@ class IDSSlice:
                     new_path,
                 )
             else:
-                # Apply integer index to each array
                 indexed_elements = []
                 for array in self._matched_elements:
                     indexed_elements.append(array[item])
 
-                # Build the index path representation
                 new_path = self._slice_path + f"[{item}]"
 
                 return IDSSlice(
@@ -104,12 +105,8 @@ class IDSSlice:
                     new_path,
                 )
         else:
-            # Normal slice behavior for non-array elements
             if isinstance(item, slice):
-                # Further slice the matched elements themselves
                 sliced_elements = self._matched_elements[item]
-
-                # Build the slice path representation
                 slice_str = self._format_slice(item)
                 new_path = self._slice_path + slice_str
 
@@ -119,7 +116,6 @@ class IDSSlice:
                     new_path,
                 )
             else:
-                # Return a single element by index
                 return self._matched_elements[int(item)]
 
     def __getattr__(self, name: str) -> "IDSSlice":
@@ -134,7 +130,6 @@ class IDSSlice:
         Returns:
             A new IDSSlice containing the child attribute from each matched element
         """
-        # Try to get child metadata if available
         child_metadata = None
         if self.metadata is not None:
             try:
@@ -142,10 +137,7 @@ class IDSSlice:
             except (KeyError, TypeError):
                 pass
 
-        # Access the attribute on each element
         child_elements = [getattr(element, name) for element in self]
-
-        # Build the new path including the attribute access
         new_path = self._slice_path + "." + name
 
         return IDSSlice(
@@ -191,10 +183,8 @@ class IDSSlice:
         result = []
         for element in self._matched_elements:
             if isinstance(element, IDSPrimitive):
-                # Extract the wrapped value from IDSPrimitive
                 result.append(element.value)
             else:
-                # Return other types as-is (structures, arrays, etc.)
                 result.append(element)
         return result
 
