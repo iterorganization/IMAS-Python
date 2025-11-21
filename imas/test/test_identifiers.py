@@ -274,3 +274,22 @@ def test_identifier_alias_equality():
     assert mat5.descriptions[0] == mid["235U"].description
     assert mat5.descriptions[1] == mid["238U"].description
     assert mat5.descriptions[2] == mid["U_235"].description
+
+
+@requires_aliases
+def test_identifier_alias_equality_non_ggd():
+    """Test identifier aliases functionality on non-ggd material"""
+    mid = identifiers.materials_identifier
+
+    summary_ids = IDSFactory().summary()
+    summary_ids.wall.material = mid.U_235  # Use alias as enum
+    assert summary_ids.wall.material == mid["235U"]
+    assert summary_ids.wall.material == mid["U_235"]
+
+    summary_ids.wall.material.name = "U_235"  # Use alias as name
+    assert summary_ids.wall.material == mid["235U"]
+    assert summary_ids.wall.material == mid["U_235"]
+
+    summary_ids.wall.material.name = "235U"  # Use canonical name
+    assert summary_ids.wall.material == mid["235U"]
+    assert summary_ids.wall.material == mid["U_235"]
