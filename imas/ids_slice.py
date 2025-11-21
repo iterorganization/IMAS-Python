@@ -68,8 +68,6 @@ class IDSSlice:
         if isinstance(item, slice):
             # Further slice the matched elements
             sliced_elements = self._matched_elements[item]
-            if not isinstance(sliced_elements, list):
-                sliced_elements = [sliced_elements]
 
             # Build the slice path representation
             slice_str = self._format_slice(item)
