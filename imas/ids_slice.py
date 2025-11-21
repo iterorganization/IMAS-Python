@@ -94,9 +94,13 @@ class IDSSlice:
         Returns:
             A new IDSSlice containing the child attribute from each matched element
         """
-        # Avoid issues with special attributes
-        if name.startswith("_"):
-            raise AttributeError(f"IDSSlice has no attribute '{name}'")
+        # Try to get child metadata if available
+        child_metadata = None
+        if self.metadata is not None:
+            try:
+                child_metadata = self.metadata[name]
+            except (KeyError, TypeError):
+                raise AttributeError(f"IDSSlice has no attribute '{name}'") from None 
 
         # Access the attribute on each element
         child_elements = [getattr(element, name) for element in self]
@@ -105,7 +109,7 @@ class IDSSlice:
         new_path = self._slice_path + "." + name
 
         return IDSSlice(
-            self.metadata,
+            child_metadata,
             child_elements,
             new_path,
         )
