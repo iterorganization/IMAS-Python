@@ -68,9 +68,12 @@ class IDSSlice:
             A single element if item is an int, or an IDSSlice if item is a slice
         """
         from imas.ids_struct_array import IDSStructArray
-        
-        # Check if matched elements are IDSStructArray - if so, apply indexing to each array
-        if self._matched_elements and isinstance(self._matched_elements[0], IDSStructArray):
+
+        # Check if matched elements are IDSStructArray
+        # If so, apply indexing to each array
+        if self._matched_elements and isinstance(
+            self._matched_elements[0], IDSStructArray
+        ):
             if isinstance(item, slice):
                 # Apply the slice to each array and collect all results
                 sliced_elements = []

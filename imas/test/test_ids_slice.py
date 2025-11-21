@@ -258,7 +258,7 @@ class TestFlatten:
             profile.ion.resize(5)
 
         slice_obj = cp.profiles_1d[:].ion
-        flattened = slice_obj[:]  
+        flattened = slice_obj[:]
         assert isinstance(flattened, IDSSlice)
         assert len(flattened) == 15
 
@@ -266,19 +266,19 @@ class TestFlatten:
         cp2.profiles_1d.resize(4)
         for profile in cp2.profiles_1d:
             profile.ion.resize(3)
-        flattened2 = cp2.profiles_1d[:2].ion[:]  
+        flattened2 = cp2.profiles_1d[:2].ion[:]
         assert len(flattened2) == 6
 
     def test_flatten_empty_and_single(self):
         cp = IDSFactory("3.39.0").core_profiles()
         cp.profiles_1d.resize(2)
-        empty_flattened = cp.profiles_1d[:].ion[:]  
+        empty_flattened = cp.profiles_1d[:].ion[:]
         assert len(empty_flattened) == 0
 
         cp2 = IDSFactory("3.39.0").core_profiles()
         cp2.profiles_1d.resize(1)
         cp2.profiles_1d[0].ion.resize(4)
-        single_flattened = cp2.profiles_1d[:].ion[:]  
+        single_flattened = cp2.profiles_1d[:].ion[:]
         assert len(single_flattened) == 4
 
     def test_flatten_indexing_and_slicing(self):
@@ -290,7 +290,7 @@ class TestFlatten:
             for j, ion in enumerate(profile.ion):
                 ion.label = f"ion_{i}_{j}"
 
-        flattened = cp.profiles_1d[:].ion[:]  
+        flattened = cp.profiles_1d[:].ion[:]
 
         assert flattened[0].label == "ion_0_0"
         assert flattened[3].label == "ion_1_0"
@@ -307,18 +307,18 @@ class TestFlatten:
         for profile in cp.profiles_1d:
             profile.ion.resize(2)
 
-        flattened = cp.profiles_1d[:].ion[:]  
+        flattened = cp.profiles_1d[:].ion[:]
         repr_str = repr(flattened)
 
         assert "IDSSlice" in repr_str
         assert "4 matches" in repr_str
-        assert "[:]" in flattened._path  
+        assert "[:]" in flattened._path
 
     def test_flatten_complex_case(self, wall_with_units):
         wall = wall_with_units
         units = wall.description_2d[0].vessel.unit[:5]
 
-        all_elements = units.element[:]  
+        all_elements = units.element[:]
         assert len(all_elements) == 4 + 2 + 3 + 3 + 3
 
 
@@ -413,7 +413,7 @@ class TestIDSSliceValues:
                 ion.neutral_index = i
                 ion.z_ion = float(i + 1)
 
-        ions = cp.profiles_1d[:].ion[:]  
+        ions = cp.profiles_1d[:].ion[:]
         indices = ions[:].neutral_index.values()
         assert all(isinstance(idx, (int, np.integer)) for idx in indices)
 
@@ -452,7 +452,7 @@ class TestIDSSliceValues:
         for profile in cp.profiles_1d:
             profile.ion.resize(2)
 
-        ions = cp.profiles_1d[:].ion[:].values()  
+        ions = cp.profiles_1d[:].ion[:].values()
 
         assert len(ions) == 6
         for ion in ions:
