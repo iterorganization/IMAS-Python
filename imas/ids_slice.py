@@ -64,10 +64,6 @@ class IDSSlice:
 
         Returns:
             A single element if item is an int, or an IDSSlice if item is a slice
-
-        Raises:
-            IndexError: If the index is out of range
-            AttributeError: If trying to index into elements that aren't indexable
         """
         if isinstance(item, slice):
             # Further slice the matched elements
@@ -99,9 +95,6 @@ class IDSSlice:
 
         Returns:
             A new IDSSlice containing the child attribute from each matched element
-
-        Raises:
-            AttributeError: If the attribute doesn't exist
         """
         # Avoid issues with special attributes
         if name.startswith("_"):
