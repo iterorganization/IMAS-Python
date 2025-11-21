@@ -105,7 +105,7 @@ class IDSSlice:
         new_path = self._slice_path + "." + name
 
         return IDSSlice(
-            None,  # metadata is not directly applicable to the child
+            self.metadata,
             child_elements,
             new_path,
         )
@@ -197,7 +197,7 @@ class IDSSlice:
 
         new_path = self._slice_path + ".flatten()"
         return IDSSlice(
-            None,
+            self.metadata,
             flattened,
             new_path,
         )
