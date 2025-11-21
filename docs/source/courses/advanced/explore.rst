@@ -91,8 +91,8 @@ Arrays of structures support Python slice notation, which returns an
     subset = core_profiles.profiles_1d[2:5]      # Elements 2, 3, 4
     every_other = core_profiles.profiles_1d[::2] # Every second element
     
-    # IDSSlice supports flatten() and values() for convenient data access
-    all_ions = core_profiles.profiles_1d[:].ion[:].flatten()
+    # IDSSlice supports array-wise indexing and values() for data access
+    all_ions = core_profiles.profiles_1d[:].ion[:]
     for ion in all_ions:
         print(ion.label.value)
 
