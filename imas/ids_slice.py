@@ -99,11 +99,7 @@ class IDSSlice:
             raise AttributeError(f"IDSSlice has no attribute '{name}'")
 
         # Access the attribute on each element
-        child_elements = []
-
-        for element in self._matched_elements:
-            child = getattr(element, name)
-            child_elements.append(child)
+        child_elements = [getattr(element, name) for element in self]
 
         # Build the new path including the attribute access
         new_path = self._slice_path + "." + name
