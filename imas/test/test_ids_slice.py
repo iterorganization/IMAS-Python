@@ -352,15 +352,20 @@ class TestVaryingArraySizeIndexing:
         units = wall_varying_sizes.description_2d[0].vessel.unit
         element_slice = units[:2].element
 
-        array_0 = element_slice[0]
-        assert len(array_0) == 4
-        assert array_0[2].name.value == "element-0-2"
+        # With new behavior, element_slice[0] gets first element from each array
+        first_from_each = element_slice[0]
+        assert isinstance(first_from_each, IDSSlice)
+        assert len(first_from_each) == 2  # 2 units, so 2 first elements
 
-        array_1 = element_slice[1]
-        assert len(array_1) == 2
+        # To access individual arrays, use iteration
+        arrays = list(element_slice)
+        assert len(arrays[0]) == 4
+        assert arrays[0][2].name.value == "element-0-2"
+
+        assert len(arrays[1]) == 2
 
         with pytest.raises(IndexError):
-            array_1[2]
+            arrays[1][2]
 
     def test_wall_with_diverse_element_counts(self):
         wall = create_wall_with_units(total_units=5, element_counts=[3, 1, 4, 2, 5])
@@ -369,9 +374,15 @@ class TestVaryingArraySizeIndexing:
         units_slice = units[:3]
         element_slice = units_slice.element
 
-        assert len(element_slice[0]) == 3
-        assert len(element_slice[1]) == 1
-        assert len(element_slice[2]) == 4
+        # With new behavior, element_slice[0] gets first element from each array
+        first_from_each = element_slice[0]
+        assert isinstance(first_from_each, IDSSlice)
+        assert len(first_from_each) == 3  # 3 units
+
+        # To access individual arrays, use iteration
+        arrays = list(element_slice)
+        assert len(arrays[0]) == 3
+        assert len(arrays[2]) == 4
 
         result = safe_element_lookup(units_slice, 2)
         assert len(result["collected"]) == 2
