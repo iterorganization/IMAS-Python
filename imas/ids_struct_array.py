@@ -142,8 +142,6 @@ class IDSStructArray(IDSBase):
 
             # Get the matched elements
             matched_elements = self.value[item]
-            if not isinstance(matched_elements, list):
-                matched_elements = [matched_elements]
 
             # Build the slice path representation using IDSSlice's method
             slice_str = IDSSlice._format_slice(item)
