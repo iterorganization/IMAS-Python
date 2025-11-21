@@ -195,54 +195,6 @@ class IDSSlice:
                 result.append(element)
         return result
 
-    def flatten(self, recursive: bool = False) -> "IDSSlice":
-        """Flatten nested arrays into a single IDSSlice.
-
-        This method is useful for MATLAB-style matrix-like access.
-        It flattens matched elements that are themselves iterable
-        (such as IDSStructArray) into a single flat IDSSlice.
-
-        Args:
-            recursive: If True, recursively flatten nested IDSSlices.
-                      If False (default), only flatten one level.
-
-        Returns:
-            New IDSSlice with flattened elements
-
-        Examples:
-            >>> # Get all ions from 2 profiles as a flat list
-            >>> all_ions = cp.profiles_1d[:2].ion.flatten()
-            >>> len(all_ions)  # Number of total ions
-            10
-            >>> # Iterate over all ions
-            >>> for ion in all_ions:
-            ...     print(ion.label)
-
-            >>> # Flatten recursively for deeply nested structures
-            >>> deeply_nested = obj.level1[:].level2[:].flatten(recursive=True)
-        """
-        from imas.ids_struct_array import IDSStructArray
-
-        flattened = []
-
-        for element in self._matched_elements:
-            if isinstance(element, IDSStructArray):
-                # Flatten IDSStructArray elements
-                flattened.extend(list(element))
-            elif recursive and isinstance(element, IDSSlice):
-                # Recursively flatten nested IDSSlices
-                flattened.extend(list(element.flatten(recursive=True)))
-            else:
-                # Keep non-array elements as-is
-                flattened.append(element)
-
-        new_path = self._slice_path + ".flatten()"
-        return IDSSlice(
-            self.metadata,
-            flattened,
-            new_path,
-        )
-
     @staticmethod
     def _format_slice(slice_obj: slice) -> str:
         """Format a slice object as a string.
