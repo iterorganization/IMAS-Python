@@ -77,9 +77,12 @@ the slice operation automatically applies to each array (array-wise indexing):
 Lazy-Loaded Arrays
 -------------------
 
-Individual indexing works with lazy loading, but slicing doesn't:
+Both individual indexing and slicing work with lazy loading:
 
 .. code-block:: python
 
     element = lazy_array[0]      # OK - loads on demand
-    subset = lazy_array[1:5]     # ValueError
+    subset = lazy_array[1:5]     # OK - loads only requested elements on demand
+
+When slicing lazy-loaded arrays, only the elements in the slice range are loaded,
+making it memory-efficient for large datasets.
