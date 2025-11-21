@@ -10,6 +10,8 @@ the resulting collection.
 import logging
 from typing import Any, Iterator, List, Union
 
+from imas.ids_metadata import IDSMetadata
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,7 +30,7 @@ class IDSSlice:
 
     def __init__(
         self,
-        metadata: Any,
+        metadata: IDSMetadata,
         matched_elements: List[Any],
         slice_path: str,
     ):
@@ -100,7 +102,7 @@ class IDSSlice:
             try:
                 child_metadata = self.metadata[name]
             except (KeyError, TypeError):
-                raise AttributeError(f"IDSSlice has no attribute '{name}'") from None 
+                pass
 
         # Access the attribute on each element
         child_elements = [getattr(element, name) for element in self]
