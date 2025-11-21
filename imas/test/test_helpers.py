@@ -19,7 +19,7 @@ from imas.ids_primitive import IDSPrimitive, IDSString1D
 from imas.ids_struct_array import IDSStructArray
 from imas.ids_structure import IDSStructure
 from imas.ids_toplevel import IDSToplevel
-from imas.util import idsdiffgen, visit_children
+from imas.util import idsdiffgen, tree_iter
 
 logger = logging.getLogger(__name__)
 
@@ -117,57 +117,60 @@ def maybe_set_random_value(
         primitive.value = random_data(primitive.metadata.data_type, ndim)
         return
 
+    for dim, same_as in enumerate(primitive.metadata.coordinates_same_as):
+        if same_as.references:
+            try:
+                ref_elem = same_as.references[0].goto(primitive)
+                if len(ref_elem.shape) <= dim or ref_elem.shape[dim] == 0:
+                    return
+            except (ValueError, AttributeError, IndexError, RuntimeError):
+                return
+
     shape = []
-    for dim, coordinate in enumerate(primitive.metadata.coordinates):
-        same_as = primitive.metadata.coordinates_same_as[dim]
-        if not coordinate.has_validation and not same_as.has_validation:
-            if primitive.metadata.name.endswith("_error_upper"):
-                # <name>_error_upper should only be filled when <name> is
-                name = primitive.metadata.name[: -len("_error_upper")]
-                data = primitive._parent[name]
-                if not data.has_value:
-                    return
-                size = data.shape[dim]
-            elif primitive.metadata.name.endswith("_error_lower"):
-                # <name>_error_lower should only be filled when <name>_error_upper is
-                name = primitive.metadata.name[: -len("_error_lower")] + "_error_upper"
-                data = primitive._parent[name]
-                if not data.has_value:
-                    return
-                size = data.shape[dim]
-            else:
+    if primitive.metadata.name.endswith("_error_upper"):
+        name = primitive.metadata.name[: -len("_error_upper")]
+        data = primitive._parent[name]
+        if not data.has_value:
+            return
+        shape = list(data.shape)
+    elif primitive.metadata.name.endswith("_error_lower"):
+        name = primitive.metadata.name[: -len("_error_lower")] + "_error_upper"
+        data = primitive._parent[name]
+        if not data.has_value:
+            return
+        shape = list(data.shape)
+    else:
+        for dim, coordinate in enumerate(primitive.metadata.coordinates):
+            same_as = primitive.metadata.coordinates_same_as[dim]
+
+            if not coordinate.has_validation and not same_as.has_validation:
                 # we can independently choose a size for this dimension:
                 size = random.randint(1, 6)
-        elif coordinate.references or same_as.references:
-            try:
-                if coordinate.references:
-                    refs = [ref.goto(primitive) for ref in coordinate.references]
-                    filled_refs = [ref for ref in refs if len(ref) > 0]
-                    assert len(filled_refs) in (0, 1)
-                    coordinate_element = filled_refs[0] if filled_refs else refs[0]
-                else:
-                    coordinate_element = same_as.references[0].goto(primitive)
-            except (ValueError, AttributeError):
-                # Ignore invalid coordinate specs
-                coordinate_element = np.ones((1,) * 6)
+            elif coordinate.references or same_as.references:
+                try:
+                    if coordinate.references:
+                        refs = [ref.goto(primitive) for ref in coordinate.references]
+                        filled_refs = [ref for ref in refs if len(ref) > 0]
+                        assert len(filled_refs) in (0, 1)
+                        coordinate_element = filled_refs[0] if filled_refs else refs[0]
+                    else:
+                        coordinate_element = same_as.references[0].goto(primitive)
+                except (ValueError, AttributeError, IndexError):
+                    # Ignore invalid coordinate specs or empty array references
+                    coordinate_element = np.ones((1,) * 6)
 
-            if len(coordinate_element) == 0:
-                # Scale chance of not setting a coordinate by our number of dimensions,
-                # such that overall there is roughly a 50% chance that any coordinate
-                # remains empty
-                maybe_set_random_value(coordinate_element, 0.5**ndim, skip_complex)
-            size = coordinate_element.shape[0 if coordinate.references else dim]
+                if len(coordinate_element) == 0:
+                    maybe_set_random_value(coordinate_element, 0.5**ndim, skip_complex)
+                size = coordinate_element.shape[0 if coordinate.references else dim]
 
-            if coordinate.size:  # coordinateX = <path> OR 1...1
-                # Coin flip whether to use the size as determined by
-                # coordinate.references, or the size from coordinate.size
-                if random.random() < 0.5:
-                    size = coordinate.size
-        else:
-            size = coordinate.size
-        if size == 0:
-            return  # Leave empty
-        shape.append(size)
+                if coordinate.size:  # coordinateX = <path> OR 1...1
+                    if random.random() < 0.5:
+                        size = coordinate.size
+            else:
+                size = coordinate.size
+            if size == 0:
+                return  # Leave empty
+            shape.append(size)
 
     if primitive.metadata.data_type is IDSDataType.STR:
         primitive.value = [random_string() for i in range(shape[0])]
@@ -298,21 +301,29 @@ def fill_consistent(
 
 
 def unset_coordinate(coordinate):
+    def unset(element):
+        # Unset element value
+        element.value = []
+        # But also its errorbars (if they exist)
+        try:
+            element._parent[element.metadata.name + "_error_upper"].value = []
+            element._parent[element.metadata.name + "_error_lower"].value = []
+        except AttributeError:
+            pass  # Ignore when element has no errorbars
+
     # Unset the coordinate quantity
-    coordinate.value = []
+    unset(coordinate)
     # Find all elements that also have this as a coordinate and unset...
     parent = coordinate._dd_parent
     while parent.metadata.data_type is not IDSDataType.STRUCT_ARRAY:
         parent = parent._dd_parent
 
-    def callback(element):
+    for element in tree_iter(parent):
         if hasattr(element, "coordinates") and element.has_value:
             for ele_coor in element.coordinates:
                 if ele_coor is coordinate:
-                    element.value = []
-                    return
-
-    visit_children(callback, parent)
+                    unset(element)
+                    break
 
 
 def compare_children(st1, st2, deleted_paths=set(), accept_lazy=False):
