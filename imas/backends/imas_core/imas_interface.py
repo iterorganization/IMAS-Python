@@ -6,6 +6,7 @@ Helper module for providing a version-independent interface to the Access Layer.
 This module tries to abstract away most API incompatibilities between the supported
 Access Layer versions (for example the rename of _ual_lowlevel to _al_lowlevel).
 """
+
 import inspect
 import logging
 
@@ -61,9 +62,6 @@ class LowlevelInterface:
 
     - If the lowlevel drops methods, we need to update the implementation fo the method
       to provide a proper error message or a workaround.
-    - Renamed methods (if this will ever happen) are perhaps best handled in the
-      ``__init__`` by providing a mapping of new to old name, so far this was only
-      relevant for the ``ual_`` to ``al_`` rename.
     """
 
     def __init__(self, lowlevel):
@@ -84,23 +82,13 @@ class LowlevelInterface:
             # Introduced after 5.0.0
             self._al_version_str = self._lowlevel.get_al_version()
             self._al_version = Version(self._al_version_str)
-        elif hasattr(lowlevel, "al_read_data"):
-            # In AL 5.0.0, all `ual_` methods were renamed to `al_`
+        else:
             self._al_version_str = "5.0.0"
             self._al_version = Version(self._al_version_str)
-        else:
-            # AL 4, don't try to determine in more detail
-            self._al_version_str = "4.?.?"
-            self._al_version = Version("4")
-            public_methods.remove("close_pulse")
 
-        if self._al_version < Version("5"):
-            method_prefix = "ual_"
-        else:
-            method_prefix = "al_"
         # Overwrite all of our methods that are implemented in the lowlevel
         for method in public_methods:
-            ll_method = getattr(lowlevel, method_prefix + method, None)
+            ll_method = getattr(lowlevel, f"al_{method}", None)
             if ll_method is not None:
                 setattr(self, method, ll_method)
 
@@ -115,24 +103,10 @@ class LowlevelInterface:
             f"but the current version is {self._al_version_str}"
         )
 
-    # AL 4 lowlevel API
-
-    def begin_pulse_action(self, backendID, shot, run, user, tokamak, version):
-        # Removed in AL5, compatibility handled in DBEntry
-        raise LLInterfaceError(f"{__name__} is not implemented")
-
-    def open_pulse(self, pulseCtx, mode, options):
-        # Removed in AL5, compatibility handled in DBEntry
-        raise LLInterfaceError(f"{__name__} is not implemented")
-
     def close_pulse(self, pulseCtx, mode):
-        # options argument (mandatory in AL4) was removed in AL5
-        # This method is overwritten in AL5, but for AL4 we need to do this:
-        return lowlevel.ual_close_pulse(pulseCtx, mode, None)
+        raise LLInterfaceError(f"{__name__} is not implemented")
 
-    def begin_global_action(self, pulseCtx, dataobjectname, rwmode, datapath=""):
-        # datapath was added in AL5 to support more efficient partial_get in the
-        # UDA backend. TODO: figure out if this is useful for lazy loading.
+    def begin_global_action(self, pulseCtx, dataobjectname, rwmode, datapath):
         raise LLInterfaceError(f"{__name__} is not implemented")
 
     def begin_slice_action(self, pulseCtx, dataobjectname, rwmode, time, interpmode):

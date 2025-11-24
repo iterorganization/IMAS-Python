@@ -224,10 +224,12 @@ def test_lazy_load_with_new_structure(requires_imas):
     eq.time_slice.resize(1)
     dbentry.put(eq)
 
-    entry2 = DBEntry(MEMORY_BACKEND, "ITER", 1, 1, data_version="3", dd_version="4.0.0")
+    entry2 = DBEntry(
+        MEMORY_BACKEND, "ITER", 1, 1, data_version="3", dd_version="3.39.0"
+    )
     entry2.open()
     lazy_eq = entry2.get("equilibrium", lazy=True)
-    assert not lazy_eq.time_slice[0].boundary.dr_dz_zero_point.r.has_value
+    assert not lazy_eq.time_slice[0].boundary_separatrix.dr_dz_zero_point.r.has_value
 
 
 def test_lazy_load_multiple_ids(backend, worker_id, tmp_path):

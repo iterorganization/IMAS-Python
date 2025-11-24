@@ -10,8 +10,6 @@ from .utils import (
     available_serializers,
     available_slicing_backends,
     create_dbentry,
-    factory,
-    hlis,
 )
 
 N_SLICES = 32
@@ -26,13 +24,13 @@ def fill_slices(core_profiles, times):
         times: time values to fill a slice for
     """
     core_profiles.ids_properties.homogeneous_time = 1  # HOMOGENEOUS
-    core_profiles.ids_properties.comment = "Generated for the IMAS-Python benchmark suite"
+    core_profiles.ids_properties.comment = (
+        "Generated for the IMAS-Python benchmark suite"
+    )
     core_profiles.ids_properties.creation_date = datetime.date.today().isoformat()
     core_profiles.code.name = "IMAS-Python ASV benchmark"
     core_profiles.code.version = imas.__version__
-    core_profiles.code.repository = (
-        "https://github.com/iterorganization/IMAS-Python"
-    )
+    core_profiles.code.repository = "https://github.com/iterorganization/IMAS-Python"
 
     core_profiles.time = np.array(times)
     core_profiles.profiles_1d.resize(len(times))
@@ -50,13 +48,13 @@ def fill_slices(core_profiles, times):
         profiles_1d.ion.resize(len(ions))
         profiles_1d.neutral.resize(len(ions))
         for i, ion in enumerate(ions):
-            if hasattr(profiles_1d.ion[i], 'label'):
+            if hasattr(profiles_1d.ion[i], "label"):
                 profiles_1d.ion[i].label = ion
                 profiles_1d.neutral[i].label = ion
-            if hasattr(profiles_1d.ion[i], 'name'):
+            if hasattr(profiles_1d.ion[i], "name"):
                 profiles_1d.ion[i].name = ion
                 profiles_1d.neutral[i].name = ion
-            
+
             # profiles_1d.ion[i].label = profiles_1d.neutral[i].label = ion
             profiles_1d.ion[i].z_ion = 1.0
             profiles_1d.ion[i].neutral_index = profiles_1d.neutral[i].ion_index = i + 1
@@ -70,31 +68,31 @@ def fill_slices(core_profiles, times):
 
 
 class GetSlice:
-    params = [hlis, available_slicing_backends]
-    param_names = ["hli", "backend"]
+    params = [available_slicing_backends]
+    param_names = ["backend"]
 
-    def setup(self, hli, backend):
-        self.dbentry = create_dbentry(hli, backend)
-        core_profiles = factory[hli].core_profiles()
+    def setup(self, backend):
+        self.dbentry = create_dbentry(backend)
+        core_profiles = imas.IDSFactory().core_profiles()
         fill_slices(core_profiles, TIME)
         self.dbentry.put(core_profiles)
 
-    def time_get_slice(self, hli, backend):
+    def time_get_slice(self, backend):
         for t in TIME:
             self.dbentry.get_slice("core_profiles", t, imas.ids_defs.CLOSEST_INTERP)
 
-    def teardown(self, hli, backend):
+    def teardown(self, backend):
         if hasattr(self, "dbentry"):  # imas + netCDF has no dbentry
             self.dbentry.close()
 
 
 class Get:
-    params = [hlis, available_backends]
-    param_names = ["hli", "backend"]
+    params = [available_backends]
+    param_names = ["backend"]
     setup = GetSlice.setup
     teardown = GetSlice.teardown
 
-    def time_get(self, hli, backend):
+    def time_get(self, backend):
         self.dbentry.get("core_profiles")
 
 
@@ -103,8 +101,8 @@ class LazyGet:
     param_names = ["lazy", "backend"]
 
     def setup(self, lazy, backend):
-        self.dbentry = create_dbentry("imas", backend)
-        core_profiles = factory["imas"].core_profiles()
+        self.dbentry = create_dbentry(backend)
+        core_profiles = imas.IDSFactory().core_profiles()
         fill_slices(core_profiles, TIME)
         self.dbentry.put(core_profiles)
 
@@ -118,75 +116,72 @@ class LazyGet:
 
 
 class Generate:
-    params = [hlis]
-    param_names = ["hli"]
+    def setup(self):
+        self.core_profiles = imas.IDSFactory().core_profiles()
 
-    def setup(self, hli):
-        self.core_profiles = factory[hli].core_profiles()
-
-    def time_generate(self, hli):
+    def time_generate(self):
         fill_slices(self.core_profiles, TIME)
 
-    def time_generate_slices(self, hli):
+    def time_generate_slices(self):
         for t in TIME:
             fill_slices(self.core_profiles, [t])
 
-    def time_create_core_profiles(self, hli):
-        factory[hli].core_profiles()
+    def time_create_core_profiles(self):
+        imas.IDSFactory().core_profiles()
 
 
 class Put:
-    params = [["0", "1"], hlis, available_backends]
+    params = [["0", "1"], available_backends]
     param_names = ["disable_validate", "hli", "backend"]
 
-    def setup(self, disable_validate, hli, backend):
-        create_dbentry(hli, backend).close()  # catch unsupported combinations
-        self.core_profiles = factory[hli].core_profiles()
+    def setup(self, disable_validate, backend):
+        create_dbentry(backend).close()  # catch unsupported combinations
+        self.core_profiles = imas.IDSFactory().core_profiles()
         fill_slices(self.core_profiles, TIME)
         os.environ["IMAS_AL_DISABLE_VALIDATE"] = disable_validate
 
-    def time_put(self, disable_validate, hli, backend):
-        with create_dbentry(hli, backend) as dbentry:
+    def time_put(self, disable_validate, backend):
+        with create_dbentry(backend) as dbentry:
             dbentry.put(self.core_profiles)
 
 
 class PutSlice:
-    params = [["0", "1"], hlis, available_slicing_backends]
-    param_names = ["disable_validate", "hli", "backend"]
+    params = [["0", "1"], available_slicing_backends]
+    param_names = ["disable_validate", "backend"]
 
-    def setup(self, disable_validate, hli, backend):
-        create_dbentry(hli, backend).close()  # catch unsupported combinations
-        self.core_profiles = factory[hli].core_profiles()
+    def setup(self, disable_validate, backend):
+        create_dbentry(backend).close()  # catch unsupported combinations
+        self.core_profiles = imas.IDSFactory().core_profiles()
         os.environ["IMAS_AL_DISABLE_VALIDATE"] = disable_validate
 
-    def time_put_slice(self, disable_validate, hli, backend):
-        with create_dbentry(hli, backend) as dbentry:
+    def time_put_slice(self, disable_validate, backend):
+        with create_dbentry(backend) as dbentry:
             for t in TIME:
                 fill_slices(self.core_profiles, [t])
                 dbentry.put_slice(self.core_profiles)
 
 
 class Serialize:
-    params = [hlis, available_serializers]
-    param_names = ["hli", "serializer"]
+    params = [available_serializers]
+    param_names = ["serializer"]
 
-    def setup(self, hli, serializer):
-        self.core_profiles = factory[hli].core_profiles()
+    def setup(self, serializer):
+        self.core_profiles = imas.IDSFactory().core_profiles()
         fill_slices(self.core_profiles, TIME)
 
-    def time_serialize(self, hli, serializer):
+    def time_serialize(self, serializer):
         self.core_profiles.serialize(serializer)
 
 
 class Deserialize:
-    params = [hlis, available_serializers]
-    param_names = ["hli", "serializer"]
+    params = [available_serializers]
+    param_names = ["serializer"]
 
-    def setup(self, hli, serializer):
-        self.core_profiles = factory[hli].core_profiles()
+    def setup(self, serializer):
+        self.core_profiles = imas.IDSFactory().core_profiles()
         fill_slices(self.core_profiles, TIME)
         self.data = self.core_profiles.serialize(serializer)
-        self.core_profiles = factory[hli].core_profiles()
+        self.core_profiles = imas.IDSFactory().core_profiles()
 
-    def time_deserialize(self, hli, serializer):
+    def time_deserialize(self, serializer):
         self.core_profiles.deserialize(self.data)

@@ -1,10 +1,10 @@
-import importlib
 import logging
 import uuid
 from pathlib import Path
 
 import imas
 import imas.exception
+import imas.ids_defs
 
 # Backend constants
 HDF5 = "HDF5"
@@ -56,28 +56,12 @@ available_slicing_backends = [
     backend for backend in available_backends if backend not in [ASCII, NETCDF]
 ]
 
-hlis = ["imas"]
-DBEntry = {
-    "imas": imas.DBEntry,
-}
-factory = {
-    "imas": imas.IDSFactory(),
-}
-available_serializers = [imas.ids_defs.ASCII_SERIALIZER_PROTOCOL]
+available_serializers = [
+    imas.ids_defs.ASCII_SERIALIZER_PROTOCOL,
+    imas.ids_defs.FLEXBUFFERS_SERIALIZER_PROTOCOL,
+]
 
 
-def create_dbentry(hli, backend):
-    if backend == NETCDF:
-        if hli == "imas":  # check if netcdf backend is available
-            try:
-                assert (
-                    imas.DBEntry._select_implementation("x.nc").__name__
-                    == "NCDBEntryImpl"
-                )
-            except (AttributeError, AssertionError):
-                raise NotImplementedError(
-                    "This version of IMAS-Python doesn't implement netCDF."
-                ) from None
-
-    path = Path.cwd() / f"DB-{hli}-{backend}"
-    return DBEntry[hli](create_uri(backend, path), "w")
+def create_dbentry(backend):
+    path = Path.cwd() / f"DB-{backend}"
+    return imas.DBEntry(create_uri(backend, path), "w")

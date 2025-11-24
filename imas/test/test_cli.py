@@ -2,10 +2,7 @@ from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
-from packaging.version import Version
 
-from imas.backends.imas_core.imas_interface import has_imas
-from imas.backends.imas_core.imas_interface import ll_interface
 from imas.command.cli import print_version
 from imas.command.db_analysis import analyze_db, process_db_analysis
 from imas.db_entry import DBEntry
@@ -20,13 +17,7 @@ def test_imas_version():
 
 
 @pytest.mark.cli
-@pytest.mark.skipif(
-    not has_imas or ll_interface._al_version < Version("5.0"),
-    reason="Needs AL >= 5 AND Requires IMAS Core.",
-)
-def test_db_analysis(
-    tmp_path,
-):
+def test_db_analysis(tmp_path, requires_imas):
     # This only tests the happy flow, error handling is not tested
     db_path = tmp_path / "test_db_analysis"
     with DBEntry(f"imas:hdf5?path={db_path}", "w") as entry:
