@@ -22,7 +22,7 @@ class IDSSlice:
     an IDSSlice is returned. This allows for:
     - Tracking the slice operation in the path
     - Further slicing of child elements
-    - Attribute access on all matched elements
+    - Child node access on all matched elements
     - Iteration over matched elements
 
     Attributes:
@@ -122,17 +122,22 @@ class IDSSlice:
                 return self._matched_elements[int(item)]
 
     def __getattr__(self, name: str) -> "IDSSlice":
-        """Access a child attribute on all matched elements.
+        """Access a child node on all matched elements.
 
-        This returns a new IDSSlice containing the child attribute from
+        This returns a new IDSSlice containing the child node from
         each matched element.
 
         Args:
-            name: Name of the attribute to access
+            name: Name of the node to access
 
         Returns:
-            A new IDSSlice containing the child attribute from each matched element
+            A new IDSSlice containing the child node from each matched element
         """
+        if not self._matched_elements:
+            raise IndexError(
+                f"Cannot access node '{name}' on empty slice with 0 elements"
+            )
+
         child_metadata = None
         if self.metadata is not None:
             try:
@@ -152,8 +157,19 @@ class IDSSlice:
     def __repr__(self) -> str:
         """Build a string representation of this slice."""
         matches_count = len(self._matched_elements)
-        match_word = "match" if matches_count == 1 else "matches"
-        return f"<IDSSlice ({self._slice_path}, " f"{matches_count} {match_word})>"
+        match_word = "item" if matches_count == 1 else "items"
+
+        array_name = self.metadata.name if self.metadata else ""
+        ids_name = ""
+        if self._matched_elements:
+            elem = self._matched_elements[0]
+            if hasattr(elem, "_toplevel") and hasattr(elem._toplevel, "metadata"):
+                ids_name = elem._toplevel.metadata.name
+        ids_prefix = f"IDS:{ids_name}, " if ids_name else ""
+
+        return (
+            f"<IDSSlice ({ids_prefix}{array_name} with {matches_count} {match_word})>"
+        )
 
     def values(self) -> List[Any]:
         """Extract raw values from elements in this slice.
