@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""IMAS-Python module to support Data Dictionary identifiers.
-"""
+"""IMAS-Python module to support Data Dictionary identifiers."""
 
 import logging
 from enum import Enum
@@ -16,16 +15,18 @@ logger = logging.getLogger(__name__)
 class IDSIdentifier(Enum):
     """Base class for all identifier enums."""
 
-    def __new__(self, value: int, description: str):
-        obj = object.__new__(self)
+    def __new__(cls, value: int, description: str, aliases: list = []):
+        obj = object.__new__(cls)
         obj._value_ = value
         return obj
 
-    def __init__(self, value: int, description: str) -> None:
+    def __init__(self, value: int, description: str, aliases: list = []) -> None:
         self.index = value
         """Unique index for this identifier value."""
         self.description = description
         """Description for this identifier value."""
+        self.aliases = aliases
+        """Alternative names for this identifier value."""
 
     def __eq__(self, other):
         if self is other:
@@ -37,35 +38,49 @@ class IDSIdentifier(Enum):
         except (AttributeError, TypeError, ValueError):
             # Attribute doesn't exist, or failed to convert
             return NotImplemented
+
         # Index must match
         if other_index == self.index:
-            # Name may be left empty
-            if other_name == self.name or other_name == "":
+            # Name may be left empty, or match name or alias
+            if (
+                other_name == self.name
+                or other_name == ""
+                or other_name in self.aliases
+            ):
                 # Description doesn't have to match, though we will warn when it doesn't
-                if other_description != self.description and other_description != "":
+                if other_description not in (self.description, ""):
                     logger.warning(
                         "Description of %r does not match identifier description %r",
                         other.description,
                         self.description,
                     )
                 return True
-            else:
-                logger.warning(
-                    "Name %r does not match identifier name %r, but indexes are equal.",
-                    other.name,
-                    self.name,
-                )
+
+            # If we get here with matching indexes but no name/alias match, warn
+            logger.warning(
+                "Name %r does not match identifier name %r, but indexes are equal.",
+                other.name,
+                self.name,
+            )
         return False
 
     @classmethod
     def _from_xml(cls, identifier_name, xml) -> Type["IDSIdentifier"]:
         element = fromstring(xml)
         enum_values = {}
+        aliases = {}
         for int_element in element.iterfind("int"):
             name = int_element.get("name")
             value = int_element.text
             description = int_element.get("description")
-            enum_values[name] = (int(value), description)
+            # alias attribute may contain multiple comma-separated aliases
+            alias_attr = int_element.get("alias", "")
+            aliases = [a.strip() for a in alias_attr.split(",") if a.strip()]
+            # Canonical entry: use the canonical 'name' as key
+            enum_values[name] = (int(value), description, aliases)
+            # Also add alias names as enum *aliases* (they become enum attributes)
+            for alias in aliases:
+                enum_values[alias] = (int(value), description, aliases)
         # Create the enumeration
         enum = cls(
             identifier_name,
