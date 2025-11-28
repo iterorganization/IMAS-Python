@@ -151,6 +151,7 @@ class IDSStructArray(IDSBase):
                     self.metadata,
                     loaded_elements,
                     slice_str,
+                    parent_array=self,
                 )
 
             from imas.ids_slice import IDSSlice
@@ -162,6 +163,7 @@ class IDSStructArray(IDSBase):
                 self.metadata,
                 matched_elements,
                 slice_str,
+                parent_array=self,
             )
         else:
             # Handle integer index

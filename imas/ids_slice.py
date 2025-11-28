@@ -8,9 +8,12 @@ the resulting collection.
 """
 
 import logging
-from typing import Any, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Union
 
 from imas.ids_metadata import IDSMetadata
+
+if TYPE_CHECKING:
+    from imas.ids_struct_array import IDSStructArray
 
 logger = logging.getLogger(__name__)
 
@@ -29,13 +32,14 @@ class IDSSlice:
         metadata: Metadata from the parent array, or None if not available
     """
 
-    __slots__ = ["metadata", "_matched_elements", "_slice_path"]
+    __slots__ = ["metadata", "_matched_elements", "_slice_path", "_parent_array"]
 
     def __init__(
         self,
         metadata: Optional[IDSMetadata],
         matched_elements: List[Any],
         slice_path: str,
+        parent_array: Optional["IDSStructArray"] = None,
     ):
         """Initialize IDSSlice.
 
@@ -43,10 +47,12 @@ class IDSSlice:
             metadata: Metadata from the parent array
             matched_elements: List of elements that matched the slice
             slice_path: String representation of the slice operation (e.g., "[8:]")
+            parent_array: Optional reference to the parent IDSStructArray for context
         """
         self.metadata = metadata
         self._matched_elements = matched_elements
         self._slice_path = slice_path
+        self._parent_array = parent_array
 
     @property
     def _path(self) -> str:
@@ -94,6 +100,7 @@ class IDSSlice:
                     self.metadata,
                     sliced_elements,
                     new_path,
+                    parent_array=self._parent_array,
                 )
             else:
                 indexed_elements = []
@@ -106,6 +113,7 @@ class IDSSlice:
                     self.metadata,
                     indexed_elements,
                     new_path,
+                    parent_array=self._parent_array,
                 )
         else:
             if isinstance(item, slice):
@@ -117,6 +125,7 @@ class IDSSlice:
                     self.metadata,
                     sliced_elements,
                     new_path,
+                    parent_array=self._parent_array,
                 )
             else:
                 return self._matched_elements[int(item)]
@@ -152,24 +161,34 @@ class IDSSlice:
             child_metadata,
             child_elements,
             new_path,
+            parent_array=self._parent_array,
         )
 
     def __repr__(self) -> str:
-        """Build a string representation of this slice."""
-        matches_count = len(self._matched_elements)
-        match_word = "item" if matches_count == 1 else "items"
+        """Build a string representation of this IDSSlice.
 
-        array_name = self.metadata.name if self.metadata else ""
-        ids_name = ""
-        if self._matched_elements:
-            elem = self._matched_elements[0]
-            if hasattr(elem, "_toplevel") and hasattr(elem._toplevel, "metadata"):
-                ids_name = elem._toplevel.metadata.name
-        ids_prefix = f"IDS:{ids_name}, " if ids_name else ""
+        Returns a string showing:
+        - The IDS type name (e.g., 'equilibrium')
+        - The full path including the slice operation (e.g., 'time_slice[:]')
+        - The number of matched elements
 
-        return (
-            f"<IDSSlice ({ids_prefix}{array_name} with {matches_count} {match_word})>"
-        )
+        Returns:
+            String representation like below
+            like '<IDSSlice (IDS:equilibrium, time_slice[:] with 106 matches)>'
+        """
+        from imas.util import get_toplevel, get_full_path
+
+        my_repr = f"<{type(self).__name__}"
+        ids_name = "unknown"
+        full_path = self._path
+
+        if self._parent_array is not None:
+            ids_name = get_toplevel(self._parent_array).metadata.name
+            parent_array_path = get_full_path(self._parent_array)
+            full_path = parent_array_path + self._path
+        item_word = "item" if len(self) == 1 else "items"
+        my_repr += f" (IDS:{ids_name}, {full_path} with {len(self)} {item_word})>"
+        return my_repr
 
     def values(self) -> List[Any]:
         """Extract raw values from elements in this slice.

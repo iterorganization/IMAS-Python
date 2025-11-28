@@ -181,12 +181,12 @@ class TestIDSSliceRepr:
         slice_obj = cp.profiles_1d[5:6]
         repr_str = repr(slice_obj)
         assert "IDSSlice" in repr_str
-        assert "1 match" in repr_str
+        assert "1 item" in repr_str
 
         slice_obj = cp.profiles_1d[5:8]
         repr_str = repr(slice_obj)
         assert "IDSSlice" in repr_str
-        assert "3 matches" in repr_str
+        assert "3 items" in repr_str
 
 
 class TestWallExampleSlicing:
@@ -291,7 +291,7 @@ class TestFlatten:
         repr_str = repr(flattened)
 
         assert "IDSSlice" in repr_str
-        assert "4 matches" in repr_str
+        assert "4 items" in repr_str
         assert "[:]" in flattened._path
 
     def test_flatten_complex_case(self, wall_with_units):
@@ -406,8 +406,9 @@ class TestIDSSliceValues:
 
         cp = IDSFactory("3.39.0").core_profiles()
         cp.profiles_1d.resize(5)
-        empty_values = cp.profiles_1d[5:10].label.values()
-        assert len(empty_values) == 0
+        # Empty slices should raise IndexError when accessing attributes
+        with pytest.raises(IndexError):
+            cp.profiles_1d[5:10].label.values()
 
     def test_values_with_step_and_negative_indices(self, wall_with_units):
         wall = wall_with_units
