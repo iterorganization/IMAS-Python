@@ -76,8 +76,8 @@ class TestMultiDimSlicing:
         assert np.allclose(array[0, 0, :], [0.0, 1.0])
         assert np.allclose(array[0, 1, :], [0.0, 1.0])
 
-    def test_to_array_jagged(self):
-        """Test to_array() with jagged (variable-size) arrays."""
+    def test_to_array_variable_size(self):
+        """Test to_array() with variable-size arrays."""
         cp = IDSFactory("3.39.0").core_profiles()
         cp.profiles_1d.resize(3)
         cp.profiles_1d[0].grid.rho_tor_norm = np.array([0.0, 0.5, 1.0])

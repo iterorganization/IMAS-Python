@@ -82,7 +82,7 @@ class IDSSlice:
         array, based on the hierarchy of slicing operations performed.
 
         Returns:
-            Tuple of dimensions. Use with caution for jagged arrays where sizes vary.
+            Tuple of dimensions.
         """
         return self._virtual_shape
 
@@ -257,7 +257,6 @@ class IDSSlice:
             child_sizes = [len(arr) for arr in child_elements]
 
             # New virtual shape: current shape + new dimension
-            # Jagged arrays handled by to_array() with object dtype
             new_virtual_shape = self._virtual_shape + (
                 child_sizes[0] if child_sizes else 0,
             )
@@ -327,10 +326,12 @@ class IDSSlice:
                     or list of extracted values.
 
         Returns:
-            For 1D: List of raw Python/numpy values or unwrapped elements
-            For multi-D with reshape=False: List of elements (each being an array)
-            For multi-D with reshape=True: numpy.ndarray with shape self.shape,
-                        or nested lists/object array representing structure
+            list or numpy.ndarray: Extracted values as follows:
+
+            - 1D slices: List of raw Python/numpy values or unwrapped elements
+            - Multi-D with reshape=False: List of elements (each being an array)
+            - Multi-D with reshape=True: numpy.ndarray with shape self.shape,
+              or nested lists/object array representing structure
 
         Examples:
             >>> # Get names from identifiers without looping
@@ -404,17 +405,15 @@ class IDSSlice:
     def to_array(self) -> np.ndarray:
         """Convert this slice to a numpy array respecting multi-dimensional structure.
 
-        For 1D slices, returns a simple 1D array.
-        For multi-dimensional slices, returns an array with shape self.shape.
-        For jagged arrays (varying sizes in lower dimensions), returns an object array.
+        For 1D slices: returns a simple 1D array.
+        For multi-dimensional slices: returns an array with shape self.shape.
 
         This is useful for integration with numpy operations, scipy functions,
         and xarray data structures. The returned array preserves the hierarchical
         structure of the IMAS data.
 
         Returns:
-            numpy.ndarray with shape self.shape. For jagged arrays,
-            dtype will be object.
+            numpy.ndarray with shape self.shape.
 
         Raises:
             ValueError: If array cannot be converted to numpy
@@ -426,7 +425,6 @@ class IDSSlice:
             >>> print(rho_array.shape)
             (106, 100)
             >>>
-            >>> # Jagged array returns object array
             >>> ion_density = core_profiles.profiles_1d[:].ion[:].density.to_array()
             >>> # Result: object array shape (106, 3) with varying sizes
             >>>
@@ -490,7 +488,6 @@ class IDSSlice:
                                 result_arr.flat[i] = val
                             return result_arr
                 else:
-                    # Jagged array - different sizes
                     result_arr = np.empty(self._virtual_shape[0], dtype=object)
                     for i, val in enumerate(array_values):
                         result_arr[i] = val

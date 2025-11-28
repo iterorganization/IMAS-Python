@@ -27,11 +27,49 @@ Basic Usage
     subset = cp.profiles_1d[1:5]        # IDSSlice
     every_other = cp.profiles_1d[::2]   # IDSSlice
     
-    # Access nested arrays (automatic array-wise indexing)
+    # Access nested arrays
     all_ions = cp.profiles_1d[:].ion[:]  # IDSSlice of individual ions
     
     # Extract values
     labels = all_ions.label.values()
+
+Multi-Dimensional Slicing
+---------------------------
+
+The ``IDSSlice`` class supports multi-dimensional shape tracking and array conversion.
+
+**Check shape of sliced data:**
+
+.. code-block:: python
+
+    # Get shape information for multi-dimensional data
+    print(cp.profiles_1d[:].grid.shape)              # (106,)
+    print(cp.profiles_1d[:].ion.shape)               # (106, ~3)
+    print(cp.profiles_1d[1:3].ion[0].element.shape)  # (2, ~3)
+
+**Extract values with shape preservation:**
+
+.. code-block:: python
+
+    # Extract as list
+    grid_values = cp.profiles_1d[:].grid.values()
+    
+    # Extract as numpy array
+    grid_array = cp.profiles_1d[:].grid.to_array()
+    
+    # Extract as numpy array
+    ion_array = cp.profiles_1d[:].ion.to_array() 
+
+**Nested structure access:**
+
+.. code-block:: python
+
+    # Access through nested arrays
+    grid_data = cp.profiles_1d[1:3].grid.rho_tor.to_array()
+    
+    # Ion properties across multiple profiles
+    ion_labels = cp.profiles_1d[:].ion[:].label.to_array()
+    ion_charges = cp.profiles_1d[:].ion[:].z_ion.to_array()
 
 Common Patterns
 ---------------
@@ -55,6 +93,9 @@ Common Patterns
 .. code-block:: python
 
     times = cp.profiles_1d[:].time.values()
+    
+    # Or as numpy array
+    times_array = cp.profiles_1d[:].time.to_array()
 
 Important: Array-wise Indexing
 -------------------------------
