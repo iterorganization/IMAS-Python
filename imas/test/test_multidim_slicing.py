@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 
 from imas.ids_factory import IDSFactory
-from imas.ids_slice import IDSSlice
 
 
 class TestMultiDimSlicing:
@@ -137,7 +136,7 @@ class TestMultiDimSlicing:
 
         # Get all ions, then slice
         result = cp.profiles_1d[:].ion[:]
-        
+
         # Should still know the structure: 10 profiles, 3 ions each
         assert result.shape == (10, 3)
         assert len(result) == 30  # Flattened for iteration, but shape preserved
@@ -153,7 +152,7 @@ class TestMultiDimSlicing:
 
         # Get first ion from all profiles
         result = cp.profiles_1d[:].ion[0]
-        
+
         assert len(result) == 5
         for i, ion in enumerate(result):
             assert ion.label == f"ion_{i}_0"
@@ -167,7 +166,7 @@ class TestMultiDimSlicing:
 
         # Get first 2 ions from each profile
         result = cp.profiles_1d[:].ion[:2]
-        
+
         assert result.shape == (5, 2)
         assert len(result) == 10  # 5 profiles * 2 ions each
 
@@ -180,7 +179,7 @@ class TestMultiDimSlicing:
 
         # Get every other ion
         result = cp.profiles_1d[:].ion[::2]
-        
+
         assert result.shape == (5, 3)  # 5 profiles, 3 ions each (0, 2, 4)
         assert len(result) == 15
 
@@ -195,7 +194,7 @@ class TestMultiDimSlicing:
 
         # Get last ion from each profile
         result = cp.profiles_1d[:].ion[-1]
-        
+
         assert len(result) == 5
         for ion in result:
             assert ion.label == "ion_2"
@@ -227,7 +226,7 @@ class TestMultiDimSlicing:
             p.electrons.density = np.array([float(i)] * 5)
 
         result = cp.profiles_1d[:].electrons.density
-        
+
         mask = np.array([True, False, True, False, True])
         filtered = result[mask]
         assert len(filtered) == 3
@@ -239,15 +238,10 @@ class TestMultiDimSlicing:
         for p in cp.profiles_1d:
             p.grid.rho_tor_norm = np.array([0.0, 0.5, 1.0])
 
-        # Assign new values through slice
-        new_values = np.array([[0.1, 0.6, 1.1], 
-                               [0.2, 0.7, 1.2],
-                               [0.3, 0.8, 1.3]])
-        
         # This requires assignment support
         # cp.profiles_1d[:].grid.rho_tor_norm[:] = new_values
         # For now, verify slicing works for reading
-        
+
         result = cp.profiles_1d[:].grid.rho_tor_norm
         array = result.to_array()
         assert array.shape == (3, 3)
@@ -257,7 +251,7 @@ class TestMultiDimSlicing:
         cp = IDSFactory("3.39.0").core_profiles()
         cp.profiles_1d.resize(3)
         cp.time = np.array([1.0, 2.0, 3.0])
-        
+
         for i, p in enumerate(cp.profiles_1d):
             p.grid.rho_tor_norm = np.array([0.0, 0.5, 1.0])
             p.electrons.temperature = np.array([1.0, 2.0, 3.0]) * (i + 1)
@@ -274,7 +268,7 @@ class TestMultiDimSlicing:
         cp = IDSFactory("3.39.0").core_profiles()
         n_profiles = 50
         cp.profiles_1d.resize(n_profiles)
-        
+
         for p in cp.profiles_1d:
             p.grid.rho_tor_norm = np.linspace(0, 1, 100)
             p.ion.resize(5)
@@ -284,7 +278,7 @@ class TestMultiDimSlicing:
         # Should handle large data without significant slowdown
         result = cp.profiles_1d[:].grid.rho_tor_norm
         array = result.to_array()
-        
+
         assert array.shape == (n_profiles, 100)
 
     def test_lazy_loading_with_multidim(self):
@@ -296,12 +290,10 @@ class TestMultiDimSlicing:
             p.grid.rho_tor_norm = np.array([0.0, 0.5, 1.0])
 
         result = cp.profiles_1d[:].grid.rho_tor_norm
-        
+
         # Verify lazy attributes are preserved
-        assert hasattr(result, '_lazy')
-        assert hasattr(result, '_parent_array')
-
-
+        assert hasattr(result, "_lazy")
+        assert hasattr(result, "_parent_array")
 
 
 class TestEdgeCases:
@@ -339,7 +331,7 @@ class TestEdgeCases:
                 i.z_ion = 1.0
 
         result = cp.profiles_1d[:].ion[0].z_ion
-        
+
         # Should be 3 items (one per profile)
         assert len(result) == 3
 
@@ -352,6 +344,6 @@ class TestEdgeCases:
 
         result1 = cp.profiles_1d[::2].ion  # Every other profile's ions
         assert result1.shape == (5, 3)
-        
+
         result2 = result1[:2]  # First 2 from each
         assert result2.shape == (5, 2)

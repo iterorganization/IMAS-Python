@@ -77,10 +77,10 @@ class IDSSlice:
     @property
     def shape(self) -> Tuple[int, ...]:
         """Get the virtual multi-dimensional shape.
-        
+
         Returns the shape of the data as if it were organized in a multi-dimensional
         array, based on the hierarchy of slicing operations performed.
-        
+
         Returns:
             Tuple of dimensions. Use with caution for jagged arrays where sizes vary.
         """
@@ -119,7 +119,7 @@ class IDSSlice:
                 # Preserve structure instead of flattening
                 sliced_elements = []
                 sliced_sizes = []
-                
+
                 for array in self._matched_elements:
                     sliced = array[item]
                     if isinstance(sliced, IDSSlice):
@@ -134,7 +134,9 @@ class IDSSlice:
 
                 # Update shape to reflect the sliced structure
                 # Keep first dimensions, update last dimension
-                new_virtual_shape = self._virtual_shape[:-1] + (sliced_sizes[0] if sliced_sizes else 0,)
+                new_virtual_shape = self._virtual_shape[:-1] + (
+                    sliced_sizes[0] if sliced_sizes else 0,
+                )
                 new_hierarchy = self._element_hierarchy[:-1] + [sliced_sizes]
 
                 return IDSSlice(
@@ -172,7 +174,9 @@ class IDSSlice:
 
                 # Update shape to reflect the slice on first dimension
                 new_virtual_shape = (len(sliced_elements),) + self._virtual_shape[1:]
-                new_element_hierarchy = [len(sliced_elements)] + self._element_hierarchy[1:]
+                new_element_hierarchy = [
+                    len(sliced_elements)
+                ] + self._element_hierarchy[1:]
 
                 return IDSSlice(
                     self.metadata,
@@ -232,11 +236,13 @@ class IDSSlice:
         if isinstance(child_elements[0], IDSStructArray):
             # Children are IDSStructArray - track the new dimension
             child_sizes = [len(arr) for arr in child_elements]
-            
+
             # New virtual shape: current shape + new dimension
-            new_virtual_shape = self._virtual_shape + (child_sizes[0] if child_sizes else 0,)
+            new_virtual_shape = self._virtual_shape + (
+                child_sizes[0] if child_sizes else 0,
+            )
             new_hierarchy = self._element_hierarchy + [child_sizes]
-            
+
             return IDSSlice(
                 child_metadata,
                 child_elements,
@@ -249,12 +255,14 @@ class IDSSlice:
             # Children are IDSNumericArray - track the array dimension
             # Each IDSNumericArray has a size (length of its data)
             child_sizes = [len(arr) for arr in child_elements]
-            
-            # New virtual shape: current shape + new dimension (size of first numeric array)
+
+            # New virtual shape: current shape + new dimension
             # Jagged arrays handled by to_array() with object dtype
-            new_virtual_shape = self._virtual_shape + (child_sizes[0] if child_sizes else 0,)
+            new_virtual_shape = self._virtual_shape + (
+                child_sizes[0] if child_sizes else 0,
+            )
             new_hierarchy = self._element_hierarchy + [child_sizes]
-            
+
             return IDSSlice(
                 child_metadata,
                 child_elements,
@@ -338,7 +346,11 @@ class IDSSlice:
             >>> # Result: ndarray shape (106, 100)
             >>>
             >>> # 3D ions case - returns object array with structure
-            >>> ion_rho = core_profiles.profiles_1d[:].ion[:].element[:].density.values(reshape=True)
+            >>> ion_rho = (
+            ...     core_profiles.profiles_1d[:].ion[:].element[:].density.values(
+            ...         reshape=True
+            ...     )
+            ... )
             >>> # Result: object array shape (106, 3, 2) with IDSNumericArray elements
         """
         from imas.ids_primitive import IDSPrimitive, IDSNumericArray
@@ -359,7 +371,9 @@ class IDSSlice:
             if isinstance(element, IDSPrimitive):
                 flat_values.append(element.value)
             elif isinstance(element, IDSNumericArray):
-                flat_values.append(element.data if hasattr(element, 'data') else element.value)
+                flat_values.append(
+                    element.data if hasattr(element, "data") else element.value
+                )
             else:
                 flat_values.append(element)
 
@@ -399,7 +413,8 @@ class IDSSlice:
         structure of the IMAS data.
 
         Returns:
-            numpy.ndarray with shape self.shape. For jagged arrays, dtype will be object.
+            numpy.ndarray with shape self.shape. For jagged arrays,
+            dtype will be object.
 
         Raises:
             ValueError: If array cannot be converted to numpy
@@ -436,7 +451,9 @@ class IDSSlice:
 
         # Multi-dimensional case
         # Check if matched elements are themselves arrays (IDSNumericArray)
-        if self._matched_elements and isinstance(self._matched_elements[0], IDSNumericArray):
+        if self._matched_elements and isinstance(
+            self._matched_elements[0], IDSNumericArray
+        ):
             # Elements are numeric arrays - extract their values and stack them
             array_values = []
             for element in self._matched_elements:
@@ -444,17 +461,17 @@ class IDSSlice:
                     array_values.append(element.value)
                 else:
                     array_values.append(element)
-            
+
             # Try to stack into proper shape
             try:
                 # Check if all arrays have the same size (regular)
                 sizes = []
                 for val in array_values:
-                    if hasattr(val, '__len__'):
+                    if hasattr(val, "__len__"):
                         sizes.append(len(val))
                     else:
                         sizes.append(1)
-                
+
                 # If all sizes are the same, we can create a regular array
                 if len(set(sizes)) == 1:
                     # Regular array - all sub-arrays same size
@@ -478,7 +495,7 @@ class IDSSlice:
                     for i, val in enumerate(array_values):
                         result_arr[i] = val
                     return result_arr
-            except (ValueError, TypeError) as e:
+            except (ValueError, TypeError):
                 # Fallback: return object array
                 result_arr = np.empty(self._virtual_shape[0], dtype=object)
                 for i, val in enumerate(array_values):
@@ -488,11 +505,29 @@ class IDSSlice:
         # For non-numeric elements in multi-dimensional structure
         # Extract and try to build structure
         flat_values = []
-        for element in self._matched_elements:
-            if isinstance(element, IDSPrimitive):
-                flat_values.append(element.value)
-            else:
-                flat_values.append(element)
+
+        # First check if matched_elements are IDSStructArray (which need flattening)
+        from imas.ids_struct_array import IDSStructArray
+
+        has_struct_arrays = self._matched_elements and isinstance(
+            self._matched_elements[0], IDSStructArray
+        )
+
+        if has_struct_arrays:
+            # Flatten IDSStructArray elements
+            for struct_array in self._matched_elements:
+                for element in struct_array:
+                    if isinstance(element, IDSPrimitive):
+                        flat_values.append(element.value)
+                    else:
+                        flat_values.append(element)
+        else:
+            # Regular elements
+            for element in self._matched_elements:
+                if isinstance(element, IDSPrimitive):
+                    flat_values.append(element.value)
+                else:
+                    flat_values.append(element)
 
         total_size = 1
         for dim in self._virtual_shape:
