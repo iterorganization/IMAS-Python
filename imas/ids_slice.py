@@ -116,7 +116,7 @@ class IDSSlice:
             self._matched_elements[0], IDSStructArray
         ):
             if isinstance(item, slice):
-                # NEW: Preserve structure instead of flattening
+                # Preserve structure instead of flattening
                 sliced_elements = []
                 sliced_sizes = []
                 
@@ -132,7 +132,7 @@ class IDSSlice:
                 slice_str = self._format_slice(item)
                 new_path = self._slice_path + slice_str
 
-                # NEW: Update shape to reflect the sliced structure
+                # Update shape to reflect the sliced structure
                 # Keep first dimensions, update last dimension
                 new_virtual_shape = self._virtual_shape[:-1] + (sliced_sizes[0] if sliced_sizes else 0,)
                 new_hierarchy = self._element_hierarchy[:-1] + [sliced_sizes]
@@ -170,7 +170,7 @@ class IDSSlice:
                 slice_str = self._format_slice(item)
                 new_path = self._slice_path + slice_str
 
-                # NEW: Update shape to reflect the slice on first dimension
+                # Update shape to reflect the slice on first dimension
                 new_virtual_shape = (len(sliced_elements),) + self._virtual_shape[1:]
                 new_element_hierarchy = [len(sliced_elements)] + self._element_hierarchy[1:]
 
@@ -251,7 +251,6 @@ class IDSSlice:
             child_sizes = [len(arr) for arr in child_elements]
             
             # New virtual shape: current shape + new dimension (size of first numeric array)
-            # Note: For now we assume all have same size (regular array)
             # Jagged arrays handled by to_array() with object dtype
             new_virtual_shape = self._virtual_shape + (child_sizes[0] if child_sizes else 0,)
             new_hierarchy = self._element_hierarchy + [child_sizes]
