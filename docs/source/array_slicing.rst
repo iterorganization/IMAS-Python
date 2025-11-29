@@ -1,5 +1,7 @@
+.. _array-slicing:
+
 Array Slicing
-==============
+=============
 
 The ``IDSStructArray`` class supports Python's standard slicing syntax.
 

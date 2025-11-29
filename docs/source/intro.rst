@@ -187,5 +187,5 @@ multi-dimensional scientific data:
 
 The ``IDSSlice`` class tracks multi-dimensional shapes and provides both
 ``.values()`` and ``.to_array()`` (numpy array)
-methods for data extraction. For more details, see :ref:`Array Slicing`.
+methods for data extraction. For more details, see :ref:`array-slicing`.
 
