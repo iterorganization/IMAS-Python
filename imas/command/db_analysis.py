@@ -7,6 +7,8 @@ import platform
 import re
 import readline
 import sys
+from csv import writer as csvwriter
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
@@ -139,12 +141,70 @@ def ids_info(idsfile: Path):
     }
 
 
+@dataclass
+class _PathUsage:
+    num_occurrences: int = 0
+    path_counter: Counter = field(default_factory=Counter)
+
+
+def _write_usage_stats_to_csv(
+    writer, usage_per_entry, usage_per_occurrence, num_entries
+):
+    """Write usage statistics to csv file.
+
+    Args:
+        writer: an instance of csv.writer
+        usage_per_entry: path usage statistics per data entry
+        usage_per_occurrence: path usage statistics per occurrence
+        num_entries: number of data entries
+    """
+    # Write header
+    writer.writerow(
+        [
+            "IDS",
+            "Path in IDS",
+            "Uses errorbar",
+            "Frequency (without occurrences)",
+            "Frequency (with occurences)",
+        ]
+    )
+
+    for ids_name in sorted(usage_per_entry):
+        entry_usage = usage_per_entry[ids_name]
+        occurrence_usage = usage_per_occurrence[ids_name]
+
+        # Usage statistics of the IDS (# entries with this IDS / # entries)
+        freq = entry_usage.num_occurrences / num_entries
+        writer.writerow([ids_name, "", "", freq, ""])
+
+        for path, entry_count in sorted(entry_usage.path_counter.items()):
+            if "_error_" in path:
+                continue  # Skip error nodes
+            occurrence_count = occurrence_usage.path_counter[path]
+
+            uses_error = f"{path}_error_upper" in entry_usage.path_counter
+            # Frequency without occurrences, see GH#84 for details
+            freq1 = entry_count / entry_usage.num_occurrences
+            # Frequency with occurences
+            freq2 = occurrence_count / occurrence_usage.num_occurrences
+
+            # Write data row
+            writer.writerow([ids_name, path, "X" if uses_error else "", freq1, freq2])
+
+
+_csv_help_text = (
+    "Write analysis output to the provided CSV file. For details, "
+    "see https://github.com/iterorganization/IMAS-Python/issues/84."
+)
+
+
 @click.command("process-db-analysis")
 @click.argument(
     "infiles", metavar="INPUT_FILES...", nargs=-1, type=infile_path, required=True
 )
 @click.option("--show-empty-ids", is_flag=True, help="Show empty IDSs in the overview.")
-def process_db_analysis(infiles, show_empty_ids):
+@click.option("--csv", type=outfile_path, help=_csv_help_text)
+def process_db_analysis(infiles, show_empty_ids, csv):
     """Process supplied Data Entry analyses, and display statistics.
 
     \b
@@ -154,7 +214,10 @@ def process_db_analysis(infiles, show_empty_ids):
     setup_rich_log_handler(False)
 
     factory = imas.IDSFactory()
-    filled_per_ids = {ids_name: set() for ids_name in factory.ids_names()}
+    usage_per_entry = defaultdict(_PathUsage)
+    usage_per_occurrence = defaultdict(_PathUsage)
+    num_entries = 0
+    # filled_per_ids = {ids_name: set() for ids_name in factory.ids_names()}
     logger.info("Using Data Dictionary version %s.", factory.dd_version)
     logger.info("Reading %d input files...", len(infiles))
 
@@ -164,17 +227,49 @@ def process_db_analysis(infiles, show_empty_ids):
             data = json.load(file)
 
         for entry in data:
+            usage_for_this_entry = defaultdict(_PathUsage)
             for ids_info in entry["ids_info"]:
-                fill_info = filled_per_ids[ids_info["name"]]
-                fill_info.update(ids_info["filled_data"])
+                ids_name = ids_info["name"]
+                filled_paths = ids_info["filled_data"]
+                # Update counters for this entry
+                usage_for_this_entry[ids_name].path_counter.update(filled_paths)
+                # Update counters for all occurrecnes
+                usage_per_occurrence[ids_name].num_occurrences += 1
+                usage_per_occurrence[ids_name].path_counter.update(filled_paths)
+            # Update data entry usage
+            for ids_name, usage in usage_for_this_entry.items():
+                usage_per_entry[ids_name].num_occurrences += 1
+                usage_per_entry[ids_name].path_counter.update(usage.path_counter.keys())
+            num_entries += 1
 
     logger.info("Done reading input files.")
+
+    if csv is not None:
+        # Output to CSV file
+        logger.info("Writing output to CSV file: %s", csv)
+        with open(csv, "w") as csvfile:
+            writer = csvwriter(csvfile)
+            _write_usage_stats_to_csv(
+                writer, usage_per_entry, usage_per_occurrence, num_entries
+            )
+        logger.info("Done.")
+        return
+
     logger.info("Analyzing filled data...")
 
     # Construct AnalysisNodes per IDS
     analysis_nodes: Dict[str, _AnalysisNode] = {}
-    for ids_name, filled in filled_per_ids.items():
+    for ids_name, usage in usage_per_occurrence.items():
+        if ids_name not in factory.ids_names():
+            logger.warning(
+                "Founds IDS %s in data files, but this IDS is not available "
+                "in DD version %s. Statistics will not be tracked.",
+                ids_name,
+                factory.version,
+            )
+            continue
         metadata = factory.new(ids_name).metadata
+        filled = set(usage.path_counter.keys())
         ids_analysis_node = _AnalysisNode("")
 
         def walk_metadata_tree(metadata: IDSMetadata, node: _AnalysisNode):
