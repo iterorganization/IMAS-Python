@@ -98,5 +98,5 @@ wall,ids_properties/homogeneous_time,,1.0,1.0
 wall,ids_properties/version_put/access_layer,,1.0,1.0
 wall,ids_properties/version_put/access_layer_language,,1.0,1.0
 wall,ids_properties/version_put/data_dictionary,,1.0,1.0
-"""
+"""  # noqa: E501 (line too long)
         )
