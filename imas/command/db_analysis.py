@@ -213,12 +213,10 @@ def process_db_analysis(infiles, show_empty_ids, csv):
     """
     setup_rich_log_handler(False)
 
-    factory = imas.IDSFactory()
     usage_per_entry = defaultdict(_PathUsage)
     usage_per_occurrence = defaultdict(_PathUsage)
     num_entries = 0
-    # filled_per_ids = {ids_name: set() for ids_name in factory.ids_names()}
-    logger.info("Using Data Dictionary version %s.", factory.dd_version)
+
     logger.info("Reading %d input files...", len(infiles))
 
     # Read input data and collate usage info per IDS
@@ -256,6 +254,8 @@ def process_db_analysis(infiles, show_empty_ids, csv):
         return
 
     logger.info("Analyzing filled data...")
+    factory = imas.IDSFactory()
+    logger.info("Using Data Dictionary version %s.", factory.dd_version)
 
     # Construct AnalysisNodes per IDS
     analysis_nodes: Dict[str, _AnalysisNode] = {}
@@ -265,7 +265,7 @@ def process_db_analysis(infiles, show_empty_ids, csv):
                 "Founds IDS %s in data files, but this IDS is not available "
                 "in DD version %s. Statistics will not be tracked.",
                 ids_name,
-                factory.version,
+                factory.dd_version,
             )
             continue
         metadata = factory.new(ids_name).metadata
