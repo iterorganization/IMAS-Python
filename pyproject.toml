@@ -64,6 +64,7 @@ dependencies = [
     "packaging",
     "xxhash >= 2",
     "imas_data_dictionaries",
+    "imas_core>=5.5.3"
 ]
 
 [project.optional-dependencies]
