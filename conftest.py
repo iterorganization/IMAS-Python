@@ -70,6 +70,13 @@ _BACKENDS = {
     "hdf5": HDF5_BACKEND,
     "mdsplus": MDSPLUS_BACKEND,
 }
+try:
+    from imas.db_entry import DBEntry
+    from imas_core.exception import ImasCoreBackendException
+    DBEntry("imas:mdsplus?path=dummy","r")
+except ImasCoreBackendException as iex:
+    if "not available" in str(iex.message):
+        _BACKENDS.pop("mdsplus")
 
 
 try:

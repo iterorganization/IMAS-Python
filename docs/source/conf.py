@@ -43,8 +43,8 @@ al_url = urljoin(iter_projects, "imas-core/")
 # IMAS-Python
 repository_url = f"{iter_projects}/{src_project}/"
 blob_url = repository_url
-issue_url = jira_url = urljoin(repository_url, "/issues/")
-mr_url = urljoin(repository_url, "/pull/")
+issue_url = urljoin(repository_url, "issues/")
+mr_url = urljoin(repository_url, "pull/")
 
 
 # Configuration of sphinx.ext.extlinks
