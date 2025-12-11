@@ -39,12 +39,12 @@ src_host = "https://github.com/iterorganization/"
 iter_projects = "https://github.com/iterorganization/"
 dd_url = urljoin(iter_projects, "imas-data-dictionary/")
 al_url = urljoin(iter_projects, "imas-core/")
-issue_url = jira_url = "https://github.com/iterorganization/IMAS-Python/issues"
 
 # IMAS-Python
 repository_url = f"{iter_projects}/{src_project}/"
 blob_url = repository_url
-mr_url = urljoin(repository_url, "/pulls")
+issue_url = jira_url = urljoin(repository_url, "/issues/")
+mr_url = urljoin(repository_url, "/pull/")
 
 
 # Configuration of sphinx.ext.extlinks
@@ -53,7 +53,7 @@ mr_url = urljoin(repository_url, "/pulls")
 extlinks = {
     "src": (blob_url + "%s", "%s"),
     "issue": (issue_url + "%s", "%s"),
-    "merge": (mr_url + "%s", "!%s"),
+    "merge": (mr_url + "%s", "%s"),
     "dd": (dd_url + "%s", "%s"),
     "al": (al_url + "%s", "%s"),
     "pypa": ("https://packaging.python.org/%s", None),
