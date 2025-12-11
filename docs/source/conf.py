@@ -52,8 +52,8 @@ mr_url = urljoin(repository_url, "pull/")
 # unique name: (base URL, label prefix)
 extlinks = {
     "src": (blob_url + "%s", "%s"),
-    "issue": (issue_url + "%s", "%s"),
-    "merge": (mr_url + "%s", "%s"),
+    "issue": (issue_url + "%s", "#%s"),
+    "merge": (mr_url + "%s", "#%s"),
     "dd": (dd_url + "%s", "%s"),
     "al": (al_url + "%s", "%s"),
     "pypa": ("https://packaging.python.org/%s", None),

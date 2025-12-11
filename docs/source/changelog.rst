@@ -16,27 +16,27 @@ Build
 Improvements
 ''''''''''''
 
-- :issue:`#84`: improve `imas process-db-analysis` 
-- :issue:`#71`: take into account identifier aliases (introduced in DD 4.1)
-- :issue:`#78`: disable *implicit* conversion when crossing a major version update
+- :issue:`84`: improve `imas process-db-analysis` 
+- :issue:`71`: take into account identifier aliases (introduced in DD 4.1)
+- :issue:`78`: disable *implicit* conversion when crossing a major version update
 - improve integration of UDA backend
 - cleaning old AL4 deprecated code
-- :issue:`#59`: convert name+identifier (DD3) into description+name (DD4) 
+- :issue:`59`: convert name+identifier (DD3) into description+name (DD4) 
 - improve type hints (following PEP-585 and PEP-604)
 - improve performance of IDS deepcopy 
-- :issue:`#60`: improve `equilibrium` DD3->4 by converting `boundary_separatrix` into `contour_tree`
-- :issue:`#22`: add custom conversion example in the doc for `em_coupling` IDS
+- :issue:`60`: improve `equilibrium` DD3->4 by converting `boundary_separatrix` into `contour_tree`
+- :issue:`22`: add custom conversion example in the doc for `em_coupling` IDS
 
 
 Bug fixes
 '''''''''
 
 - fix testcases with coordinate validation issues
-- :issue:`#80`: fix `imas print` when using netcdf and imas_core is not present
-- :issue:`#61`: special DD3->4 rule to flip sign quantities missing the `cocos_label_transform attribute` in DD
-- :merge:`#58`: fix unclear provenance capture
-- :merge:`#57`: fix 0D arrays from lazy loading with netcdf
-- :issue:`#55`: handle missing case when converting 3.42->4 (_tor->_phi)
+- :issue:`80`: fix `imas print` when using netcdf and imas_core is not present
+- :issue:`61`: special DD3->4 rule to flip sign quantities missing the `cocos_label_transform attribute` in DD
+- :merge:`58`: fix unclear provenance capture
+- :merge:`57`: fix 0D arrays from lazy loading with netcdf
+- :issue:`55`: handle missing case when converting 3.42->4 (_tor->_phi)
   
 
 
