@@ -3,6 +3,44 @@
 Changelog
 =========
 
+What's new in IMAS-Python 2.1.0
+-------------------------------
+
+Build
+'''''
+
+- update Python version support (remove 3.8, add 3.13)
+- add dependency on `imas_core <https://pypi.org/project/imas-core/>`__
+
+
+Improvements
+''''''''''''
+
+- :issue:`#84`: improve `imas process-db-analysis` 
+- :issue:`#71`: take into account identifier aliases (introduced in DD 4.1)
+- :issue:`#78`: disable *implicit* conversion when crossing a major version update
+- improve integration of UDA backend
+- cleaning old AL4 deprecated code
+- :issue:`#59`: convert name+identifier (DD3) into description+name (DD4) 
+- improve type hints (following PEP-585 and PEP-604)
+- improve performance of IDS deepcopy 
+- :issue:`#60`: improve `equilibrium` DD3->4 by converting `boundary_separatrix` into `contour_tree`
+- :issue:`#22`: add custom conversion example in the doc for `em_coupling` IDS
+
+
+Bug fixes
+'''''''''
+
+- fix testcases with coordinate validation issues
+- :issue:`#80`: fix `imas print` when using netcdf and imas_core is not present
+- :issue:`#61`: special DD3->4 rule to flip sign quantities missing the `cocos_label_transform attribute` in DD
+- :merge:`#58`: fix unclear provenance capture
+- :merge:`#57`: fix 0D arrays from lazy loading with netcdf
+- :issue:`#55`: handle missing case when converting 3.42->4 (_tor->_phi)
+  
+
+
+
 What's new in IMAS-Python 2.0.1
 -------------------------------
 
@@ -74,9 +112,9 @@ Bug fixes
     Dictionary 4.0.0 and 3.42.0. In other cases, the Data Dictionary version is
     now explicitly indicated.
 
-- :issue:`IMAS-5560`: Fix a bug where IMASPy would not correctly recognize that
+- IMAS-5560: Fix a bug where IMASPy would not correctly recognize that
   the UDA backend is used.
-- :issue:`IMAS-5541`: Fix a bug when converting a closed contour to Data
+- IMAS-5541: Fix a bug when converting a closed contour to Data
   Dictionary version 4.0.0.
 - Work around incorrect Data Dictionary 3.x metadata when converting
   ``flux_loop/flux`` in the ``magnetics`` IDS to Data Dictionary version 4.0.0.
