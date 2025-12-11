@@ -15,6 +15,11 @@ from . import setup_logging
 from .db_entry import DBEntry
 from .ids_factory import IDSFactory
 from .ids_convert import convert_ids
+from .convert_core_edge_plasma import (
+    convert_to_plasma_profiles,
+    convert_to_plasma_transport,
+    convert_to_plasma_sources,
+)
 from .ids_identifiers import identifiers
 
 # Load the IMAS-Python IMAS AL/DD core
