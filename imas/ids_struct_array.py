@@ -121,12 +121,56 @@ class IDSStructArray(IDSBase):
         return struct
 
     def __getitem__(self, item):
-        # value is a list, so the given item should be convertable to integer
-        # TODO: perhaps we should allow slices as well?
-        list_idx = int(item)
-        if self._lazy:
-            self._load(item)
-        return self.value[list_idx]
+        """Get element(s) from the struct array.
+
+        Args:
+            item: Integer index or slice object
+
+        Returns:
+            A single IDSStructure if item is an int, or an IDSSlice if item is a slice
+        """
+        if isinstance(item, slice):
+            if self._lazy:
+
+                self._load(None)  # Load size
+
+                # Convert slice to indices
+                start, stop, step = item.indices(len(self))
+
+                # Load only the elements in the slice range
+                loaded_elements = []
+                for i in range(start, stop, step):
+                    self._load(i)  # Load each element on demand
+                    loaded_elements.append(self.value[i])
+
+                from imas.ids_slice import IDSSlice
+
+                slice_str = IDSSlice._format_slice(item)
+
+                return IDSSlice(
+                    self.metadata,
+                    loaded_elements,
+                    slice_str,
+                    parent_array=self,
+                )
+
+            from imas.ids_slice import IDSSlice
+
+            matched_elements = self.value[item]
+            slice_str = IDSSlice._format_slice(item)
+
+            return IDSSlice(
+                self.metadata,
+                matched_elements,
+                slice_str,
+                parent_array=self,
+            )
+        else:
+            # Handle integer index
+            list_idx = int(item)
+            if self._lazy:
+                self._load(item)
+            return self.value[list_idx]
 
     def __setitem__(self, item, value):
         # value is a list, so the given item should be convertable to integer

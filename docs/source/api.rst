@@ -19,4 +19,5 @@ IMAS-Python IDS manipulation
    ids_toplevel.IDSToplevel
    ids_primitive.IDSPrimitive
    ids_structure.IDSStructure
+   ids_slice.IDSSlice
    ids_struct_array.IDSStructArray

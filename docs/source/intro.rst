@@ -154,3 +154,38 @@ can use ``<IDS>.get()`` to load IDS data from disk:
     >>> dbentry2 = imas.DBEntry("mypulsefile.nc","r")
     >>> core_profiles2 = dbentry2.get("core_profiles")
     >>> print(core_profiles2.ids_properties.comment.value)
+
+
+.. _`Multi-Dimensional Slicing`:
+
+Multi-Dimensional Slicing
+''''''''''''''''''''''''''
+
+IMAS-Python supports advanced slicing of hierarchical data structures with automatic
+shape tracking and array conversion to numpy. This enables intuitive access to
+multi-dimensional scientific data:
+
+.. code-block:: python
+
+    >>> # Load data
+    >>> entry = imas.DBEntry("mypulsefile.nc","r")
+    >>> cp = entry.get("core_profiles", autoconvert=False, lazy=True)
+    
+    >>> # Check shape of sliced data
+    >>> cp.profiles_1d[:].grid.shape
+    (106,)
+    >>> cp.profiles_1d[:].ion.shape
+    (106, ~3)  # ~3 ions per profile
+    
+    >>> # Extract values
+    >>> grid_values = cp.profiles_1d[:].grid.to_array()
+    >>> ion_labels = cp.profiles_1d[:].ion[:].label.to_array()
+    
+    >>> # Work with subsets
+    >>> subset_grid = cp.profiles_1d[1:3].grid.to_array()
+    >>> subset_ions = cp.profiles_1d[1:3].ion.to_array()
+
+The ``IDSSlice`` class tracks multi-dimensional shapes and provides both
+``.values()`` and ``.to_array()`` (numpy array)
+methods for data extraction. For more details, see :ref:`array-slicing`.
+
