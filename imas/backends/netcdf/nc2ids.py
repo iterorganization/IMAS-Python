@@ -157,6 +157,8 @@ class NC2IDS:
                     for index, node in indexed_tree_iter(self.ids, target_metadata):
                         value = data[index]
                         if value != getattr(var, "_FillValue", None):
+                            if isinstance(value, np.generic):
+                                value = value.item()
                             # NOTE: bypassing IDSPrimitive.value.setter logic
                             node._IDSPrimitive__value = value
 
@@ -166,10 +168,16 @@ class NC2IDS:
                 # here, we'll let IDSPrimitive.value.setter take care of it:
                 self.ids[target_metadata.path].value = data
 
-            else:
+            # We need to unpack 0D ints, floats and complex numbers. For better
+            # performance this check is done outside the for-loop:
+            elif metadata.ndim or metadata.data_type is IDSDataType.STR:
                 for index, node in indexed_tree_iter(self.ids, target_metadata):
                     # NOTE: bypassing IDSPrimitive.value.setter logic
                     node._IDSPrimitive__value = data[index]
+            else:
+                for index, node in indexed_tree_iter(self.ids, target_metadata):
+                    # NOTE: bypassing IDSPrimitive.value.setter logic
+                    node._IDSPrimitive__value = data[index].item()  # Unpack 0D value
 
     def validate_variables(self) -> None:
         """Validate that all variables in the netCDF Group exist and match the DD."""
@@ -365,7 +373,7 @@ class LazyContext:
                 value = var[self.index]
 
             if value is not None:
-                if isinstance(value, np.ndarray):
+                if isinstance(value, (np.ndarray, np.generic)):
                     if value.ndim == 0:  # Unpack 0D numpy arrays:
                         value = value.item()
                     else:
