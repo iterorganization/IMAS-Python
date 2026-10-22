@@ -27,7 +27,7 @@ def test_hash_str1d(minimal):
         "multiple entries to test!",
     ]
     minimal.str_1d = string_list
-    hashes = list(map(xxh3_64_digest, string_list))
+    hashes = [xxh3_64_digest(s.encode("utf-8")) for s in string_list]
     expected = xxh3_64_digest(struct.pack("<Q", len(string_list)) + b"".join(hashes))
     assert expected == b"\x98\x011\x9dx+\x0e\xc0"
     assert imas.util.calc_hash(minimal.str_1d) == expected
