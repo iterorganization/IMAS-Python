@@ -330,6 +330,7 @@ def create_mdsplus_model(cache_dir_path: Path) -> None:
                 "-Xms1g",  # what do these do?
                 "-Xmx8g",  # what do these do?
                 "-XX:+UseG1GC",  # what do these do?
+                "--enable-native-access=ALL-UNNAMED",  # Java-25
                 "-cp",
                 jarfile,
                 compiletree,
@@ -339,13 +340,14 @@ def create_mdsplus_model(cache_dir_path: Path) -> None:
             env={
                 "PATH": os.environ.get("PATH", ""),
                 "LD_LIBRARY_PATH": os.environ.get("LD_LIBRARY_PATH", ""),
-                get_mdsplus_model_var(): str(cache_dir_path),
+                # MDSplus locates models through '<tree>_path' (tree='ids')
+                "ids_path": str(cache_dir_path),
             },
         )
         # Touch a file to show that we have finished the model
         (cache_dir_path / "done.txt").touch()
     except CalledProcessError as e:
-        logger.error("Error making MDSPlus model in {path}", cache_dir_path)
+        logger.error("Error making MDSPlus model in %s", cache_dir_path)
         raise e
 
 
