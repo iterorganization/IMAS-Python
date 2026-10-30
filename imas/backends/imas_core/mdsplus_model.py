@@ -12,7 +12,7 @@ import tempfile
 import time
 import uuid
 from pathlib import Path
-from subprocess import CalledProcessError, check_output
+from subprocess import STDOUT, CalledProcessError, check_output
 from zlib import crc32
 from packaging.version import Version
 
@@ -324,13 +324,19 @@ def create_mdsplus_model(cache_dir_path: Path) -> None:
                 "Could not determine CompileTree class in jTraverser.jar."
             )
         compiletree = compiletree_class.rpartition(".class")[0].replace("/", ".")
+        # only add option to suppress warning if the JVM supports it
+        native_access = ["--enable-native-access=ALL-UNNAMED"]
+        try:
+            check_output(["java", *native_access, "-version"], stderr=STDOUT)
+        except CalledProcessError:
+            native_access = []
         check_output(
             [
                 "java",
                 "-Xms1g",  # what do these do?
                 "-Xmx8g",  # what do these do?
                 "-XX:+UseG1GC",  # what do these do?
-                "--enable-native-access=ALL-UNNAMED",  # Java-25
+                *native_access,
                 "-cp",
                 jarfile,
                 compiletree,
