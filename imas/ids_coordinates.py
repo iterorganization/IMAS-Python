@@ -81,7 +81,7 @@ class IDSCoordinate:
                     logger.debug(
                         f"Ignoring invalid coordinate specifier {spec}", exc_info=True
                     )
-        self.references: "tuple[IDSPath]" = tuple(refs)
+        self.references: "tuple[IDSPath, ...]" = tuple(refs)
         """A tuple paths that this coordinate refers to.
         """
 
@@ -357,7 +357,6 @@ class IDSCoordinates:
         IDSPath.goto().
         """
         did_capture = []
-        path = self._node._path
         try:
             yield did_capture
         except CoordinateLookupError as exc:
@@ -365,6 +364,7 @@ class IDSCoordinates:
         except IndexError as exc:
             # Can happen in IDSPath.goto when an invalid index is encountered.
             coordinate_refs = coordinate.format_refs(self._node)
+            path = self._node._path
             raise ValidationError(
                 f"Error while validating element `{path}`: dimension {dim + 1} has an "
                 f"invalid index for coordinate(s) {coordinate_refs}."
@@ -372,13 +372,14 @@ class IDSCoordinates:
         except Exception as exc:
             # Ignore all other exceptions and log them
             if "Unexpected index" in str(exc):
-                logger.debug(
-                    "Ignored AoS coordinate outside our tree (see IMAS-4675) of "
-                    "element `%s`, dimension %s, coordinate `%s`",
-                    path,
-                    dim,
-                    coordinate.references,
-                )
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug(
+                        "Ignored AoS coordinate outside our tree (see IMAS-4675) "
+                        "of element `%s`, dimension %s, coordinate `%s`",
+                        self._node._path,
+                        dim,
+                        coordinate.references,
+                    )
             else:
                 if self._node._version <= "3.38.1":
                     version_error = (
@@ -395,7 +396,7 @@ class IDSCoordinates:
                     coordinate.references,
                     dim,
                     version_error,
-                    exc_info=1,
+                    exc_info=True,
                 )
             # Flag to the caller that an error was suppressed
             did_capture.append(1)
