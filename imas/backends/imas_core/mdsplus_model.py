@@ -12,7 +12,7 @@ import tempfile
 import time
 import uuid
 from pathlib import Path
-from subprocess import CalledProcessError, check_output
+from subprocess import STDOUT, CalledProcessError, check_output
 from zlib import crc32
 from packaging.version import Version
 
@@ -324,12 +324,19 @@ def create_mdsplus_model(cache_dir_path: Path) -> None:
                 "Could not determine CompileTree class in jTraverser.jar."
             )
         compiletree = compiletree_class.rpartition(".class")[0].replace("/", ".")
+        # only add option to suppress warning if the JVM supports it
+        native_access = ["--enable-native-access=ALL-UNNAMED"]
+        try:
+            check_output(["java", *native_access, "-version"], stderr=STDOUT)
+        except CalledProcessError:
+            native_access = []
         check_output(
             [
                 "java",
                 "-Xms1g",  # what do these do?
                 "-Xmx8g",  # what do these do?
                 "-XX:+UseG1GC",  # what do these do?
+                *native_access,
                 "-cp",
                 jarfile,
                 compiletree,
@@ -339,13 +346,14 @@ def create_mdsplus_model(cache_dir_path: Path) -> None:
             env={
                 "PATH": os.environ.get("PATH", ""),
                 "LD_LIBRARY_PATH": os.environ.get("LD_LIBRARY_PATH", ""),
-                get_mdsplus_model_var(): str(cache_dir_path),
+                # MDSplus locates models through '<tree>_path' (tree='ids')
+                "ids_path": str(cache_dir_path),
             },
         )
         # Touch a file to show that we have finished the model
         (cache_dir_path / "done.txt").touch()
     except CalledProcessError as e:
-        logger.error("Error making MDSPlus model in {path}", cache_dir_path)
+        logger.error("Error making MDSPlus model in %s", cache_dir_path)
         raise e
 
 

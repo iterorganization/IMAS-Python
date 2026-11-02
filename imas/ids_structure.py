@@ -57,7 +57,7 @@ class IDSStructure(IDSBase):
     def __getattr__(self, name):
         if name not in self._children:
             raise AttributeError(
-                f"IDS structure '{self._path}' has no attribute '{name}'"
+                f"IDS structure '{self.metadata.path_string}' has no attribute '{name}'"
             )
         # Create child node
         child_meta = self._children[name]

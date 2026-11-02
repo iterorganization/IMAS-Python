@@ -3,6 +3,23 @@
 Changelog
 =========
 
+What's new in IMAS-Python 2.3.1
+-------------------------------
+
+Improvements
+''''''''''''
+
+- :merge:`140`: improve performance of ``hasattr()`` on IDS structures 
+- :merge:`139`: improve performance of :py:meth:`~imas.ids_toplevel.IDSToplevel.validate` for large arrays of structures
+
+Bugs
+''''
+
+- :issue:`146`: Fix creation of MDSplus models, regression since 2.2.0 when used together with IMAS-Core >= 5.6
+- Fix broken test (due to breaking change in xxhash>=4 dep)
+
+
+
 What's new in IMAS-Python 2.3.0
 -------------------------------
 
