@@ -132,6 +132,20 @@ def _check_convert_to_plasma_ids(idss_with_occurrences):
             )
 
 
+def _parse_ids_option(ids: str, known_ids: list[str], dd_version: str) -> list[str]:
+    """Split the comma-separated --ids option and check the names against the DD."""
+    names = list(dict.fromkeys(name.strip() for name in ids.split(",") if name.strip()))
+    if not names:
+        raise click.BadParameter("no IDS name given", param_hint="'--ids'")
+    unknown = [name for name in names if name not in known_ids]
+    if unknown:
+        raise click.BadParameter(
+            f"unknown IDS name(s) for DD version {dd_version}: {', '.join(unknown)}",
+            param_hint="'--ids'",
+        )
+    return names
+
+
 @cli.command("convert", no_args_is_help=True)
 @click.argument("uri_in")
 @click.argument("dd_version")
@@ -139,8 +153,9 @@ def _check_convert_to_plasma_ids(idss_with_occurrences):
 @click.option(
     "--ids",
     default="*",
-    help="Specify which IDS to convert. \
-If not provided, all IDSs in the data entry are converted.",
+    help="Specify which IDS to convert, or a comma-separated list of IDSs, for "
+    "example core_profiles,equilibrium. "
+    "If not provided, all IDSs in the data entry are converted.",
 )
 @click.option("--occurrence", default=-1, help="Specify which occurrence to convert.")
 @click.option("--quiet", "-q", is_flag=True, help="Suppress progress output.")
@@ -190,6 +205,15 @@ def convert_ids(
     else:
         raise UnknownDDVersion(dd_version, dd_zip.dd_xml_versions())
 
+    # Check the requested IDS names before the output Data Entry is created
+    target_factory = imas.IDSFactory(
+        version_params.get("dd_version"), version_params.get("xml_path")
+    )
+    if ids == "*":
+        ids_list = target_factory.ids_names()
+    else:
+        ids_list = _parse_ids_option(ids, target_factory.ids_names(), dd_version)
+
     provenance_origin_uri = ""
     if not no_provenance:
         provenance_origin_uri = uri_in
@@ -200,7 +224,6 @@ def convert_ids(
         entry_out = stack.enter_context(DBEntry(uri_out, "x", **version_params))
 
         # First build IDS/occurrence list so we can show a decent progress bar
-        ids_list = [ids] if ids != "*" else entry_out.factory.ids_names()
         idss_with_occurrences = []
         for ids_name in ids_list:
             if occurrence == -1:
