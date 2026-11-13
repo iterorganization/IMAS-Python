@@ -2,6 +2,8 @@
 # You should have received the IMAS-Python LICENSE file with this project.
 """Main CLI entry point"""
 
+from __future__ import annotations
+
 import logging
 import sys
 from contextlib import ExitStack
@@ -156,7 +158,7 @@ def _parse_ids_option(
             occ = occ.strip()
             if occ == ALL_OCCURRENCES:
                 occurrence = ALL_OCCURRENCES
-            elif occ.isdigit():
+            elif occ.isdecimal():
                 occurrence = int(occ)
             else:
                 raise click.BadParameter(
@@ -219,7 +221,7 @@ def convert_ids(
     no_provenance: bool,
     convert_to_plasma_ids: bool,
 ):
-    """Convert a Data Entry (or a single IDS) to the target DD version.
+    """Convert a Data Entry (or selected IDSs/occurrences) to the target DD version.
 
     Provide a different backend to URI_OUT than URI_IN to convert between backends.
     For example:

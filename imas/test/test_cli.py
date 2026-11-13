@@ -272,7 +272,8 @@ def test_imas_convert_occurrence_option_is_deprecated(tmp_path):
 
 @pytest.mark.cli
 @pytest.mark.parametrize(
-    "ids", ["core_profiles:x", "core_profiles:-1", "core_profiles:"]
+    "ids",
+    ["core_profiles:x", "core_profiles:-1", "core_profiles:", "core_profiles:\u00b2"],
 )
 def test_imas_convert_invalid_occurrence(tmp_path, ids):
     in_db = tmp_path / "in"
