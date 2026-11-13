@@ -132,13 +132,17 @@ def _check_convert_to_plasma_ids(idss_with_occurrences):
             )
 
 
+ALL_OCCURRENCES = "*"
+
+
 def _parse_ids_option(
     ids: str, known_ids: list[str], dd_version: str
-) -> list[tuple[str, int | None]]:
+) -> list[tuple[str, int | str | None]]:
     """Split the comma-separated --ids option into (IDS name, occurrence) pairs.
 
-    Each entry is an IDS name, optionally followed by ``:occurrence``. The occurrence
-    is None when it is not given. Names are checked against the target DD.
+    Each entry is an IDS name, optionally followed by ``:OCCURRENCE`` or ``:*`` (all
+    occurrences). The occurrence is None when it is not given. Names are checked
+    against the target DD.
     """
     entries = []
     for item in ids.split(","):
@@ -150,13 +154,16 @@ def _parse_ids_option(
         occurrence = None
         if sep:
             occ = occ.strip()
-            if not occ.isdigit():
+            if occ == ALL_OCCURRENCES:
+                occurrence = ALL_OCCURRENCES
+            elif occ.isdigit():
+                occurrence = int(occ)
+            else:
                 raise click.BadParameter(
-                    f"invalid occurrence in {item!r}: expected IDS or IDS:OCCURRENCE "
-                    "with a non-negative integer occurrence",
+                    f"invalid occurrence in {item!r}: expected IDS, IDS:OCCURRENCE "
+                    "with a non-negative integer occurrence, or IDS:*",
                     param_hint="'--ids'",
                 )
-            occurrence = int(occ)
         entries.append((name, occurrence))
     entries = list(dict.fromkeys(entries))
     if not entries:
@@ -177,16 +184,17 @@ def _parse_ids_option(
 @click.option(
     "--ids",
     default="*",
-    help="Specify which IDSs to convert, as a comma-separated list of IDS or "
-    "IDS:OCCURRENCE, for example summary,plasma_profiles:1,plasma_profiles:2. "
-    "An IDS without an occurrence converts all its occurrences. "
+    help="Specify which IDSs to convert, as a comma-separated list of IDS, "
+    "IDS:OCCURRENCE or IDS:* (all occurrences), for example "
+    "summary,plasma_profiles:1,plasma_profiles:2. An IDS without an occurrence "
+    "means occurrence 0. "
     "If not provided, all IDSs in the data entry are converted.",
 )
 @click.option(
     "--occurrence",
     default=-1,
     help="Deprecated: use --ids IDS:OCCURRENCE instead. "
-    "Specify which occurrence to convert for IDSs given without one.",
+    "Occurrence to convert for IDSs given without one.",
 )
 @click.option("--quiet", "-q", is_flag=True, help="Suppress progress output.")
 @click.option("--timeit", is_flag=True, help="Show timing information.")
@@ -240,7 +248,9 @@ def convert_ids(
         version_params.get("dd_version"), version_params.get("xml_path")
     )
     if ids == "*":
-        ids_list = [(name, None) for name in target_factory.ids_names()]
+        ids_list = [(name, ALL_OCCURRENCES) for name in target_factory.ids_names()]
+        if occurrence != -1:
+            ids_list = [(name, occurrence) for name, _ in ids_list]
     else:
         ids_list = _parse_ids_option(ids, target_factory.ids_names(), dd_version)
     if occurrence != -1:
@@ -256,20 +266,35 @@ def convert_ids(
     # Use an ExitStack to avoid three nested with-statements
     with ExitStack() as stack:
         entry_in = stack.enter_context(DBEntry(uri_in, "r"))
-        entry_out = stack.enter_context(DBEntry(uri_out, "x", **version_params))
 
         # First build IDS/occurrence list so we can show a decent progress bar
         idss_with_occurrences = []
+        missing = []
         for ids_name, ids_occurrence in ids_list:
-            if ids_occurrence is None and occurrence != -1:
-                ids_occurrence = occurrence
-            if ids_occurrence is None:
-                idss_with_occurrences.extend(
-                    (ids_name, occ) for occ in entry_in.list_all_occurrences(ids_name)
-                )
-            else:
+            if ids_occurrence is None:  # IDS given without an occurrence
+                ids_occurrence = occurrence if occurrence != -1 else 0
+            if ids == "*" and ids_occurrence != ALL_OCCURRENCES:
+                # Deprecated --occurrence without --ids: keep its old behaviour
                 idss_with_occurrences.append((ids_name, ids_occurrence))
+                continue
+            available = entry_in.list_all_occurrences(ids_name)
+            if ids_occurrence == ALL_OCCURRENCES:
+                idss_with_occurrences.extend((ids_name, occ) for occ in available)
+                if not available and ids != "*":
+                    missing.append(f"{ids_name}:*")
+            elif ids_occurrence in available:
+                idss_with_occurrences.append((ids_name, ids_occurrence))
+            else:
+                missing.append(f"{ids_name}:{ids_occurrence}")
+        if missing:
+            # Reported before the output Data Entry is created
+            raise click.BadParameter(
+                f"not found in the input Data Entry: {', '.join(missing)}",
+                param_hint="'--ids'",
+            )
         idss_with_occurrences = list(dict.fromkeys(idss_with_occurrences))
+
+        entry_out = stack.enter_context(DBEntry(uri_out, "x", **version_params))
 
         if convert_to_plasma_ids:  # Sanity checks for conversion to plasma IDSs
             _check_convert_to_plasma_ids(idss_with_occurrences)

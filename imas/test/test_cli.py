@@ -163,7 +163,7 @@ def test_imas_convert_ids_list(tmp_path):
                 "4.1.0",
                 f"imas:hdf5?path={out_db}",
                 "--ids",
-                "core_profiles, equilibrium,core_profiles",
+                "core_profiles:*, equilibrium,core_profiles:*",
             ],
         )
         assert convert_result.exit_code == 0, convert_result.output
@@ -228,16 +228,16 @@ def test_imas_convert_ids_with_occurrences(tmp_path):
                 "4.1.0",
                 f"imas:hdf5?path={out_db}",
                 "--ids",
-                "equilibrium, core_profiles:1,core_profiles:2,core_profiles:1",
+                "equilibrium, core_profiles:1,core_profiles:2,core_profiles:1,wall:*",
             ],
         )
         assert convert_result.exit_code == 0, convert_result.output
 
     with DBEntry(f"imas:hdf5?path={out_db}", "r", dd_version="4.1.0") as entry:
-        # An IDS without an occurrence converts all of them
-        assert entry.list_all_occurrences("equilibrium") == [0, 1]
+        # As in the IDS path syntax, an IDS without an occurrence means occurrence 0
+        assert entry.list_all_occurrences("equilibrium") == [0]
         assert entry.list_all_occurrences("core_profiles") == [1, 2]
-        assert entry.list_all_occurrences("wall") == []
+        assert entry.list_all_occurrences("wall") == [0]
 
 
 @pytest.mark.cli
@@ -293,4 +293,36 @@ def test_imas_convert_invalid_occurrence(tmp_path, ids):
         )
     assert convert_result.exit_code == 2
     assert "invalid occurrence" in convert_result.output
+    assert not out_db.exists()
+
+
+@pytest.mark.cli
+@pytest.mark.parametrize(
+    "ids, missing",
+    [
+        ("core_profiles:3", "core_profiles:3"),
+        ("core_profiles,wall", "wall:0"),
+        ("core_profiles:*,wall:*", "wall:*"),
+    ],
+)
+def test_imas_convert_ids_missing_from_input(tmp_path, ids, missing):
+    in_db = tmp_path / "in"
+    out_db = tmp_path / "out"
+    _write_occurrences(in_db, [("core_profiles", 2)])
+
+    runner = CliRunner()
+    with runner.isolated_filesystem(tmp_path):
+        convert_result = runner.invoke(
+            convert_ids,
+            [
+                f"imas:hdf5?path={in_db}",
+                "4.1.0",
+                f"imas:hdf5?path={out_db}",
+                "--ids",
+                ids,
+            ],
+        )
+    # Reported before the output Data Entry is created
+    assert convert_result.exit_code == 2
+    assert f"not found in the input Data Entry: {missing}" in convert_result.output
     assert not out_db.exists()

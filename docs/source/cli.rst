@@ -10,8 +10,7 @@ some tasks without writing Python code:
   occurrences from a Data Entry, for example
   ``--ids summary,plasma_profiles:1,plasma_profiles:2``) to a different DD
   version. This command can also be used to convert IDSs between different
-  backends. The ``--occurrence`` option is deprecated: give the occurrence in
-  ``--ids`` instead.
+  backends.
 - ``imas print`` can print the contents of an IDS to the terminal.
 - ``imas version`` shows version information of IMAS-Python.
 - ``imas analyze-db`` and ``imas process-db-analysis`` analyze the contents
