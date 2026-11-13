@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
@@ -200,4 +201,96 @@ def test_imas_convert_unknown_ids(tmp_path):
     assert "unknown IDS name(s) for DD version 4.1.0: core_profile" in (
         convert_result.output
     )
+    assert not out_db.exists()
+
+
+def _write_occurrences(db_path, idss):
+    with DBEntry(f"imas:hdf5?path={db_path}", "w", dd_version="3.39.0") as entry:
+        for ids_name, occurrences in idss:
+            ids = entry.factory.new(ids_name)
+            ids.ids_properties.homogeneous_time = 2
+            for i in range(occurrences):
+                entry.put(ids, i)
+
+
+@pytest.mark.cli
+def test_imas_convert_ids_with_occurrences(tmp_path):
+    in_db = tmp_path / "in"
+    out_db = tmp_path / "out"
+    _write_occurrences(in_db, [("core_profiles", 3), ("equilibrium", 2), ("wall", 1)])
+
+    runner = CliRunner()
+    with runner.isolated_filesystem(tmp_path):
+        convert_result = runner.invoke(
+            convert_ids,
+            [
+                f"imas:hdf5?path={in_db}",
+                "4.1.0",
+                f"imas:hdf5?path={out_db}",
+                "--ids",
+                "equilibrium, core_profiles:1,core_profiles:2,core_profiles:1",
+            ],
+        )
+        assert convert_result.exit_code == 0, convert_result.output
+
+    with DBEntry(f"imas:hdf5?path={out_db}", "r", dd_version="4.1.0") as entry:
+        # An IDS without an occurrence converts all of them
+        assert entry.list_all_occurrences("equilibrium") == [0, 1]
+        assert entry.list_all_occurrences("core_profiles") == [1, 2]
+        assert entry.list_all_occurrences("wall") == []
+
+
+@pytest.mark.cli
+def test_imas_convert_occurrence_option_is_deprecated(tmp_path):
+    in_db = tmp_path / "in"
+    out_db = tmp_path / "out"
+    _write_occurrences(in_db, [("core_profiles", 3), ("equilibrium", 2)])
+
+    runner = CliRunner()
+    with patch("imas.command.cli.logger") as logger:
+        with runner.isolated_filesystem(tmp_path):
+            convert_result = runner.invoke(
+                convert_ids,
+                [
+                    f"imas:hdf5?path={in_db}",
+                    "4.1.0",
+                    f"imas:hdf5?path={out_db}",
+                    "--ids",
+                    "core_profiles,equilibrium:0",
+                    "--occurrence",
+                    "2",
+                ],
+            )
+            assert convert_result.exit_code == 0, convert_result.output
+    assert any("deprecated" in str(c.args[0]) for c in logger.warning.call_args_list)
+
+    with DBEntry(f"imas:hdf5?path={out_db}", "r", dd_version="4.1.0") as entry:
+        # --occurrence still applies to IDSs given without an occurrence
+        assert entry.list_all_occurrences("core_profiles") == [2]
+        assert entry.list_all_occurrences("equilibrium") == [0]
+
+
+@pytest.mark.cli
+@pytest.mark.parametrize(
+    "ids", ["core_profiles:x", "core_profiles:-1", "core_profiles:"]
+)
+def test_imas_convert_invalid_occurrence(tmp_path, ids):
+    in_db = tmp_path / "in"
+    out_db = tmp_path / "out"
+    _write_occurrences(in_db, [("core_profiles", 1)])
+
+    runner = CliRunner()
+    with runner.isolated_filesystem(tmp_path):
+        convert_result = runner.invoke(
+            convert_ids,
+            [
+                f"imas:hdf5?path={in_db}",
+                "4.1.0",
+                f"imas:hdf5?path={out_db}",
+                "--ids",
+                ids,
+            ],
+        )
+    assert convert_result.exit_code == 2
+    assert "invalid occurrence" in convert_result.output
     assert not out_db.exists()

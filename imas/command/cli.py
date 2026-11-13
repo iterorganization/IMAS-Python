@@ -132,18 +132,42 @@ def _check_convert_to_plasma_ids(idss_with_occurrences):
             )
 
 
-def _parse_ids_option(ids: str, known_ids: list[str], dd_version: str) -> list[str]:
-    """Split the comma-separated --ids option and check the names against the DD."""
-    names = list(dict.fromkeys(name.strip() for name in ids.split(",") if name.strip()))
-    if not names:
+def _parse_ids_option(
+    ids: str, known_ids: list[str], dd_version: str
+) -> list[tuple[str, int | None]]:
+    """Split the comma-separated --ids option into (IDS name, occurrence) pairs.
+
+    Each entry is an IDS name, optionally followed by ``:occurrence``. The occurrence
+    is None when it is not given. Names are checked against the target DD.
+    """
+    entries = []
+    for item in ids.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        name, sep, occ = item.partition(":")
+        name = name.strip()
+        occurrence = None
+        if sep:
+            occ = occ.strip()
+            if not occ.isdigit():
+                raise click.BadParameter(
+                    f"invalid occurrence in {item!r}: expected IDS or IDS:OCCURRENCE "
+                    "with a non-negative integer occurrence",
+                    param_hint="'--ids'",
+                )
+            occurrence = int(occ)
+        entries.append((name, occurrence))
+    entries = list(dict.fromkeys(entries))
+    if not entries:
         raise click.BadParameter("no IDS name given", param_hint="'--ids'")
-    unknown = [name for name in names if name not in known_ids]
+    unknown = list(dict.fromkeys(name for name, _ in entries if name not in known_ids))
     if unknown:
         raise click.BadParameter(
             f"unknown IDS name(s) for DD version {dd_version}: {', '.join(unknown)}",
             param_hint="'--ids'",
         )
-    return names
+    return entries
 
 
 @cli.command("convert", no_args_is_help=True)
@@ -153,11 +177,17 @@ def _parse_ids_option(ids: str, known_ids: list[str], dd_version: str) -> list[s
 @click.option(
     "--ids",
     default="*",
-    help="Specify which IDS to convert, or a comma-separated list of IDSs, for "
-    "example core_profiles,equilibrium. "
+    help="Specify which IDSs to convert, as a comma-separated list of IDS or "
+    "IDS:OCCURRENCE, for example summary,plasma_profiles:1,plasma_profiles:2. "
+    "An IDS without an occurrence converts all its occurrences. "
     "If not provided, all IDSs in the data entry are converted.",
 )
-@click.option("--occurrence", default=-1, help="Specify which occurrence to convert.")
+@click.option(
+    "--occurrence",
+    default=-1,
+    help="Deprecated: use --ids IDS:OCCURRENCE instead. "
+    "Specify which occurrence to convert for IDSs given without one.",
+)
 @click.option("--quiet", "-q", is_flag=True, help="Suppress progress output.")
 @click.option("--timeit", is_flag=True, help="Show timing information.")
 @click.option(
@@ -210,9 +240,14 @@ def convert_ids(
         version_params.get("dd_version"), version_params.get("xml_path")
     )
     if ids == "*":
-        ids_list = target_factory.ids_names()
+        ids_list = [(name, None) for name in target_factory.ids_names()]
     else:
         ids_list = _parse_ids_option(ids, target_factory.ids_names(), dd_version)
+    if occurrence != -1:
+        logger.warning(
+            "--occurrence is deprecated and will be removed in the next major "
+            "release; use --ids IDS:OCCURRENCE instead (for example --ids summary:1)."
+        )
 
     provenance_origin_uri = ""
     if not no_provenance:
@@ -225,13 +260,16 @@ def convert_ids(
 
         # First build IDS/occurrence list so we can show a decent progress bar
         idss_with_occurrences = []
-        for ids_name in ids_list:
-            if occurrence == -1:
+        for ids_name, ids_occurrence in ids_list:
+            if ids_occurrence is None and occurrence != -1:
+                ids_occurrence = occurrence
+            if ids_occurrence is None:
                 idss_with_occurrences.extend(
                     (ids_name, occ) for occ in entry_in.list_all_occurrences(ids_name)
                 )
             else:
-                idss_with_occurrences.append((ids_name, occurrence))
+                idss_with_occurrences.append((ids_name, ids_occurrence))
+        idss_with_occurrences = list(dict.fromkeys(idss_with_occurrences))
 
         if convert_to_plasma_ids:  # Sanity checks for conversion to plasma IDSs
             _check_convert_to_plasma_ids(idss_with_occurrences)
