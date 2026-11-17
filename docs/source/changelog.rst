@@ -3,6 +3,27 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+Features
+''''''''
+
+- :issue:`144`: ``imas convert --ids`` takes a comma-separated list of ``IDS``,
+  ``IDS:OCCURRENCE`` and ``IDS:*`` (all occurrences), for example
+  ``--ids summary,plasma_profiles:1,plasma_profiles:2``. As in the IDS path syntax,
+  an IDS without an occurrence means occurrence 0, so ``--ids core_profiles`` no
+  longer converts all occurrences: use ``--ids core_profiles:*`` for that. Unknown
+  IDS names, malformed occurrences and IDSs or occurrences that are not in the input
+  Data Entry are reported before the output Data Entry is created.
+
+Deprecations
+''''''''''''
+
+- [deprecation] :issue:`144`: the ``--occurrence`` option of ``imas convert``;
+  use ``--ids IDS:OCCURRENCE`` instead. To be removed in the next major release.
+
+
 What's new in IMAS-Python 2.3.1
 -------------------------------
 
