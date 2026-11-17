@@ -262,3 +262,45 @@ class IDSTensorizer:
                 tmp_var[aos_coords + tuple(map(slice, node.shape))] = node.value
 
         return tmp_var
+
+    def _recursively_convert_to_list(
+        self, path: str, inactive_index: Tuple, shape: Tuple, i_dim: int
+    ):
+        entry = []
+        for index in range(shape[i_dim]):
+            new_index = inactive_index + (index,)
+            if i_dim == len(shape) - 1:
+                entry.append(self.filled_data[path][new_index].value)
+            else:
+                entry.append(
+                    self._recursively_convert_to_list(path, new_index, shape, i_dim + 1)
+                )
+        return entry
+
+    def awkward_tensorize(self, path: str):
+        """
+        Tensorizes the data at the given path with the specified fill value.
+
+        Args:
+            path: The path to the data in the IDS.
+
+        Returns:
+            A tensor filled with the data from the specified path.
+        """
+        if not self.filled_data[path]:
+            return []
+        hdf5_dim = len(next(iter(self.filled_data[path])))
+
+        if hdf5_dim == 0:
+            return self.filled_data[path][()].value
+
+        if path in self.shapes:
+            shape = self.shapes[path].shape[:hdf5_dim]
+        else:
+            dimensions = self.ncmeta.get_dimensions(path, self.homogeneous_time)
+            full_shape = tuple(self.dimension_size[dim] for dim in dimensions)
+            # Get the split between HDF5 indices and stored matrices
+            # i.e. equilibrium.time_slice.profiles_2d <-> psi
+            shape = full_shape[:hdf5_dim]
+
+        return self._recursively_convert_to_list(path, tuple(), shape, 0)

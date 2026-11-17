@@ -81,6 +81,9 @@ docs = [
 netcdf = [
     "netCDF4>=1.4.1",
 ]
+awkward = [
+    "awkward",
+]
 h5py = [
     "h5py",
 ]
@@ -102,7 +105,7 @@ test = [
     # Pint is used in training snippets
     "pint",
     # Optional dependencies
-    "imas-python[netcdf,h5py,xarray,saxonche]",
+    "imas-python[netcdf,h5py,xarray,saxonche,awkward]",
 ]
 
 [project.scripts]

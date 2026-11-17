@@ -16,6 +16,7 @@ python:
         - docs
         - netcdf
         - h5py
+        - awkward
 
 sphinx:
   builder: html
