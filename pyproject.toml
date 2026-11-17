@@ -63,7 +63,7 @@ dependencies = [
     "importlib_resources;python_version<'3.9'",
     "packaging",
     "xxhash >= 2",
-    "imas_data_dictionaries",
+    "imas_data_dictionaries>=4.1.0",
     "imas_core"
 ]
 
