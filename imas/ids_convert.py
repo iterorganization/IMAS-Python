@@ -1344,7 +1344,7 @@ def _magnetics_method_to_ip(method: IDSBase, ip: IDSBase) -> None:
     if not len(method):
         return
     ip.resize(len(method))
-    for old_item, new_item in zip(method, ip, strict=True):
+    for old_item, new_item in zip(method, ip):
         new_item.method_name.value = old_item.name.value
         new_item.data.value = old_item.ip.data.value
         new_item.time.value = old_item.ip.time.value
