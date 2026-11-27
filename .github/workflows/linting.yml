@@ -17,9 +17,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          # until saxonche is available in 3.13
-          # https://saxonica.plan.io/issues/6561
-          python-version: "<3.13"
+          # choose lowest python version supported to reject syntax it cannot handle yet
+          python-version: "3.9"
 
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
