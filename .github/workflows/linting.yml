@@ -24,7 +24,7 @@ jobs:
         run: python -c "import sys; print(sys.version)"
 
       - name: Install the code linting and formatting tools
-        run: pip install --upgrade 'black >=24,<25' flake8
+        run: pip install --upgrade 'black >=25,<26' flake8
 
       - name: Check formatting of code with black
         run: black --check imas
