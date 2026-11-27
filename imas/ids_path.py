@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Logic for interpreting paths to elements in an IDS
-"""
+"""Logic for interpreting paths to elements in an IDS"""
 
 import logging
 import re

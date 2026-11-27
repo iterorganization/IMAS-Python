@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Create a default log handler when IMAS-Python is imported.
-"""
+"""Create a default log handler when IMAS-Python is imported."""
 
 import logging
 import os

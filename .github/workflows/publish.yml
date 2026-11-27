@@ -16,9 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v7
       with:
-        # until saxonche is available in 3.13
-        # https://saxonica.plan.io/issues/6561
-        python-version: "<3.13"
+        python-version: "3.15"
     - name: Install pypa/build
       run: >-
         python3 -m pip install pip setuptools wheel build

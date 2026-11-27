@@ -1,7 +1,7 @@
 [build-system]
 # Minimum requirements for the build system to execute.
 # Keep this on a single line for the grep magic of build scripts to work
-requires = ["setuptools>=61", "wheel", "numpy", "packaging", "tomli;python_version<'3.11'", "setuptools_scm>8"]
+requires = ["setuptools>=61", "wheel", "packaging", "tomli;python_version<'3.11'", "setuptools_scm>8"]
 
 build-backend = "setuptools.build_meta"
 
@@ -16,7 +16,7 @@ authors = [
 ]
 description = "Pythonic wrappers for the IMAS Access Layer"
 readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 license = {file = "LICENSE.txt"}
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -40,8 +40,6 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Unix Shell",
     "Topic :: Database",
     "Topic :: Database :: Front-Ends",
@@ -60,7 +58,6 @@ dependencies = [
     "rich",
     "scipy",
     "click",
-    "importlib_resources;python_version<'3.9'",
     "packaging",
     "xxhash >= 2",
     "imas_data_dictionaries>=4.1.0",

@@ -1,5 +1,4 @@
-"""A minimal testcase loading an IDS file and checking that the structure built is ok
-"""
+"""A minimal testcase loading an IDS file and checking that the structure built is ok"""
 
 import numpy as np
 
