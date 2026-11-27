@@ -1,5 +1,4 @@
-"""A testcase checking if resampling works for the latest data dictionary version.
-"""
+"""A testcase checking if resampling works for the latest data dictionary version."""
 
 import numpy as np
 

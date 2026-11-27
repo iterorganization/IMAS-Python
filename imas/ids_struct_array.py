@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""IDS StructArray represents an Array of Structures in the IDS tree.
-"""
+"""IDS StructArray represents an Array of Structures in the IDS tree."""
 
 import logging
 from copy import deepcopy

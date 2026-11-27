@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Helper methods for loading data from and storing data to Data Entries.
-"""
+"""Helper methods for loading data from and storing data to Data Entries."""
 
 from typing import Optional
 

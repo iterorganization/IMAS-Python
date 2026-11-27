@@ -1,7 +1,6 @@
 # This file is part of IMAS-Python.
 # You should have received the IMAS-Python LICENSE file with this project.
-"""Provides the classes for IDS data nodes
-"""
+"""Provides the classes for IDS data nodes"""
 import logging
 import math
 import operator
